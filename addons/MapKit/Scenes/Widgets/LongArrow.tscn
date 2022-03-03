@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://addons/MapKit/Scripts/Widgets/LongArrow.cs" type="Script" id=1]
+
+[sub_resource type="Curve" id=1]
+_data = [ Vector2( 0.000762194, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.83003, 0.326715 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="Curve" id=2]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), 0.0, 0.0, 0, 0 ]
+
+[node name="LongArrow" type="Node2D"]
+script = ExtResource( 1 )
+bodyPath = NodePath("Body")
+headPath = NodePath("Head")
+
+[node name="Body" type="Line2D" parent="."]
+width_curve = SubResource( 1 )
+
+[node name="Head" type="Line2D" parent="."]
+width = 20.0
+width_curve = SubResource( 2 )
