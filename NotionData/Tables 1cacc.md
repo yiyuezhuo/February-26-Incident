@@ -8,6 +8,6 @@
 
 [Area Table](Tables%201cacc/Area%20Table%20f045f.csv)
 
-[Leader Assignments Table](Tables%201cacc/Leader%20Ass%205df24.csv)
+[Assignments Table](Tables%201cacc/Assignment%205df24.csv)
 
 [Unit Table](Tables%201cacc/Unit%20Table%20c41b2.csv)

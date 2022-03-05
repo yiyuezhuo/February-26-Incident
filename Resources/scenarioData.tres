@@ -6,3 +6,8 @@
 script = ExtResource( 1 )
 notionDataPath = "res://NotionData/Tables 1cacc"
 leaderTablePath = "res://NotionData/Tables 1cacc/Leaders Ta 3f9c1.csv"
+areaTablePath = "res://NotionData/Tables 1cacc/Area Table f045f.csv"
+celebrityTablePath = "res://NotionData/Tables 1cacc/Celebritie bddd6.csv"
+objectiveTablePath = "res://NotionData/Tables 1cacc/Objectives 4b905.csv"
+unitTablePath = "res://NotionData/Tables 1cacc/Unit Table c41b2.csv"
+assignmentTable = "res://NotionData/Tables 1cacc/Assignment 5df24.csv"

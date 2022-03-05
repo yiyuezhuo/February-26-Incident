@@ -1,4 +1,4 @@
 # 秩父宮雍仁親王
 
-English: Yasuhito, Prince Chichibu
+Name: Yasuhito, Prince Chichibu
 Portrait: Yasuhito.jpg

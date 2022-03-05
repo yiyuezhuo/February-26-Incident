@@ -3,6 +3,8 @@ namespace YYZ.App
 
 using Godot;
 using YYZ.Data.February26;
+using System.Collections;
+// using System.Collections.Generic;
 
 public class StrategyView : Control
 {
@@ -13,12 +15,21 @@ public class StrategyView : Control
     {
         scenarioData = scenarioDataRes.GetInstance();
 
-        GD.Print($"Leader Table: {scenarioData.leaderTable.Count}");
-        
-        foreach(var KV in scenarioData.leaderTable)
+        var tables = new IDataTable[]{
+            scenarioData.leaderTable, 
+            scenarioData.areaTable,
+            scenarioData.celebrityTable,
+            scenarioData.objectiveTable,
+            scenarioData.unitTable
+        };
+
+        foreach(var table in tables)
         {
-            GD.Print($"{KV.Key} => {KV.Value}");
+            var verbose = table == tables[tables.Length - 1];
+            // var verbose = true;
+            table.Inspect(verbose);
         }
+
     }
 }
 

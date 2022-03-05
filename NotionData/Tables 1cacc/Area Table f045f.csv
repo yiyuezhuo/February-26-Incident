@@ -1,14 +1,14 @@
-﻿Name,Tags,ID,Name_Jap,Related to Unit Table (Column)
-1st Infantry Regiment Barracks,,Area%20Table%20f045f/1st%20Infant%201f452.md,第1歩兵連隊兵舎,"Unit%20Table%20c41b2/PM%20Assassi%2091c1a.md, Unit%20Table%20c41b2/Ministry%20o%2052c9c.md, Unit%20Table%20c41b2/Tokyo%20Metr%20e7e95.md, Unit%20Table%20c41b2/Makino%20Nob%207553e.md"
-3rd Infantry Regiment Barracks,,Area%20Table%20f045f/3rd%20Infant%204212e.md,第3歩兵連隊兵舎,"Unit%20Table%20c41b2/Saito%CC%84%20Mak%2051982.md, Unit%20Table%20c41b2/Kantaro%CC%84%20S%204bf4b.md"
-3rd Imperial Guard Barracks,,Area%20Table%20f045f/3rd%20Imperi%20f13b1.md,近衛歩兵第3連隊兵舎,Unit%20Table%20c41b2/Takahashi%20%20a1209.md
-Takahashi Residence,,Area%20Table%20f045f/Takahashi%20%2002ab1.md,高橋邸,
-Saito Residence,,Area%20Table%20f045f/Saito%20Resi%207bc12.md,斎藤邸,
-Yasukuni Shrine,,Area%20Table%20f045f/Yasukuni%20S%208c7b4.md,靖国神社,
-Grand Chamberlain’s Residence,,Area%20Table%20f045f/Grand%20Cham%20196a5.md,侍従長邸,
-Imperial Palace,,Area%20Table%20f045f/Imperial%20P%20efd83.md,宮城,
-Police HQ,,Area%20Table%20f045f/Police%20HQ%2051b69.md,警視庁,
-Ministry of War,,Area%20Table%20f045f/Ministry%20o%205ad3e.md,陸軍省,
-Prime Minister’s Residence,,Area%20Table%20f045f/Prime%20Mini%20e0834.md,首相公邸,
-Asahi Shimbun,,Area%20Table%20f045f/Asahi%20Shim%20ef850.md,朝日新聞社,
-River,unmovable,Area%20Table%20f045f/River%208e2d0.md,川,
+﻿Name,Tags,ID,Name_Jap,Related to Unit Table (Column),Related to Objectives Table (Area)
+1st Infantry Regiment Barracks,,Area%20Table%20f045f/1st%20Infant%201f452.md,第1歩兵連隊兵舎,"Unit%20Table%20c41b2/PM%20Assassi%2091c1a.md, Unit%20Table%20c41b2/Ministry%20o%2052c9c.md, Unit%20Table%20c41b2/Tokyo%20Metr%20e7e95.md, Unit%20Table%20c41b2/Makino%20Nob%207553e.md",
+3rd Infantry Regiment Barracks,,Area%20Table%20f045f/3rd%20Infant%204212e.md,第3歩兵連隊兵舎,"Unit%20Table%20c41b2/Saito%CC%84%20Mak%2051982.md, Unit%20Table%20c41b2/Kantaro%CC%84%20S%204bf4b.md",
+3rd Imperial Guard Barracks,,Area%20Table%20f045f/3rd%20Imperi%20f13b1.md,近衛歩兵第3連隊兵舎,Unit%20Table%20c41b2/Takahashi%20%20a1209.md,
+Takahashi Residence,,Area%20Table%20f045f/Takahashi%20%2002ab1.md,高橋邸,,Objectives%204b905/%E9%AB%98%E6%A9%8B%E6%98%AF%E6%B8%85%2030bf5.md
+Saito Residence,,Area%20Table%20f045f/Saito%20Resi%207bc12.md,斎藤邸,,Objectives%204b905/%E6%96%8E%E8%97%A4%E5%AE%9F%20d890d.md
+Yasukuni Shrine,,Area%20Table%20f045f/Yasukuni%20S%208c7b4.md,靖国神社,,
+Grand Chamberlain’s Residence,,Area%20Table%20f045f/Grand%20Cham%20196a5.md,侍従長邸,,Objectives%204b905/%E9%88%B4%E6%9C%A8%E8%B2%AB%E5%A4%AA%E9%83%8E%20e1a4f.md
+Imperial Palace,,Area%20Table%20f045f/Imperial%20P%20efd83.md,宮城,,
+Police HQ,,Area%20Table%20f045f/Police%20HQ%2051b69.md,警視庁,,Objectives%204b905/%E8%AD%A6%E8%A6%96%E5%BA%81%20599d4.md
+Ministry of War,,Area%20Table%20f045f/Ministry%20o%205ad3e.md,陸軍省,,Objectives%204b905/%E9%99%B8%E8%BB%8D%E7%9C%81%20b2512.md
+Prime Minister’s Residence,,Area%20Table%20f045f/Prime%20Mini%20e0834.md,首相公邸,,Objectives%204b905/%E5%B2%A1%E7%94%B0%E5%95%93%E4%BB%8B%200cc79.md
+Asahi Shimbun,,Area%20Table%20f045f/Asahi%20Shim%20ef850.md,朝日新聞社,,Objectives%204b905/%E6%9C%9D%E6%97%A5%E6%96%B0%E8%81%9E%E7%A4%BE%206faf2.md
+River,unmovable,Area%20Table%20f045f/River%208e2d0.md,川,,
