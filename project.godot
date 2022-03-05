@@ -11,8 +11,13 @@ config_version=4
 [application]
 
 config/name="February 26 Incident"
+run/main_scene="res://Scenes/StrategyView.tscn"
 boot_splash/image="res://Textures/Rebel_troops_in_February_26_Incident.png"
-config/icon="res://icon.png"
+config/icon="res://Textures/320px-226_Hi_no_Maru.svg.png"
+
+[network]
+
+limits/debugger_stdout/max_chars_per_second=40480
 
 [physics]
 

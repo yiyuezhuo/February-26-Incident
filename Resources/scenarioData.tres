@@ -1,0 +1,8 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/ScenarioDataRes.cs" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+notionDataPath = "res://NotionData/Tables 1cacc"
+leaderTablePath = "res://NotionData/Tables 1cacc/Leaders Ta 3f9c1.csv"
