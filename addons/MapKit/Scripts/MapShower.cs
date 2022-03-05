@@ -18,7 +18,12 @@ public interface IMapData<TArea>
     int height{get;}
     TArea ColorToArea(Color color);
     Color? Pos2Color(Vector2 p);
-    void EnsureSetup();
+    // void GetInstance();
+}
+
+public interface IMapDataRes<TArea>
+{
+    IMapData<TArea> GetInstance();
 }
 
 /// <summary>
@@ -204,8 +209,8 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
     public override void _Ready()
     {
         // GD.Print($"mapDataResource={mapDataResource}, typeof(TArea)={typeof(TArea)}");
-        mapData = (IMapData<TArea>)mapDataResource; // TODO: Casting performance problem?
-        mapData.EnsureSetup(); // TODO: Looks like a very ugly implementation leak
+        mapData = ((IMapDataRes<TArea>)mapDataResource).GetInstance(); // TODO: Casting performance problem?
+        // mapData.EnsureSetup(); // TODO: Looks like a very ugly implementation leak
 
         var material = (ShaderMaterial)this.Material;
 

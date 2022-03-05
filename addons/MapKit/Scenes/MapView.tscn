@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://addons/MapKit/Scripts/MapShower.cs" type="Script" id=1]
 [ext_resource path="res://addons/MapKit/Scenes/Widgets/Arrow.tscn" type="PackedScene" id=2]
 [ext_resource path="res://addons/MapKit/Scripts/MapView.cs" type="Script" id=3]
+[ext_resource path="res://Resources/mapData.tres" type="Resource" id=4]
 [ext_resource path="res://addons/MapKit/Scripts/Widgets/ArrowContainer.cs" type="Script" id=7]
 [ext_resource path="res://addons/MapKit/Scenes/Widgets/MapImage.tscn" type="PackedScene" id=8]
 [ext_resource path="res://addons/MapKit/Scripts/Widgets/MapImageContainer.cs" type="Script" id=9]
@@ -18,6 +19,7 @@ longArrowPath = NodePath("LongArrow")
 
 [node name="Map" type="Sprite" parent="."]
 script = ExtResource( 1 )
+mapDataResource = ExtResource( 4 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true

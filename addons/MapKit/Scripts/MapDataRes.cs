@@ -82,15 +82,19 @@ public class Region : IArea
     }
 }
 
-public class MapDataCore
+public class MapData : IMapData<Region>
 {
+    static MapData instance;
+
     public Image baseImage;
-    public int width;
-    public int height;
+    public int width{get; set;}
+    public int height{get; set;}
     Dictionary<Color, Region> areaMap = new Dictionary<Color, Region>();
 
-    public MapDataCore(Texture baseTexture, string regionJsonString)
+    MapData(Texture baseTexture, string path)
     {
+        var regionJsonString = YYZ.Text.Read(path);
+
         baseImage = baseTexture.GetData();
         baseImage.Lock();
 
@@ -98,6 +102,13 @@ public class MapDataCore
         height = baseImage.GetHeight();
 
         areaMap = Region.GetRegionMap(regionJsonString);
+    }
+
+    public static MapData GetInstance(Texture baseTexture, string regionJsonString)
+    {
+        if(instance == null)
+            instance = new MapData(baseTexture, regionJsonString);
+        return instance;
     }
 
     Vector2 WorldToMap(Vector2 worldPos)
@@ -130,21 +141,27 @@ public class MapDataCore
 /// A reference implementation for `IMapData<IArea>`, though in real game IMapData will be implemented in a more complex class
 /// and the `MapDataCore` may be more useful.
 /// </summary>
-public class MapData : YYZ.ResourceNeedSetup, IMapData<Region>
+public class MapDataRes : Resource, IMapDataRes<Region> // YYZ.ResourceNeedSetup, 
 {
     [Export] Texture baseTexture;
     [Export(PropertyHint.File)] string regionDataPath;
 
-    MapDataCore core;
+    // MapDataCore core;
+    /*
     protected override void Setup()
     {
         core = new MapDataCore(baseTexture, YYZ.Text.Read(regionDataPath));
     }
+    */
+    public MapData GetInstance() => MapData.GetInstance(baseTexture, regionDataPath);
+    IMapData<Region> IMapDataRes<Region>.GetInstance() => GetInstance();
 
+    /*
     public int width{get => core.width;}
     public int height{get => core.height;}
     public Color? Pos2Color(Vector2 worldPos) => core.Pos2Color(worldPos);
     public Region ColorToArea(Color color) => core.ColorToArea(color);
+    */
 }
 
 

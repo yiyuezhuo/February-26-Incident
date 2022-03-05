@@ -32,7 +32,7 @@ public class MapImageContainer : AutoExpandedContainer<TextureRect, IMapImageDat
         {
             case PositionHint.Center:
                 child.FlipH = false;
-                child.RectPosition = data.pos - offset / 2; // Control Node start with left top instead of center.
+                child.RectPosition = data.pos - offset / 2; // Control Node starts with left top instead of center.
                 break;
             case PositionHint.Left:
                 child.FlipH = false;
