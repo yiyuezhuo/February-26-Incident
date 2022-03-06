@@ -4,22 +4,10 @@ namespace YYZ.Data.February26
 
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public class ScenarioData
 {
-    /*
-    static ScenarioData instance;
-
-    public static ScenarioData GetInstance(ScenarioDataRes res)
-    {
-        if(instance == null)
-        {
-            instance = new ScenarioData(res);
-        }
-        return instance;
-    }
-    */
-
     // tables
     public LeaderTable leaderTable;
     public AreaTable areaTable;
@@ -30,6 +18,10 @@ public class ScenarioData
     
     // 
     public RegionLabelMap regionLabelMap;
+
+    // public Dictionary<string, AreaTable.Data> areaTableByName = new Dictionary<string, AreaTable.Data>();
+
+    public List<Region> regions = new List<Region>();
 
     public ScenarioData(ScenarioDataRes res)
     {
@@ -60,9 +52,25 @@ public class ScenarioData
             assignment.unit = unitTable[assignment.unitId];
         }
 
+        // Initialize Regions
+
+
+
         // Initialize map label
 
         regionLabelMap = new RegionLabelMap(res.regionLabelPath);
+
+        // Link 
+        var areaTableByName = new Dictionary<string, AreaTable.Data>();
+        foreach(var area in areaTable.Values)
+            areaTableByName[area.name] = area;
+        
+        /*
+        foreach(var regionLabel in regionLabelMap.Values)
+        {
+            areaTableByName[regionLabel.label]
+        }
+        */
         
     }
 }

@@ -33,7 +33,15 @@ public class StrategyView : Control
             // Inspect(table, verbose);
         }
 
-        Inspect(scenarioData.regionLabelMap, true);
+        Inspect(scenarioData.regionLabelMap, false);
+
+    
+        /*
+        foreach(var assignment in scenarioData.assignmentTable.Values)
+        {
+            assignment.
+        }
+        */
 
     }
 
