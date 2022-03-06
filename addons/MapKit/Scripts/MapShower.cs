@@ -18,7 +18,6 @@ public interface IMapData<TArea>
     int height{get;}
     TArea ColorToArea(Color color);
     Color? Pos2Color(Vector2 p);
-    // void GetInstance();
 }
 
 public interface IMapDataRes<TArea>

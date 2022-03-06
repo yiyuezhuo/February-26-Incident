@@ -10,9 +10,12 @@ using static System.Net.WebUtility;
 
 public interface IDataTable
 {
-    void Inspect(bool verbose); // Debug purpose
+    void Inspect(bool verbose); // Debug purpose at this time
 }
 
+/// <summary>
+/// Read csv data
+/// </summary>
 public class DataTable<RT, T> : Dictionary<string, T>, IDataTable where T : DataTable<RT, T>.IData, new()
 {
     public interface IData
@@ -46,19 +49,18 @@ public class DataTable<RT, T> : Dictionary<string, T>, IDataTable where T : Data
 
     public void Inspect(bool verbose)
     {
-        GD.Print($"{GetName()}: Count -> {Count}");
+        // GD.Print($"{GetName()}: Count -> {Count}");
+        GD.Print($"{GetType().Name}: Count -> {Count}");
         if(verbose)
         {
-            GD.Print($"this={this}");
+            // GD.Print($"this={this}");
             foreach(var KV in this)
             {
-                GD.Print($"KV={KV}");
+                // GD.Print($"KV={KV}");
                 GD.Print($"{KV.Key} => {KV.Value}");
             }
         }
     }
-
-    public virtual string GetName() => "DataTable";
 }
 
 public class LeaderTable : DataTable<LeaderTable.Item, LeaderTable.Data> // Dictionary<string, LeaderTable.Leader>
@@ -102,8 +104,6 @@ public class LeaderTable : DataTable<LeaderTable.Item, LeaderTable.Data> // Dict
             return $"Leader({name}, {nameJap})";
         }
     }
-
-    public override string GetName() => "LeaderTable";
 }
 
 public class AreaTable : DataTable<AreaTable.Item, AreaTable.Data>
@@ -136,8 +136,6 @@ public class AreaTable : DataTable<AreaTable.Item, AreaTable.Data>
 
         public override string ToString() => $"Area({name}, {nameJap})";
     }
-
-    public override string GetName() => "AreaTable";
 }
 
 public class CelebrityTable : DataTable<CelebrityTable.Item, CelebrityTable.Data>
@@ -167,8 +165,6 @@ public class CelebrityTable : DataTable<CelebrityTable.Item, CelebrityTable.Data
 
         public override string ToString() => $"Celebrity({name}, {nameJap})";
     }
-
-    public override string GetName() => "CelebrityTable";
 }
 
 public class ObjectiveTable : DataTable<ObjectiveTable.Item, ObjectiveTable.Data>
@@ -207,8 +203,6 @@ public class ObjectiveTable : DataTable<ObjectiveTable.Item, ObjectiveTable.Data
 
         public override string ToString() => $"Objective({name}, {nameJap})";
     }
-
-    public override string GetName() => "ObjectiveTable";
 }
 
 public class UnitTable : DataTable<UnitTable.Item, UnitTable.Data>
@@ -250,8 +244,6 @@ public class UnitTable : DataTable<UnitTable.Item, UnitTable.Data>
 
         public override string ToString() => $"Unit({name}, {nameJap})";
     }
-
-    public override string GetName() => "UnitTable";
 }
 
 
@@ -283,8 +275,6 @@ public class AssignmentTable : DataTable<AssignmentTable.Item, AssignmentTable.D
             unitId = UrlToId(item.Unit);
         }
     }
-
-    public override string GetName() => "AssignmentTable";
 }
 
 

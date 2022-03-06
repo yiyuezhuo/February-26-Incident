@@ -48,6 +48,7 @@ public class Region : IArea
             return JsonConvert.DeserializeObject<RegionDataResult>(jsonString);
         }
     }
+    
     /// <summary>
     /// Get a dictionary which maps baseColor to Region.
     /// </summary>
@@ -82,16 +83,25 @@ public class Region : IArea
     }
 }
 
-public class MapData : IMapData<Region>
+/*
+public interface IRegion<TArea> : IArea
 {
-    static MapData instance;
+    Dictionary<Color, TArea> GetRegionMap(string regionJsonString);
+}
+*/
+
+public abstract class MapData<TArea> : IMapData<TArea> // where TArea : IRegion<TArea>
+{
+    // static MapData<TArea> instance;
 
     public Image baseImage;
     public int width{get; set;}
     public int height{get; set;}
-    Dictionary<Color, Region> areaMap = new Dictionary<Color, Region>();
+    Dictionary<Color, TArea> areaMap = new Dictionary<Color, TArea>();
 
-    MapData(Texture baseTexture, string path)
+    protected abstract Dictionary<Color, TArea> GetRegionMap(string regionJsonString);
+
+    public MapData(Texture baseTexture, string path)
     {
         var regionJsonString = YYZ.Text.Read(path);
 
@@ -101,20 +111,24 @@ public class MapData : IMapData<Region>
         width = baseImage.GetWidth();
         height = baseImage.GetHeight();
 
-        areaMap = Region.GetRegionMap(regionJsonString);
+        areaMap = GetRegionMap(regionJsonString);
+        // areaMap = TArea.GetRegionMap(regionJsonString);
     }
 
-    public static MapData GetInstance(Texture baseTexture, string regionJsonString)
+    /*
+    public static MapData<TArea> GetInstance(Texture baseTexture, string regionJsonString)
     {
         if(instance == null)
-            instance = new MapData(baseTexture, regionJsonString);
+            instance = new MapData<TArea>(baseTexture, regionJsonString);
         return instance;
     }
+    */
 
     Vector2 WorldToMap(Vector2 worldPos)
     {
         return new Vector2(worldPos.x + width / 2, worldPos.y + height / 2);
     }
+    
     public Color? Pos2Color(Vector2 worldPos)
     {
         // {0, 0} is assumed to be "center"
@@ -130,38 +144,28 @@ public class MapData : IMapData<Region>
         return baseImage.GetPixel(x, y);
     }
     
-    public Region ColorToArea(Color color)
+    public TArea ColorToArea(Color color)
     {
         //GD.Print($"color={color}, areaMap.Count={areaMap.Count}, areaMap.Keys={areaMap.Keys}");
         return areaMap[color];
     }
 }
 
-/// <summary>
-/// A reference implementation for `IMapData<IArea>`, though in real game IMapData will be implemented in a more complex class
-/// and the `MapDataCore` may be more useful.
-/// </summary>
 public class MapDataRes : Resource, IMapDataRes<Region> // YYZ.ResourceNeedSetup, 
 {
     [Export] Texture baseTexture;
     [Export(PropertyHint.File)] string regionDataPath;
 
-    // MapDataCore core;
-    /*
-    protected override void Setup()
+    public class MapData : MapData<Region>
     {
-        core = new MapDataCore(baseTexture, YYZ.Text.Read(regionDataPath));
+        public MapData(Texture baseTexture, string path) : base(baseTexture, path) {}
+        protected override Dictionary<Color, Region> GetRegionMap(string regionJsonString) => Region.GetRegionMap(regionJsonString);
     }
-    */
-    public MapData GetInstance() => MapData.GetInstance(baseTexture, regionDataPath);
-    IMapData<Region> IMapDataRes<Region>.GetInstance() => GetInstance();
 
-    /*
-    public int width{get => core.width;}
-    public int height{get => core.height;}
-    public Color? Pos2Color(Vector2 worldPos) => core.Pos2Color(worldPos);
-    public Region ColorToArea(Color color) => core.ColorToArea(color);
-    */
+    MapData instance;
+
+    public MapData<Region> GetInstance() => instance != null ? instance : instance = new MapData(baseTexture, regionDataPath);
+    IMapData<Region> IMapDataRes<Region>.GetInstance() => GetInstance();
 }
 
 

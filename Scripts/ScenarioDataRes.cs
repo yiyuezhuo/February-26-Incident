@@ -7,6 +7,7 @@ using System;
 
 public class ScenarioData
 {
+    /*
     static ScenarioData instance;
 
     public static ScenarioData GetInstance(ScenarioDataRes res)
@@ -17,22 +18,29 @@ public class ScenarioData
         }
         return instance;
     }
+    */
 
+    // tables
     public LeaderTable leaderTable;
     public AreaTable areaTable;
     public CelebrityTable celebrityTable;
     public ObjectiveTable objectiveTable;
     public UnitTable unitTable;
     public AssignmentTable assignmentTable;
+    
+    // 
+    public RegionLabelMap regionLabelMap;
 
     public ScenarioData(ScenarioDataRes res)
     {
+        // Initialize tables
+
         leaderTable = new LeaderTable(res.leaderTablePath, res.notionDataPath);
         areaTable = new AreaTable(res.areaTablePath, res.notionDataPath);
         celebrityTable = new CelebrityTable(res.celebrityTablePath, res.notionDataPath);
         objectiveTable = new ObjectiveTable(res.objectiveTablePath, res.notionDataPath);
         unitTable = new UnitTable(res.unitTablePath, res.notionDataPath);
-        assignmentTable = new AssignmentTable(res.assignmentTable, res.notionDataPath);
+        assignmentTable = new AssignmentTable(res.assignmentTablePath, res.notionDataPath);
 
         // Link
         foreach(var objective in objectiveTable.Values)
@@ -51,6 +59,11 @@ public class ScenarioData
             assignment.leader = leaderTable[assignment.leaderId];
             assignment.unit = unitTable[assignment.unitId];
         }
+
+        // Initialize map label
+
+        regionLabelMap = new RegionLabelMap(res.regionLabelPath);
+        
     }
 }
 
@@ -62,9 +75,11 @@ public class ScenarioDataRes : Resource
     [Export(PropertyHint.File)] public string celebrityTablePath;
     [Export(PropertyHint.File)] public string objectiveTablePath;
     [Export(PropertyHint.File)] public string unitTablePath;
-    [Export(PropertyHint.File)] public string assignmentTable;
+    [Export(PropertyHint.File)] public string assignmentTablePath;
+    [Export(PropertyHint.File)] public string regionLabelPath;
 
-    public ScenarioData GetInstance() => ScenarioData.GetInstance(this);
+    ScenarioData instance;
+    public ScenarioData GetInstance() => instance != null ? instance : instance = new ScenarioData(this);
 }
 
 
