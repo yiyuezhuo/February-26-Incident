@@ -25,6 +25,7 @@ public class StrategyView : Control
         };
         
         foreach(var table in tables)
+        
         {
             // var verbose = table == tables[tables.Length - 1];
             // var verbose = true;
@@ -42,6 +43,9 @@ public class StrategyView : Control
             assignment.
         }
         */
+        GD.Print($"scenarioData.regions.Count: {scenarioData.regions.Count}");
+        foreach(var region in scenarioData.regions)
+            GD.Print(region);
 
     }
 

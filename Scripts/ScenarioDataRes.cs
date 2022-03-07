@@ -18,6 +18,7 @@ public class ScenarioData
     
     // 
     public RegionLabelMap regionLabelMap;
+    public MapData mapData;
 
     // public Dictionary<string, AreaTable.Data> areaTableByName = new Dictionary<string, AreaTable.Data>();
 
@@ -54,7 +55,9 @@ public class ScenarioData
 
         // Initialize Regions
 
-
+        mapData = res.mapDataRes.GetInstance();
+        foreach(var region in mapData.GetAllAreas())
+            regions.Add(region);
 
         // Initialize map label
 
@@ -65,13 +68,15 @@ public class ScenarioData
         foreach(var area in areaTable.Values)
             areaTableByName[area.name] = area;
         
-        /*
         foreach(var regionLabel in regionLabelMap.Values)
         {
-            areaTableByName[regionLabel.label]
+            var area = areaTableByName[regionLabel.label];
+            var posLeftTop = regionLabel.position;
+            var pos = new Vector2(posLeftTop.x - mapData.width / 2, posLeftTop.y - mapData.height / 2);
+            var colorNullable = mapData.Pos2Color(pos);
+            var region = mapData.ColorToArea(colorNullable.Value);
+            region.areaData = area;
         }
-        */
-        
     }
 }
 
@@ -85,6 +90,7 @@ public class ScenarioDataRes : Resource
     [Export(PropertyHint.File)] public string unitTablePath;
     [Export(PropertyHint.File)] public string assignmentTablePath;
     [Export(PropertyHint.File)] public string regionLabelPath;
+    [Export] public MapDataRes mapDataRes;
 
     ScenarioData instance;
     public ScenarioData GetInstance() => instance != null ? instance : instance = new ScenarioData(this);

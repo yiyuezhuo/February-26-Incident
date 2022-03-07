@@ -1,6 +1,7 @@
-[gd_resource type="Resource" load_steps=2 format=2]
+[gd_resource type="Resource" load_steps=3 format=2]
 
 [ext_resource path="res://Scripts/ScenarioDataRes.cs" type="Script" id=1]
+[ext_resource path="res://Resources/mapData.tres" type="Resource" id=2]
 
 [resource]
 script = ExtResource( 1 )
@@ -12,3 +13,4 @@ objectiveTablePath = "res://NotionData/Tables 1cacc/Objectives 4b905.csv"
 unitTablePath = "res://NotionData/Tables 1cacc/Unit Table c41b2.csv"
 assignmentTablePath = "res://NotionData/Tables 1cacc/Assignment 5df24.csv"
 regionLabelPath = "res://MapData/TokyoBaseTex.json"
+mapDataRes = ExtResource( 2 )

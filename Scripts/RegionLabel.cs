@@ -46,7 +46,11 @@ public class RegionLabelMap : Dictionary<string, RegionLabelMap.Data>
     {
         public string label;
         public Vector2 position;
-        public Data(string label, Vector2 position) => this.position = position;
+        public Data(string label, Vector2 position)
+        {
+            this.label = label;
+            this.position = position;
+        }
     }
 }
 
