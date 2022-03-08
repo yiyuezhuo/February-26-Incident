@@ -5,15 +5,34 @@ namespace YYZ.Data.February26
 using System.Collections.Generic;
 using Godot;
 
-public class Region : MapKit.Region, MapKit.IRegion<Region>
+/// <summary>
+/// App layer Region representation.
+/// </summary>
+public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit>, Unit>, MapKit.IRegion<Region>
 {
+    // MapKit.IRegion properties
+    public Color baseColor{get; set;}
+    public Color remapColor{get; set;}
+    public HashSet<Region> neighbors{get;set;}
+    public Vector2 center{get; set;}
     
-    public AreaTable.Data areaData;
-    public new HashSet<Region> neighbors{get; set;}
+    public AreaTable.Data areaData; // Most of time, it's null.
+
+    public List<Unit> children{get; set;} = new List<Unit>();
 
     string GetAreaDataDesc() => areaData != null ? areaData.ToString() : "[No Area Data]";
 
-    public override string ToString() => $"Region({GetAreaDataDesc()}, {center})";
+    public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count})";
+
+    /*
+    public Side parent;
+    public List<Unit> children;
+    public void MoveChildTo(Unit child, Region other)
+    {
+        children.Remove(child);
+        other.children.Add(child);
+    }
+    */
 }
 
 

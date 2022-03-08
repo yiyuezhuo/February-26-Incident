@@ -7,6 +7,8 @@ using CsvHelper.Configuration.Attributes;
 using Godot;
 using System.Collections.Generic;
 using static System.Net.WebUtility;
+using System.Linq;
+using System;
 
 public interface IDataTable
 {
@@ -205,6 +207,58 @@ public class ObjectiveTable : DataTable<ObjectiveTable.Item, ObjectiveTable.Data
     }
 }
 
+public class SideTable : DataTable<SideTable.Item, SideTable.Data>
+{
+    public SideTable(string tablePath, string root) : base(tablePath, root) {}
+
+    public class Item
+    {
+        public string Name{get; set;}
+        public string Name_Jap{get; set;}
+        public string Color{get; set;}
+        public string Picture{get; set;}
+        public string Rebel{get; set;} // "Yes" or "No"
+        public string ID{get; set;}
+    }
+
+    public class Data : IData
+    {
+        Item item;
+
+        public string name{get => item.Name;}
+        public string nameJap{get => item.Name_Jap;}
+        public Color color;
+        public Texture picture;
+        public bool isRebel;
+        public string id{get; set;}
+
+        public void Setup(Item item, string root)
+        {
+            this.item = item;
+
+            var colorArr = item.Color.Split(",").Select(byte.Parse).ToArray();
+            color = Color.Color8(colorArr[0], colorArr[1], colorArr[2]);
+            picture = UrlToTexture(item.Picture, root);
+            isRebel = parseNotionBool(item.Rebel);
+            id = UrlToId(item.ID);
+        }
+
+        bool parseNotionBool(string s)
+        {
+            switch(item.Rebel)
+            {
+                case "Yes":
+                    return true;
+                case "No":
+                    return false;
+            }
+            throw new ArgumentOutOfRangeException($"Unknown Rebel type: {item.Rebel}");
+        }
+
+        public override string ToString() => $"Unit({name}, {nameJap})";
+    }
+}
+
 public class UnitTable : DataTable<UnitTable.Item, UnitTable.Data>
 {
     public UnitTable(string tablePath, string root) : base(tablePath, root) {}
@@ -213,7 +267,7 @@ public class UnitTable : DataTable<UnitTable.Item, UnitTable.Data>
     {
         public string Name{get; set;}
         public string Name_Jap{get; set;}
-        public string Strength{get; set;}
+        public float Strength{get; set;}
         public string ID{get; set;}
         public string Area{get; set;}
         // [Name("Related to Leader Assignments Table (Unit)")] public string Leaders; // Parse assignment info from here instead of original file.
@@ -235,7 +289,7 @@ public class UnitTable : DataTable<UnitTable.Item, UnitTable.Data>
         public void Setup(Item item, string root)
         {
             this.item = item;
-            strength = float.Parse(item.Strength);
+            strength = item.Strength;
             id = UrlToId(item.ID);
             areaId = UrlToId(item.Area);
             // GD.Print($"item.Leaders={item.Leaders}");

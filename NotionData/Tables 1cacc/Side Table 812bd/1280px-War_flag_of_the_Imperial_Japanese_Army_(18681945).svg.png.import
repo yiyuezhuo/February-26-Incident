@@ -1,0 +1,35 @@
+[remap]
+
+importer="texture"
+type="StreamTexture"
+path="res://.import/1280px-War_flag_of_the_Imperial_Japanese_Army_(18681945).svg.png-08759862b0cb64effbc1a6cf9fe8e930.stex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://NotionData/Tables 1cacc/Side Table 812bd/1280px-War_flag_of_the_Imperial_Japanese_Army_(18681945).svg.png"
+dest_files=[ "res://.import/1280px-War_flag_of_the_Imperial_Japanese_Army_(18681945).svg.png-08759862b0cb64effbc1a6cf9fe8e930.stex" ]
+
+[params]
+
+compress/mode=0
+compress/lossy_quality=0.7
+compress/hdr_mode=0
+compress/bptc_ldr=0
+compress/normal_map=0
+flags/repeat=0
+flags/filter=true
+flags/mipmaps=false
+flags/anisotropic=false
+flags/srgb=2
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/HDR_as_SRGB=false
+process/invert_color=false
+process/normal_map_invert_y=false
+stream=false
+size_limit=0
+detect_3d=true
+svg/scale=1.0

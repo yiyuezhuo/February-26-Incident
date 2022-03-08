@@ -5,6 +5,96 @@ namespace YYZ.Data.February26
 using Godot;
 using System;
 using System.Collections.Generic;
+using YYZ.Collections;
+
+// "App layer" objects, which is detached from `DataTable.Data`.
+
+/*
+public interface IHalfDownNode<T, TCC, TC> where TCC : ICollection<TC> where T : IHalfDownNode<T, TCC, TC>
+{
+    TCC children{get; set;}
+    void MoveChildTo(TC child, T other);
+}
+
+public interface IHalfUpNode<TP>
+{
+    TP parent{get; set;}
+    void Move(TP parent);
+}
+*/
+
+public class Side : IContainer<HashSet<Region>, Region>
+{
+    SideTable.Data data;
+
+    public string name{get => data.name;}
+    public string nameJap{get => data.nameJap;}
+    public Color color{get => color;}
+    public Texture picture{get => picture;}
+
+    public Side(SideTable.Data data)
+    {
+        this.data = data;
+    }
+
+    public HashSet<Region> children{get; set;} = new HashSet<Region>();
+    /*
+    public void MoveChildTo(Region region, Side other)
+    {
+        children.Remove(region);
+        other.children.Add(region);
+    }
+    */
+
+    public override string ToString() => $"Side({name}, {nameJap}, {children.Count})";
+}
+
+public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>
+{
+    UnitTable.Data data;
+
+    public string name{get => data.name;}
+    public string nameJap{get => data.nameJap;}
+    public float strength{get; set;}
+
+    public Unit(UnitTable.Data data)
+    {
+        this.data  = data;
+        this.strength = data.strength;
+    }
+
+    public List<Leader> children{get; set;} = new List<Leader>();
+
+    /*
+    public Region parent;
+    public List<Leader> children;
+
+    public void MoveChildTo(Leader child, Unit other)
+    {
+        children.Remove(child);
+        other.children.Add(child);
+    }
+    */
+
+    public override string ToString() => $"Unit({name}, {nameJap}, {children.Count})";
+}
+
+public class Leader : Child<Leader, Unit, List<Leader>>
+{
+    LeaderTable.Data data;
+
+    public string name {get => data.name;}
+    public string nameJap{get => data.nameJap;}
+    public Texture portrait{get => data.portrait;}
+
+    public Leader(LeaderTable.Data data)
+    {
+        this.data = data;
+    }
+
+    // public Unit parent;
+    public override string ToString() => $"Leader({name}, {nameJap})";
+}
 
 public class ScenarioData
 {
@@ -13,6 +103,7 @@ public class ScenarioData
     public AreaTable areaTable;
     public CelebrityTable celebrityTable;
     public ObjectiveTable objectiveTable;
+    public SideTable sideTable;
     public UnitTable unitTable;
     public AssignmentTable assignmentTable;
     
@@ -20,11 +111,28 @@ public class ScenarioData
     public RegionLabelMap regionLabelMap;
     public MapData mapData;
 
-    // public Dictionary<string, AreaTable.Data> areaTableByName = new Dictionary<string, AreaTable.Data>();
+    public HashSet<Side> sides = new HashSet<Side>();
+    public HashSet<Region> regions = new HashSet<Region>();
+    public HashSet<Unit> units = new HashSet<Unit>();
+    public HashSet<Leader> leaders = new HashSet<Leader>();
 
-    public List<Region> regions = new List<Region>();
+    public Side rebelSide;
+    public Side govSide;
+
+    /*
+    MembershipDatabase<Side, Region> sideRegionMembership = new MembershipDatabase<Side, Region>();
+    MembershipDatabase<Region, Unit> regionUnitMembership = new MembershipDatabase<Region, Unit>();
+    MembershipDatabase<Unit, Leader> unitLeaderMembership = new MembershipDatabase<Unit, Leader>();
+    */
 
     public ScenarioData(ScenarioDataRes res)
+    {
+        mapData = res.mapDataRes.GetInstance();
+        SetupTableData(res, out var areaToRegion);
+        SetupAPPData(areaToRegion);
+    }
+
+    void SetupTableData(ScenarioDataRes res, out Dictionary<AreaTable.Data, Region> areaToRegion)
     {
         // Initialize tables
 
@@ -32,6 +140,7 @@ public class ScenarioData
         areaTable = new AreaTable(res.areaTablePath, res.notionDataPath);
         celebrityTable = new CelebrityTable(res.celebrityTablePath, res.notionDataPath);
         objectiveTable = new ObjectiveTable(res.objectiveTablePath, res.notionDataPath);
+        sideTable = new SideTable(res.sideTablePath, res.notionDataPath);
         unitTable = new UnitTable(res.unitTablePath, res.notionDataPath);
         assignmentTable = new AssignmentTable(res.assignmentTablePath, res.notionDataPath);
 
@@ -53,21 +162,17 @@ public class ScenarioData
             assignment.unit = unitTable[assignment.unitId];
         }
 
-        // Initialize Regions
-
-        mapData = res.mapDataRes.GetInstance();
-        foreach(var region in mapData.GetAllAreas())
-            regions.Add(region);
-
         // Initialize map label
 
         regionLabelMap = new RegionLabelMap(res.regionLabelPath);
 
-        // Link 
+        // Link map label
+
         var areaTableByName = new Dictionary<string, AreaTable.Data>();
         foreach(var area in areaTable.Values)
             areaTableByName[area.name] = area;
         
+        areaToRegion = new Dictionary<AreaTable.Data, Region>();
         foreach(var regionLabel in regionLabelMap.Values)
         {
             var area = areaTableByName[regionLabel.label];
@@ -76,6 +181,64 @@ public class ScenarioData
             var colorNullable = mapData.Pos2Color(pos);
             var region = mapData.ColorToArea(colorNullable.Value);
             region.areaData = area;
+
+            areaToRegion[area] = region;
+        }
+    }
+
+    void SetupAPPData(Dictionary<AreaTable.Data, Region> areaToRegion)
+    {
+        // Initialize App layer data
+
+        // Side
+
+        foreach(var sideData in sideTable.Values)
+        {
+            var side = new Side(sideData);
+            sides.Add(side);
+
+            // sideRegionMembership.CreateMembership(side);
+            if(sideData.isRebel)
+                rebelSide = side;
+            else
+                govSide = side;
+        }
+
+        // Region
+
+        foreach(var region in mapData.GetAllAreas())
+        {
+            regions.Add(region);
+            if(region.areaData == null || region.areaData.movable)
+                region.EnterTo(rebelSide);
+        }
+
+        // Unit
+        var unitDataToUnit = new Dictionary<UnitTable.Data, Unit>();
+        foreach(var unitData in unitTable.Values) // Here we assume all units are rebels.
+        {
+            var unit = new Unit(unitData);
+            units.Add(unit);
+            unitDataToUnit[unitData] = unit;
+
+            var region = areaToRegion[unitData.area];
+            unit.EnterTo(region);
+        }
+
+        // Leader
+        var leaderDataToLeader = new Dictionary<LeaderTable.Data, Leader>();
+        foreach(var leaderData in leaderTable.Values)
+        {
+            var leader = new Leader(leaderData);
+            leaders.Add(leader);
+            leaderDataToLeader[leaderData] = leader;
+            // EnterTo is delegated to assignment
+        }
+
+        // Assignmemt
+        foreach(var assignment in assignmentTable.Values)
+        {
+            leaderDataToLeader[assignment.leader].EnterTo(unitDataToUnit[assignment.unit]);
         }
     }
 }
@@ -87,6 +250,7 @@ public class ScenarioDataRes : Resource
     [Export(PropertyHint.File)] public string areaTablePath;
     [Export(PropertyHint.File)] public string celebrityTablePath;
     [Export(PropertyHint.File)] public string objectiveTablePath;
+    [Export(PropertyHint.File)] public string sideTablePath;
     [Export(PropertyHint.File)] public string unitTablePath;
     [Export(PropertyHint.File)] public string assignmentTablePath;
     [Export(PropertyHint.File)] public string regionLabelPath;
@@ -97,4 +261,4 @@ public class ScenarioDataRes : Resource
 }
 
 
-} 
+}
