@@ -9,75 +9,28 @@ using System.Collections.Generic;
 public class StrategyView : Control
 {
     [Export] ScenarioDataRes scenarioDataRes;
+    [Export] NodePath mapViewPath;
+    [Export] PackedScene mapImageScene;
 
     ScenarioData scenarioData;
+    MapView mapView;
     public override void _Ready()
     {
         scenarioData = scenarioDataRes.GetInstance();
+        mapView = (MapView)GetNode(mapViewPath);
 
-        var tables = new IDataTable[]{
-            scenarioData.leaderTable, 
-            scenarioData.areaTable,
-            scenarioData.celebrityTable,
-            scenarioData.objectiveTable,
-            scenarioData.sideTable,
-            scenarioData.unitTable,
-            scenarioData.assignmentTable
-        };
-        
-        foreach(var table in tables)
-
+        foreach(var unit in scenarioData.units)
         {
-            // var verbose = table == tables[tables.Length - 1];
-            // var verbose = true;
-            var verbose = false;
-            table.Inspect(verbose);
-            // Inspect(table, verbose);
-        }
+            var node = mapImageScene.Instance<TextureRect>();
+            // var node = new TextureRect();
+            node.RectPosition = scenarioData.mapData.MapToWorld(unit.parent.center);
+            node.Texture = unit.children[0].portrait;
 
-        Inspect(scenarioData.regionLabelMap, false);
+            GD.Print($"node={node}");
 
-    
-        /*
-        foreach(var assignment in scenarioData.assignmentTable.Values)
-        {
-            assignment.
-        }
-        */
-        GD.Print($"scenarioData.regions.Count: {scenarioData.regions.Count}");
-        /*
-        foreach(var region in scenarioData.regions)
-            GD.Print(region);
-        */
-
-        foreach(var containers in new IEnumerable< IContainerWeak<IEnumerable<object>, object> >[]{scenarioData.sides, scenarioData.regions, scenarioData.units})
-        { 
-            foreach(var container in containers)
-            {
-                foreach (var el in container.children)
-                {
-                    GD.Print($"{container} ∋ {el}");
-                }
-            }
-        }
-
-
-    }
-
-    public void Inspect<TK, TV>(Dictionary<TV, TK> dict, bool verbose)
-    {
-        GD.Print($"{dict.GetType().Name}: Count -> {dict.Count}");
-        if(verbose)
-        {
-            // GD.Print($"this={this}");
-            foreach(var KV in dict)
-            {
-                // GD.Print($"KV={KV}");
-                GD.Print($"{KV.Key} => {KV.Value}");
-            }
+            mapView.AddChild(node);
         }
     }
-
 }
 
 

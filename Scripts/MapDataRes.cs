@@ -8,7 +8,7 @@ using Godot;
 /// <summary>
 /// App layer Region representation.
 /// </summary>
-public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit>, Unit>, MapKit.IRegion<Region>
+public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit>, Unit>, MapKit.IRegion<Region>, MapKit.IArea
 {
     // MapKit.IRegion properties
     public Color baseColor{get; set;}
@@ -22,6 +22,7 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
 
     string GetAreaDataDesc() => areaData != null ? areaData.ToString() : "[No Area Data]";
 
+    // public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count}, {parent})";
     public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count})";
 }
 

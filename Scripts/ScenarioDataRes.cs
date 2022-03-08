@@ -26,6 +26,7 @@ public class Side : IContainer<HashSet<Region>, Region>
     public HashSet<Region> children{get; set;} = new HashSet<Region>();
 
     public override string ToString() => $"Side({name}, {nameJap}, {children.Count})";
+    public string ToHierarchy() => ToString();
 }
 
 public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>
@@ -44,6 +45,7 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
 
     public List<Leader> children{get; set;} = new List<Leader>();
 
+    // public override string ToString() => $"Unit({name}, {nameJap}, {children.Count}, {parent})";
     public override string ToString() => $"Unit({name}, {nameJap}, {children.Count})";
 }
 
@@ -61,6 +63,7 @@ public class Leader : Child<Leader, Unit, List<Leader>>
     }
 
     // public Unit parent;
+    // public override string ToString() => $"Leader({name}, {nameJap}, {parent})";
     public override string ToString() => $"Leader({name}, {nameJap})";
 }
 
@@ -172,7 +175,7 @@ public class ScenarioData
         {
             regions.Add(region);
             if(region.areaData == null || region.areaData.movable)
-                region.EnterTo(rebelSide);
+                region.EnterTo(govSide);
         }
 
         // Unit
@@ -197,13 +200,20 @@ public class ScenarioData
             // EnterTo is delegated to assignment
         }
 
-        // Assignmemt
+        // Assignment
         foreach(var assignment in assignmentTable.Values)
         {
             leaderDataToLeader[assignment.leader].EnterTo(unitDataToUnit[assignment.unit]);
         }
 
-        // TODO: Rebels occupy inital regions
+        // Rebels occupy initial regions
+        foreach(var region in regions)
+        {
+            if(region.children.Count > 0) // All "units" belong to Rebel at this time.
+            {
+                region.MoveTo(rebelSide);
+            }
+        }
     }
 }
 

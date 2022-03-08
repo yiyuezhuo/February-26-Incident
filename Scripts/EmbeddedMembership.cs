@@ -13,6 +13,7 @@ public interface IContainerWeak<out TCC, out TC> where TCC : IEnumerable<TC>
 public interface IContainer<out TCC, out TC> : IContainerWeak<TCC, TC> where TCC : ICollection<TC>
 {
     // TCC children {get;}
+    string ToHierarchy();
 }
 
 public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer<TCC, T> where TCC : ICollection<T>
@@ -35,6 +36,8 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
             parent.children.Remove(This);
         EnterTo(container);
     }
+
+    public string ToHierarchy() => $"{this} ∋ {parent}";
 }
 
 

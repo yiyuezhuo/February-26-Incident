@@ -103,6 +103,10 @@ public class MapData<TRegion> : IMapData<TRegion> where TRegion : IRegion<TRegio
     {
         return new Vector2(worldPos.x + width / 2, worldPos.y + height / 2);
     }
+    public Vector2 MapToWorld(Vector2 mapPos)
+    {
+        return new Vector2(mapPos.x - width / 2, mapPos.y - height / 2);
+    }
     
     public Color? Pos2Color(Vector2 worldPos)
     {

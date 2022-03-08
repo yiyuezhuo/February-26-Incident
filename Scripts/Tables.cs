@@ -132,7 +132,7 @@ public class AreaTable : DataTable<AreaTable.Item, AreaTable.Data>
         public void Setup(Item item, string _)
         {
             this.item = item;
-            this.movable = item.Tags.Contains("unmovable");
+            this.movable = !item.Tags.Contains("unmovable");
             id = UrlToId(item.ID);
         }
 
