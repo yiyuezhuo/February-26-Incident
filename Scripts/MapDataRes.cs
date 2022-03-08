@@ -23,16 +23,6 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     string GetAreaDataDesc() => areaData != null ? areaData.ToString() : "[No Area Data]";
 
     public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count})";
-
-    /*
-    public Side parent;
-    public List<Unit> children;
-    public void MoveChildTo(Unit child, Region other)
-    {
-        children.Remove(child);
-        other.children.Add(child);
-    }
-    */
 }
 
 

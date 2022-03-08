@@ -9,20 +9,6 @@ using YYZ.Collections;
 
 // "App layer" objects, which is detached from `DataTable.Data`.
 
-/*
-public interface IHalfDownNode<T, TCC, TC> where TCC : ICollection<TC> where T : IHalfDownNode<T, TCC, TC>
-{
-    TCC children{get; set;}
-    void MoveChildTo(TC child, T other);
-}
-
-public interface IHalfUpNode<TP>
-{
-    TP parent{get; set;}
-    void Move(TP parent);
-}
-*/
-
 public class Side : IContainer<HashSet<Region>, Region>
 {
     SideTable.Data data;
@@ -38,13 +24,6 @@ public class Side : IContainer<HashSet<Region>, Region>
     }
 
     public HashSet<Region> children{get; set;} = new HashSet<Region>();
-    /*
-    public void MoveChildTo(Region region, Side other)
-    {
-        children.Remove(region);
-        other.children.Add(region);
-    }
-    */
 
     public override string ToString() => $"Side({name}, {nameJap}, {children.Count})";
 }
@@ -64,17 +43,6 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
     }
 
     public List<Leader> children{get; set;} = new List<Leader>();
-
-    /*
-    public Region parent;
-    public List<Leader> children;
-
-    public void MoveChildTo(Leader child, Unit other)
-    {
-        children.Remove(child);
-        other.children.Add(child);
-    }
-    */
 
     public override string ToString() => $"Unit({name}, {nameJap}, {children.Count})";
 }
@@ -118,12 +86,6 @@ public class ScenarioData
 
     public Side rebelSide;
     public Side govSide;
-
-    /*
-    MembershipDatabase<Side, Region> sideRegionMembership = new MembershipDatabase<Side, Region>();
-    MembershipDatabase<Region, Unit> regionUnitMembership = new MembershipDatabase<Region, Unit>();
-    MembershipDatabase<Unit, Leader> unitLeaderMembership = new MembershipDatabase<Unit, Leader>();
-    */
 
     public ScenarioData(ScenarioDataRes res)
     {
@@ -240,6 +202,8 @@ public class ScenarioData
         {
             leaderDataToLeader[assignment.leader].EnterTo(unitDataToUnit[assignment.unit]);
         }
+
+        // TODO: Rebels occupy inital regions
     }
 }
 

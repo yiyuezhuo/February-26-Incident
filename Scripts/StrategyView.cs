@@ -50,20 +50,6 @@ public class StrategyView : Control
             GD.Print(region);
         */
 
-        /*
-        foreach(var containers in new IEnumerable<object>[]{scenarioData.sides, scenarioData.regions, scenarioData.units, scenarioData.leaders})
-        { 
-            foreach(var obj in containers)
-            {
-                var container = (IContainerWeak<IEnumerable<object>, object>)obj;
-                foreach (var el in container.children)
-                {
-                    GD.Print($"{container} | {el}");
-                }
-            }
-        }
-        */
-
         foreach(var containers in new IEnumerable< IContainerWeak<IEnumerable<object>, object> >[]{scenarioData.sides, scenarioData.regions, scenarioData.units})
         { 
             foreach(var container in containers)
