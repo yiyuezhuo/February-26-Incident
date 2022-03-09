@@ -1,0 +1,21 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type canvas_item;
+
+uniform vec4 begin_color : hint_color = vec4(1.0, 0.3, 0.3, 1.0);
+uniform vec4 end_color : hint_color = vec4(1.0, 0, 0, 1.0);
+
+void vertex(){
+	VERTEX = vec2(VERTEX.x, VERTEX.y * (2.0 * UV.x + 1.0));
+	// VERTEX = vec2(VERTEX.x, (VERTEX.y - 90.0) * VERTEX.x * 0.08);
+	// VERTEX = VERTEX + 3.0 * vec2(0, VERTEX.x);
+	// VERTEX = vec2(10.0 * sin(TIME), 0.0) + VERTEX;
+	// VERTEX = vec2(10.0 * sin(TIME) * VERTEX.x, 0.0) + VERTEX;
+}
+
+void fragment(){
+	// COLOR = mix(begin_color, end_color, UV.x);
+	COLOR = vec4(step(abs(sin(TIME)), UV.x), 0.0, 0.0, 1.0);
+	// COLOR = vec4(step(0.5, UV.x), 0.0, 0.0, 1.0);
+}"

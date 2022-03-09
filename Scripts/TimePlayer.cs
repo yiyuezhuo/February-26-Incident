@@ -27,6 +27,8 @@ public class TimePlayer : Control
     float multipler = 0.0f;
     // float elapsed = 0.0f;
     DateTime lastDate;
+    Button lastClickedButton;
+    Button lastClickedNonPauseButton;
 
     public event EventHandler<int> simulationEvent;
 
@@ -43,32 +45,52 @@ public class TimePlayer : Control
         x32Button = BindButton(x32ButtonPath, 32.0f);
 
         lastDate = DateTime.Parse(startDate);
+
+        lastClickedButton = pauseButton;
+        lastClickedNonPauseButton = x1Button;
+
+        timeLabel.Text = lastDate.ToString();
     }
 
-    Godot.Collections.Array GetBindParam(float t) => new Godot.Collections.Array{t};
+    Godot.Collections.Array GetBindParam(Button button, float t) => new Godot.Collections.Array{button, t};
     Button BindButton(string buttonPath, float t)
     {
         var button = (Button)GetNode(buttonPath);
-        button.Connect("pressed", this, nameof(SetMultipler), GetBindParam(t));
+        button.Connect("pressed", this, nameof(PressedHandler), GetBindParam(button, t));
         return button;
     }
 
     public override void _Process(float delta)
     {
+        
+        if(Input.IsActionJustPressed("pause_toggle"))
+        {
+            GD.Print($"pause_toggle: {lastClickedButton == pauseButton}");
+            var grabButton = lastClickedButton == pauseButton ? lastClickedNonPauseButton : pauseButton;
+            // grabButton.GrabClickFocus();
+            grabButton.GrabFocus();
+            grabButton.EmitSignal("pressed");
+            GD.Print("Action end");
+        }
+        
+        // GD.Print("Regular");
         var elapsedSeconds = delta * baseTimeStep * multipler;
         var date = lastDate.AddSeconds(elapsedSeconds);
-        var dm = date.Ticks % TimeSpan.TicksPerMinute - lastDate.Ticks % TimeSpan.TicksPerMinute;
+        var dm = date.Ticks / TimeSpan.TicksPerMinute - lastDate.Ticks / TimeSpan.TicksPerMinute;
         if(dm > 0)
         {
             var trimedDate = new DateTime(date.Ticks - date.Ticks % TimeSpan.TicksPerMinute, date.Kind);
-            timeLabel.Text = trimedDate.ToString(); // ToString(System.Globalization.CultureInfo.InvariantCulture)
+            timeLabel.Text = trimedDate.ToString(); // TODO: use `ToString(System.Globalization.CultureInfo.InvariantCulture)` ?
             simulationEvent?.Invoke(this, (int)dm); // TODO: check Long to Int conversion?
         }
         lastDate = date;
     }
 
-    public void SetMultipler(float multipler)
+    public void PressedHandler(Button clickedButton, float multipler)
     {
+        this.lastClickedButton = clickedButton;
+        if(clickedButton != pauseButton)
+            this.lastClickedNonPauseButton = clickedButton;
         this.multipler = multipler;
     }
 }

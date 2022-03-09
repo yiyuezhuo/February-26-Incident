@@ -11,12 +11,12 @@ public class LongArrow : Node2D
 {
     [Export] NodePath bodyPath;
     [Export] NodePath headPath;
-    [Export] float bodyEndPercent = 0.97f;
-    [Export] float headBeginPercent = 0.93f; // continuous constraint: headBeginPercent < bodyEndPercent
+    [Export] protected float bodyEndPercent = 0.97f;
+    [Export] protected float headBeginPercent = 0.93f; // continuous constraint: headBeginPercent < bodyEndPercent
     [Export] int size = 100;
 
-    Line2D body;
-    Line2D head;
+    protected Line2D body;
+    protected Line2D head;
     public override void _Ready()
     {
         body = (Line2D)GetNode(bodyPath);
@@ -39,6 +39,9 @@ public class LongArrow : Node2D
         
     }
 
+    /// <summary>
+    /// Set control points for the curve.
+    /// </summary>
     public void SetCurvePositions(IEnumerable<Vector2> controlPoints)
     {
         var points = controlPoints.ToList();

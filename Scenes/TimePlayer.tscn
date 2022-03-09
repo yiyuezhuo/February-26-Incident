@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Scripts/TimePlayer.cs" type="Script" id=1]
 
-[node name="PanelContainer" type="PanelContainer"]
+[node name="TimePlayer" type="PanelContainer"]
 margin_right = 14.0
 margin_bottom = 14.0
 script = ExtResource( 1 )
@@ -41,7 +41,7 @@ margin_bottom = 52.0
 [node name="PauseButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 margin_right = 20.0
 margin_bottom = 20.0
-hint_tooltip = "Pause Game"
+hint_tooltip = "Pause Game. Use \"space\" button to toggle."
 text = "P"
 
 [node name="X1Button" type="Button" parent="VBoxContainer/HBoxContainer"]
