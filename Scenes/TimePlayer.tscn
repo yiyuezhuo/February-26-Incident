@@ -1,0 +1,82 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/TimePlayer.cs" type="Script" id=1]
+
+[node name="PanelContainer" type="PanelContainer"]
+margin_right = 14.0
+margin_bottom = 14.0
+script = ExtResource( 1 )
+timeLabelPath = NodePath("VBoxContainer/PanelContainer/TimeLabel")
+pauseButtonPath = NodePath("VBoxContainer/HBoxContainer/PauseButton")
+x1ButtonPath = NodePath("VBoxContainer/HBoxContainer/X1Button")
+x2ButtonPath = NodePath("VBoxContainer/HBoxContainer/X2Button")
+x4ButtonPath = NodePath("VBoxContainer/HBoxContainer/X4Button")
+x8ButtonPath = NodePath("VBoxContainer/HBoxContainer/X8Button")
+x16ButtonPath = NodePath("VBoxContainer/HBoxContainer/X16Button")
+x32ButtonPath = NodePath("VBoxContainer/HBoxContainer/X32Button")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 187.0
+margin_bottom = 59.0
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer"]
+margin_right = 180.0
+margin_bottom = 28.0
+
+[node name="TimeLabel" type="Label" parent="VBoxContainer/PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 173.0
+margin_bottom = 21.0
+text = "3:00, February 26 1936"
+align = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 32.0
+margin_right = 180.0
+margin_bottom = 52.0
+
+[node name="PauseButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+margin_right = 20.0
+margin_bottom = 20.0
+hint_tooltip = "Pause Game"
+text = "P"
+
+[node name="X1Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+margin_left = 24.0
+margin_right = 44.0
+margin_bottom = 20.0
+hint_tooltip = "Run game in X1 speed."
+text = "1"
+
+[node name="X2Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+margin_left = 48.0
+margin_right = 68.0
+margin_bottom = 20.0
+text = "2"
+
+[node name="X4Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+margin_left = 72.0
+margin_right = 92.0
+margin_bottom = 20.0
+text = "4"
+
+[node name="X8Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+margin_left = 96.0
+margin_right = 116.0
+margin_bottom = 20.0
+text = "8"
+
+[node name="X16Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+margin_left = 120.0
+margin_right = 148.0
+margin_bottom = 20.0
+text = "16"
+
+[node name="X32Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+margin_left = 152.0
+margin_right = 180.0
+margin_bottom = 20.0
+text = "32"

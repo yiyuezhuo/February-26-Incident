@@ -34,17 +34,17 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
     [Export] NodePath longArrowPath;
 
     // Persistent state
-    IMapViewStateData uiStateData;
+    protected IMapViewStateData uiStateData;
 
-    MapShower<TArea> mapShower;
-    Camera2D camera;
+    protected MapShower<TArea> mapShower;
+    protected Camera2D camera;
 
     // "Widgets"
-    ArrowContainer arrowContainer;
-    MapImageContainer mapImageContainer;
-    LongArrow longArrow;
+    protected ArrowContainer arrowContainer;
+    protected MapImageContainer mapImageContainer;
+    protected LongArrow longArrow;
 
-    bool dragging = false;
+    protected bool dragging = false;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -57,6 +57,9 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
         longArrow = (LongArrow)GetNode(longArrowPath);
 
         Restore();
+
+        // arrowContainer.Hide();
+        // mapImageContainer.Hide();
     }
 
     void Restore() // It may be helpful to create a `TryResotre` to handle `uiStateData == null` situation.
