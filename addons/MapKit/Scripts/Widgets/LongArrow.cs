@@ -36,7 +36,6 @@ public class LongArrow : Node2D
         };
         SetCurvePositions(testPoints);
         */
-        
     }
 
     /// <summary>
@@ -59,13 +58,9 @@ public class LongArrow : Node2D
         // var fy = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(tArr, yArr); // Akima requires at least 5 points and looks ugly, while "robust"
         var fx = MathNet.Numerics.Interpolation.CubicSpline.InterpolateNatural(tArr, xArr);
         var fy = MathNet.Numerics.Interpolation.CubicSpline.InterpolateNatural(tArr, yArr); // We can also consider Hermite InterpolateHermite
-
-        // const int size = 100;
         
         var bodySize = (int)Mathf.Floor((size - 1) * bodyEndPercent);
         var headBeginIdx = (int)Mathf.Floor((size - 1) * headBeginPercent);
-        //if(size - cutoff < 2)
-        //    cutoff = size - 2;
 
         var bodyPoints = new Vector2[bodySize];
         var headPoints = new Vector2[size - headBeginIdx];
@@ -83,16 +78,7 @@ public class LongArrow : Node2D
         }
 
         body.Points = bodyPoints;
-        //head.Points = headPoints;
         head.Points = new Vector2[]{headPoints[0], headPoints[headPoints.Length-1]};
-
-        /*
-        var headSrc = xyArr[];
-        var headDst = xyArr[size - 1];
-        head.Points = new Vector2[]{headSrc, headDst};
-        */
-
-        //GD.Print($"{body.Points[0]}, {body.Points[body.Points.Length-1]}");
     }
 }
 

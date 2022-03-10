@@ -34,7 +34,7 @@ public class StrategyView : Control
             node.RectPosition = scenarioData.mapData.MapToWorld(unit.parent.center);
             node.Texture = unit.children[0].portrait;
 
-            GD.Print($"node={node}");
+            // GD.Print($"node={node}");
 
             mapView.AddChild(node);
         }

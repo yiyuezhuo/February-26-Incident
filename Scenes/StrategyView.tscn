@@ -54,5 +54,3 @@ margin_bottom = 66.0
 script = ExtResource( 4 )
 scenarioDataRes = ExtResource( 3 )
 verboseLevel = 1
-
-[node name="DebugProgressLongArrow" parent="." instance=ExtResource( 7 )]

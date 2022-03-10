@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Scenes/StrategyPad.tscn" type="PackedScene" id=1]
+[ext_resource path="res://NotionData/Tables 1cacc/Leaders Ta 3f9c1/Teruzo_Ando.jpg" type="Texture" id=2]
+[ext_resource path="res://Shaders/StrategyPad.gdshader" type="Shader" id=3]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 3 )
+shader_param/selected = false
+
+[node name="Node2D" type="Node2D"]
+
+[node name="StrategyPad" parent="." instance=ExtResource( 1 )]
+
+[node name="StrategyPad2" parent="." instance=ExtResource( 1 )]
+material = SubResource( 1 )
+margin_left = 74.0
+margin_top = 17.0
+margin_right = 114.0
+margin_bottom = 57.0
+texture = ExtResource( 2 )

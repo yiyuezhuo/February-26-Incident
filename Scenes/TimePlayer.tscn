@@ -6,6 +6,7 @@
 margin_right = 14.0
 margin_bottom = 14.0
 script = ExtResource( 1 )
+startDate = "2/26/1936 3:00:00 AM"
 timeLabelPath = NodePath("VBoxContainer/PanelContainer/TimeLabel")
 pauseButtonPath = NodePath("VBoxContainer/HBoxContainer/PauseButton")
 x1ButtonPath = NodePath("VBoxContainer/HBoxContainer/X1Button")
