@@ -196,6 +196,7 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
     
     public event EventHandler<TArea> areaSelectedEvent;
     public event EventHandler<TArea> areaClickEvent;
+    public event EventHandler<TArea> areaRightClickEvent;
 
     // States
     public ImageTextureStrap<TArea> foregroundStrap;
@@ -326,6 +327,7 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
     {
         //GD.Print($"OnRaycstHit:{p}");
         
+        /*
         var baseColorSelectedNullable = Pos2Color(p);
         //Debug.Log($"baseColorSelectedNullable={baseColorSelectedNullable}");
         if(baseColorSelectedNullable == null)
@@ -336,6 +338,10 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
         // Debug.Log($"baseColorSelected={baseColorSelected}");
         var areaSelected = mapData.ColorToArea(baseColorSelected);
         //Debug.Log($"areaSelected={areaSelected}");
+        */
+        var areaSelected = GetAreaFromPos(p);
+        if(areaSelected.Equals(default(TArea)))
+            return;
 
         // Debug.Log($"{areaLastSelected == null}, {areaSelected != areaLastSelected}, bc:{areaSelected.baseColor} rc:{areaSelected.remapColor}");
         // GD.Print($"areaSelected={areaSelected}, areaLastSelected={areaLastSelected}");
@@ -357,16 +363,28 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
     
     public void OnClick(Vector2 pos)
     {
-        // Abstract out following code duplication
+        var areaSelected = GetAreaFromPos(pos);
+
+        areaClickEvent?.Invoke(this, areaSelected);
+    }
+
+    TArea GetAreaFromPos(Vector2 pos)
+    {
         var baseColorSelectedNullable = Pos2Color(pos);
         if(baseColorSelectedNullable == null)
         {
-            return;
+            return default(TArea);
         }
         var baseColorSelected = baseColorSelectedNullable.Value;
         var areaSelected = mapData.ColorToArea(baseColorSelected);
+        return areaSelected;
+    }
 
-        areaClickEvent?.Invoke(this, areaSelected);
+    public void OnRightClick(Vector2 pos)
+    {
+        var areaSelected = GetAreaFromPos(pos);
+
+        areaRightClickEvent?.Invoke(this, areaSelected);
     }
     
     /*

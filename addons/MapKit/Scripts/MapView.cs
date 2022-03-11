@@ -46,6 +46,8 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
 
     protected bool dragging = false;
 
+    Vector2 cameraBeginPos;
+
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
@@ -57,6 +59,8 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
         longArrow = (LongArrow)GetNode(longArrowPath);
 
         Restore();
+
+        cameraBeginPos = camera.Position;
 
         // arrowContainer.Hide();
         // mapImageContainer.Hide();
@@ -100,8 +104,9 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
                     break;
 
                 case (int)ButtonList.Right: // 2
-                    dragging = buttonEvent.Pressed;
-                    GD.Print($"dragging: {dragging}");
+                    // dragging = buttonEvent.Pressed;
+                    // GD.Print($"dragging: {dragging}");
+                    DraggingClickHandler(buttonEvent);
                     break;
 
                 case (int)ButtonList.Middle: // 3 (wheel click)
@@ -143,6 +148,24 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
             if(dragging)
             {
                 camera.Position -= motionEvent.Relative;
+            }
+        }
+    }
+
+    void DraggingClickHandler(InputEventMouseButton buttonEvent)
+    {
+        dragging = buttonEvent.Pressed;
+        GD.Print($"dragging: {dragging}");
+        if(buttonEvent.Pressed)
+        {
+            cameraBeginPos = camera.Position;
+        }
+        else
+        {
+            if(camera.Position.DistanceTo(camera.Position) < 2)
+            {
+                var pos = mapShower.GetLocalMousePosition();
+                mapShower.OnRightClick(pos);
             }
         }
     }

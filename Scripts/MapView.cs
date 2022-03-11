@@ -12,6 +12,7 @@ public class MapView : YYZ.MapKit.MapView<Region>
         arrowContainer.Hide();
         mapImageContainer.Hide();
     }
+
 }
 
 

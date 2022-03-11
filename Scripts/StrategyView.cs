@@ -17,10 +17,14 @@ public class StrategyView : Control
 
     ScenarioData scenarioData;
     MapView mapView;
+    MapShower mapShower;
     TimePlayer timePlayer;
+
+    StrategyPad selectedPad;
 
     MapKit.Widgets.ProgressLongArrow debugProgressLongArrow;
     float debugPercentAcc = 0f;
+
     public override void _Ready()
     {
         scenarioData = scenarioDataRes.GetInstance();
@@ -29,17 +33,23 @@ public class StrategyView : Control
 
         foreach(var unit in scenarioData.units)
         {
-            var node = mapImageScene.Instance<TextureRect>();
+            var pad = mapImageScene.Instance<StrategyPad>();
             // var node = new TextureRect();
-            node.RectPosition = scenarioData.mapData.MapToWorld(unit.parent.center);
-            node.Texture = unit.children[0].portrait;
+            pad.RectPosition = scenarioData.mapData.MapToWorld(unit.parent.center);
+            pad.Texture = unit.children[0].portrait;
+            pad.unit = unit;
+
+            pad.unitSelectedUpdateEvent += OnUnitSelectedUpdate;
 
             // GD.Print($"node={node}");
 
-            mapView.AddChild(node);
+            mapView.AddChild(pad);
         }
 
         timePlayer.simulationEvent += SimulationHandler;
+        mapShower = (MapShower)mapView.GetMapShower();
+        mapShower.areaClickEvent += OnAreaClick;
+        mapShower.areaRightClickEvent += OnAreaRightClick;
 
         // DEBUG
         // debugProgressLongArrow = (MapKit.Widgets.ProgressLongArrow)GetNode(debugProgressLongArrowPath);
@@ -64,6 +74,45 @@ public class StrategyView : Control
     public override void _PhysicsProcess(float delta)
     {
         debugProgressLongArrow.SetPercent(debugPercentAcc);
+    }
+
+    public void OnAreaClick(object sender, Region area)
+    {
+
+    }
+
+    public void OnAreaRightClick(object sender, Region area)
+    {
+
+    }
+
+    public void OnUnitSelectedUpdate(object sender, bool selected)
+    {
+        var pad = (StrategyPad)sender;
+
+        if(selected)
+        {
+            if(selectedPad != null)
+            {
+                selectedPad.SetSelected(false); 
+            }
+            pad.SetSelected(true);
+            selectedPad = pad;
+        }
+        else
+        {
+            selectedPad = pad;
+        }
+    }
+
+    void TryClearSelectedPad()
+    {
+        if(selectedPad != null)
+        {
+            selectedPad.SetSelected(false);
+            selectedPad = null;
+        }
+
     }
 }
 
