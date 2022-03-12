@@ -49,6 +49,9 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
         return float.PositiveInfinity;
     }
 
+    /// <summary>
+    /// Path finding using A* algorithm, if failed it will return empty list.
+    /// </summary>
     public List<IndexT> PathFindingAStar(IndexT src, IndexT dst)
     {
         var openSet = new HashSet<IndexT>{src};

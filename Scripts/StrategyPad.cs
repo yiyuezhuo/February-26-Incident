@@ -26,7 +26,8 @@ public class StrategyPad : TextureRect
 
     public override void _Ready()
     {
-        material = (ShaderMaterial)Material; // The `resource_local_to_scene` is enabled, so we don't have to duplicate them manually.
+        // material = (ShaderMaterial)Material.Duplicate();
+        material = (ShaderMaterial)Material;
 
         Connect("mouse_entered", this, nameof(OnMouseEnter));
         Connect("mouse_exited", this, nameof(OnMouseExited));

@@ -162,7 +162,7 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
         }
         else
         {
-            if(camera.Position.DistanceTo(camera.Position) < 2)
+            if(camera.Position.DistanceTo(cameraBeginPos) < 2)
             {
                 var pos = mapShower.GetLocalMousePosition();
                 mapShower.OnRightClick(pos);

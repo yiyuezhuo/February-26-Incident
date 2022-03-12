@@ -27,9 +27,21 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
 }
 
 
-public class MapData : MapKit.MapData<Region>
+public class MapData : MapKit.MapData<Region>, PathFinding.IGraph<Region>
 {
     public MapData(Texture baseTexture, string path) : base(baseTexture, path) {}
+
+    public float MoveCost(Region src, Region dst) => src.center.DistanceTo(dst.center);
+    public float EstimateCost(Region src, Region dst) => MoveCost(src, dst);
+    public IEnumerable<Region> Neighbors(Region src)
+    {
+        foreach(var region in src.neighbors)
+        {
+            var movable = region.areaData == null || region.areaData.movable;
+            if(movable)
+                yield return region;
+        }
+    }
 }
 
 

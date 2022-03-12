@@ -340,8 +340,10 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
         //Debug.Log($"areaSelected={areaSelected}");
         */
         var areaSelected = GetAreaFromPos(p);
-        if(areaSelected.Equals(default(TArea)))
+        if(areaSelected == null)
             return;
+        // if(areaSelected.Equals(default(TArea)))
+        //     return;
 
         // Debug.Log($"{areaLastSelected == null}, {areaSelected != areaLastSelected}, bc:{areaSelected.baseColor} rc:{areaSelected.remapColor}");
         // GD.Print($"areaSelected={areaSelected}, areaLastSelected={areaLastSelected}");

@@ -7,6 +7,9 @@
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 3 )
 shader_param/selected = false
+shader_param/selected_color = Color( 1, 0, 0, 1 )
+shader_param/hovering = false
+shader_param/hovering_color = Color( 1, 0.7, 0.7, 1 )
 
 [node name="Node2D" type="Node2D"]
 
