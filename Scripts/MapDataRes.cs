@@ -24,14 +24,22 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
 
     // public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count}, {parent})";
     public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count})";
+
+    public float DistanceTo(Region other) => center.DistanceTo(other.center);
 }
 
 
 public class MapData : MapKit.MapData<Region>, PathFinding.IGraph<Region>
 {
-    public MapData(Texture baseTexture, string path) : base(baseTexture, path) {}
+    public MapData(Texture baseTexture, string path) : base(baseTexture, path)
+    {
+        foreach(var region in areaMap.Values)
+        {
+            region.center = MapToWorld(region.center); // We transform Map coordinates to world for simplicity.
+        }
+    }
 
-    public float MoveCost(Region src, Region dst) => src.center.DistanceTo(dst.center);
+    public float MoveCost(Region src, Region dst) => src.DistanceTo(dst);
     public float EstimateCost(Region src, Region dst) => MoveCost(src, dst);
     public IEnumerable<Region> Neighbors(Region src)
     {

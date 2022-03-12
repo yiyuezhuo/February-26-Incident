@@ -82,7 +82,7 @@ public class MapData<TRegion> : IMapData<TRegion> where TRegion : IRegion<TRegio
     public Image baseImage;
     public int width{get; set;}
     public int height{get; set;}
-    Dictionary<Color, TRegion> areaMap = new Dictionary<Color, TRegion>();
+    protected Dictionary<Color, TRegion> areaMap = new Dictionary<Color, TRegion>();
 
     protected RegionMapFactory<TRegion> regionMapFactory = new RegionMapFactory<TRegion>();
 
@@ -99,11 +99,11 @@ public class MapData<TRegion> : IMapData<TRegion> where TRegion : IRegion<TRegio
         areaMap = regionMapFactory.Get(regionJsonString);
     }
 
-    Vector2 WorldToMap(Vector2 worldPos)
+    protected Vector2 WorldToMap(Vector2 worldPos)
     {
         return new Vector2(worldPos.x + width / 2, worldPos.y + height / 2);
     }
-    public Vector2 MapToWorld(Vector2 mapPos)
+    protected Vector2 MapToWorld(Vector2 mapPos)
     {
         return new Vector2(mapPos.x - width / 2, mapPos.y - height / 2);
     }
