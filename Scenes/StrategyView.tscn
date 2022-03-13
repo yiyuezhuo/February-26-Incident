@@ -15,6 +15,7 @@ script = ExtResource( 2 )
 scenarioDataRes = ExtResource( 3 )
 mapViewPath = NodePath("HBoxContainer/ViewportContainer/Viewport/MapView")
 timePlayerPath = NodePath("TimePlayer")
+nameViewButtonPath = NodePath("ViewToggleContainer/NameViewButton")
 mapImageScene = ExtResource( 5 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
@@ -52,3 +53,20 @@ margin_bottom = 66.0
 script = ExtResource( 4 )
 scenarioDataRes = ExtResource( 3 )
 verboseLevel = 1
+
+[node name="ViewToggleContainer" type="HBoxContainer" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -22.0
+margin_top = -20.0
+
+[node name="NameViewButton" type="Button" parent="ViewToggleContainer"]
+margin_right = 22.0
+margin_bottom = 20.0
+text = "N"
+
+[node name="Label" type="Label" parent="."]
+margin_right = 40.0
+margin_bottom = 14.0

@@ -12,6 +12,7 @@ public class StrategyView : Control
 	[Export] ScenarioDataRes scenarioDataRes;
 	[Export] NodePath mapViewPath;
 	[Export] NodePath timePlayerPath;
+	[Export] NodePath nameViewButtonPath;
 	// [Export] NodePath debugProgressLongArrowPath;
 	
 	[Export] PackedScene mapImageScene;
@@ -25,6 +26,8 @@ public class StrategyView : Control
 
 	StrategyPad selectedPad;
 	List<StrategyPad> pads = new List<StrategyPad>();
+	bool showRegionName = false;
+	List<Label> regionNameLabels = new List<Label>();
 
 	// MapKit.Widgets.ProgressLongArrow debugProgressLongArrow;
 	// float debugPercentAcc = 0f;
@@ -60,6 +63,9 @@ public class StrategyView : Control
 		mapShower.areaClickEvent += OnAreaClick;
 		mapShower.areaRightClickEvent += OnAreaRightClick;
 
+		var nameViewButton = (Button)GetNode(nameViewButtonPath);
+		nameViewButton.Connect("pressed", this, nameof(OnNameViewButtonPressed));
+
 		/*
 		// DEBUG
 		// debugProgressLongArrow = (MapKit.Widgets.ProgressLongArrow)GetNode(debugProgressLongArrowPath);
@@ -68,6 +74,34 @@ public class StrategyView : Control
 		debugProgressLongArrow.SetCurvePositions(new Vector2[]{new Vector2(100f, 100f), new Vector2(500f, 300f)});
 		debugProgressLongArrow.SetPercent(debugPercentAcc);
 		*/
+	}
+
+	public void OnNameViewButtonPressed()
+	{
+		showRegionName = !showRegionName;
+		if(showRegionName)
+		{
+			foreach(var region in scenarioData.regions)
+			{
+				var label = new Label();
+				label.Text = region.ToLabelString();
+				
+				label.AddColorOverride("font_color", new Color(0, 0, 0, 1));
+				label.Align = Label.AlignEnum.Center;
+
+				regionNameLabels.Add(label);
+				mapView.AddChild(label);
+				label.RectPosition = region.center - label.RectSize / 2;
+			}
+		}
+		else
+		{
+			foreach(var label in regionNameLabels)
+			{
+				label.QueueFree(); // TODO: Object Pool seems overkill for this.
+			}
+			regionNameLabels.Clear();
+		}
 	}
 
 	public void SimulationHandler(object sender, int n)
@@ -125,6 +159,10 @@ public class StrategyView : Control
 					var src = extendsRequest ? unit.movingState.destination : unit.parent;
 
 					var path = pathfinding.PathFindingAStar(src, area);
+
+					if(path.Count == 0)
+						return; // don't update arrow
+
 					var movingState = new MovingState(path);
 
 					if(extendsRequest)

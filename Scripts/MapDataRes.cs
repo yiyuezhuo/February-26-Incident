@@ -21,6 +21,7 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public List<Unit> children{get; set;} = new List<Unit>();
 
     string GetAreaDataDesc() => areaData != null ? areaData.ToString() : "[No Area Data]";
+    public string ToLabelString() => areaData != null ? areaData.name : center.ToString();
 
     // public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count}, {parent})";
     public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count})";
