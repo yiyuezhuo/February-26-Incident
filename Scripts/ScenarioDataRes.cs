@@ -16,7 +16,7 @@ public class Side : IContainer<HashSet<Region>, Region>
 
     public string name{get => data.name;}
     public string nameJap{get => data.nameJap;}
-    public Color color{get => color;}
+    public Color color{get => data.color;}
     public Texture picture{get => picture;}
 
     public Side(SideTable.Data data)
@@ -30,125 +30,6 @@ public class Side : IContainer<HashSet<Region>, Region>
     public string ToHierarchy() => ToString();
 }
 
-public class MovingState
-{
-    public List<Region> path;
-    public float movedDistance;
-    public float nextDistance;
-    public float totalDistance;
-
-    public override string ToString()
-    {
-        var ps = string.Join(",", path);
-        return $"MovingState[{path.Count}]({movedDistance}/{nextDistance}/{totalDistance}, {ps})";
-    }
-
-    public MovingState(IEnumerable<Region> path)
-    {
-        this.path = path.ToList();
-
-        movedDistance = 0f;
-        totalDistance = 0f;
-        for(int i=0; i<this.path.Count-1; i++)
-        {
-            var dist = this.path[i].DistanceTo(this.path[i+1]);
-            if(i==0)
-                nextDistance = dist;
-            totalDistance += dist;
-        }
-    }
-
-    /// <summary>
-    /// lastReached = `null` denotes no location update happens.
-    /// returned bool denotes if the path is "completed"
-    /// </summary>
-    public bool GoForward(float movement, out Region lastReached)
-    {
-        lastReached = null;
-        // assert path.Count >= 1
-        while(movement > 0)
-        {
-            if(movedDistance + movement >= nextDistance)
-            {
-                movedDistance = 0;
-                movement -= nextDistance - movedDistance;
-                totalDistance -= nextDistance;
-                path.RemoveAt(0);
-                lastReached = path[0];
-                if(path.Count == 1)
-                {
-                    return true;
-                }
-                nextDistance = path[0].DistanceTo(path[1]);
-                
-                
-            }
-            else{
-                movedDistance += movement;
-                movement = 0;
-            }
-        }
-        return false;
-    }
-
-    /// <summary>
-    /// Python list "extend" like (inplace) method.
-    /// </summary>
-    public void Extends(MovingState followedState)
-    {
-        // if(path[path.Count-1].Equals(followedState.path[0]))
-        //     throw new ArgumentException("Extended tail and extending head should be the same region");
-        
-        path.AddRange(followedState.path.Skip(1));
-        totalDistance += followedState.totalDistance;
-    }
-
-    public Region destination{get => path[path.Count-1];}
-
-    
-}
-
-public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>
-{
-    UnitTable.Data data;
-
-    public string name{get => data.name;}
-    public string nameJap{get => data.nameJap;}
-    public float strength{get; set;}
-    public float moveSpeedMPerMin = 25; // 25m/min -> 1.5km/h
-    public static float mPerPixel = 6; // 6m = 1 unit pixel distance
-    public float moveSpeedPiexelPerMin {get => moveSpeedMPerMin / mPerPixel;}
-
-    public MovingState movingState;
-
-    public Unit(UnitTable.Data data)
-    {
-        this.data  = data;
-        this.strength = data.strength;
-    }
-
-    public List<Leader> children{get; set;} = new List<Leader>();
-
-    // public override string ToString() => $"Unit({name}, {nameJap}, {children.Count}, {parent})";
-    public override string ToString() => $"Unit({name}, {nameJap}, {children.Count})";
-
-    /// <summary>
-    /// return value denotes whether region is updated.
-    /// </summary>
-    public bool GoForward(float movement, out Region lastReached)
-    {
-        // if(movingState == null)
-        //     return null;
-        var completed = movingState.GoForward(movement, out lastReached);
-        if (completed)
-            movingState = null;
-        if(lastReached != null)
-            MoveTo(lastReached);
-        return completed;
-    }
-
-    public bool isMoving {get => movingState != null;}
-}
 
 public class Leader : Child<Leader, Unit, List<Leader>>
 {
@@ -184,7 +65,7 @@ public class ScenarioData
     public MapData mapData;
 
     public HashSet<Side> sides = new HashSet<Side>();
-    public HashSet<Region> regions = new HashSet<Region>();
+    public IEnumerable<Region> regions{get => mapData.GetAllAreas();}
     public HashSet<Unit> units = new HashSet<Unit>();
     public HashSet<Leader> leaders = new HashSet<Leader>();
 
@@ -272,11 +153,13 @@ public class ScenarioData
 
         // Region
 
-        foreach(var region in mapData.GetAllAreas())
+        foreach(var region in regions)
         {
-            regions.Add(region);
             if(region.areaData == null || region.areaData.movable)
+            {
+                // regions.Add(region);
                 region.EnterTo(govSide);
+            }
         }
 
         // Unit
@@ -286,6 +169,7 @@ public class ScenarioData
             var unit = new Unit(unitData);
             units.Add(unit);
             unitDataToUnit[unitData] = unit;
+            unit.side = rebelSide;
 
             var region = areaToRegion[unitData.area];
             unit.EnterTo(region);

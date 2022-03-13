@@ -7,6 +7,7 @@ using System;
 
 using YYZ.Data.February26;
 using System.Linq;
+using System.Collections.Generic; 
 
 public class StrategyPad : TextureRect
 {
@@ -78,13 +79,13 @@ public class StrategyPad : TextureRect
             arrow.SetPercent(unit.movingState.movedDistance / unit.movingState.totalDistance);
     }
 
-    public void GoForward(float movement)
+    public void GoForward(float movement, out List<Region> reachedRegions)
     {
-        var completed = unit.GoForward(movement, out var lastReached);
-        if(lastReached != null)
+        var completed = unit.GoForward(movement, out reachedRegions);
+        if(reachedRegions.Count > 0)
         {
-            RectPosition = lastReached.center;
-            SyncArrow();
+            RectPosition = reachedRegions[reachedRegions.Count-1].center;
+            SyncArrowShape();
         }
         SyncArrowPercent();
     }
@@ -92,7 +93,7 @@ public class StrategyPad : TextureRect
     /// <summary>
     /// Sync arrow "shape" but not percent.
     /// </summary>
-    public void SyncArrow()
+    public void SyncArrowShape()
     {
         if(arrow != null)
             arrow.QueueFree();

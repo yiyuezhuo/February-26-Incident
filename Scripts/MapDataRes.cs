@@ -27,6 +27,7 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count})";
 
     public float DistanceTo(Region other) => center.DistanceTo(other.center);
+    public bool movable{get => areaData == null || areaData.movable;}
 }
 
 
@@ -51,6 +52,8 @@ public class MapData : MapKit.MapData<Region>, PathFinding.IGraph<Region>
                 yield return region;
         }
     }
+
+    // public IEnumerable<Region> GetAllAreas() => areaMap.Values;
 }
 
 

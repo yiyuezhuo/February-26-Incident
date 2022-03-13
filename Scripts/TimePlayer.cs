@@ -65,12 +65,12 @@ public class TimePlayer : Control
         
         if(Input.IsActionJustPressed("pause_toggle"))
         {
-            GD.Print($"pause_toggle: {lastClickedButton == pauseButton}");
+            // GD.Print($"pause_toggle: {lastClickedButton == pauseButton}");
             var grabButton = lastClickedButton == pauseButton ? lastClickedNonPauseButton : pauseButton;
             // grabButton.GrabClickFocus();
             grabButton.GrabFocus();
             grabButton.EmitSignal("pressed");
-            GD.Print("Action end");
+            // GD.Print("Action end");
         }
         
         // GD.Print("Regular");

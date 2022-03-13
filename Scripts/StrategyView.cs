@@ -42,6 +42,16 @@ public class StrategyView : Control
 		mapView = (MapView)GetNode(mapViewPath);
 		timePlayer = (TimePlayer)GetNode(timePlayerPath);
 
+
+		timePlayer.simulationEvent += SimulationHandler;
+		mapShower = (MapShower)mapView.GetMapShower();
+		mapShower.areaClickEvent += OnAreaClick;
+		mapShower.areaRightClickEvent += OnAreaRightClick;
+
+		var nameViewButton = (Button)GetNode(nameViewButtonPath);
+		nameViewButton.Connect("pressed", this, nameof(OnNameViewButtonPressed));
+
+		// Non-binding setup
 		foreach(var unit in scenarioData.units)
 		{
 			var pad = mapImageScene.Instance<StrategyPad>();
@@ -58,22 +68,15 @@ public class StrategyView : Control
 			mapView.AddChild(pad);
 		}
 
-		timePlayer.simulationEvent += SimulationHandler;
-		mapShower = (MapShower)mapView.GetMapShower();
-		mapShower.areaClickEvent += OnAreaClick;
-		mapShower.areaRightClickEvent += OnAreaRightClick;
-
-		var nameViewButton = (Button)GetNode(nameViewButtonPath);
-		nameViewButton.Connect("pressed", this, nameof(OnNameViewButtonPressed));
-
-		/*
-		// DEBUG
-		// debugProgressLongArrow = (MapKit.Widgets.ProgressLongArrow)GetNode(debugProgressLongArrowPath);
-		debugProgressLongArrow = progressLongArrowScene.Instance<MapKit.Widgets.ProgressLongArrow>();
-		mapView.AddChild(debugProgressLongArrow);
-		debugProgressLongArrow.SetCurvePositions(new Vector2[]{new Vector2(100f, 100f), new Vector2(500f, 300f)});
-		debugProgressLongArrow.SetPercent(debugPercentAcc);
-		*/
+		foreach(var region in scenarioData.regions)
+		{
+			var areaInfo = mapShower.GetAreaInfo(region);
+			if(region.movable)
+				areaInfo.foregroundColor = region.parent.color;
+			else
+				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
+		}
+		mapShower.Flush();
 	}
 
 	public void OnNameViewButtonPressed()
@@ -91,7 +94,7 @@ public class StrategyView : Control
 
 				regionNameLabels.Add(label);
 				mapView.AddChild(label);
-				label.RectPosition = region.center - label.RectSize / 2;
+				label.RectPosition = region.center - label.RectSize / 2; // RectSize get desired value when it actually enter the tree.
 			}
 		}
 		else
@@ -117,9 +120,15 @@ public class StrategyView : Control
 		{
 			if(pad.unit.isMoving)
 			{
-				pad.GoForward(pad.unit.moveSpeedPiexelPerMin);
+				pad.GoForward(pad.unit.moveSpeedPiexelPerMin, out var reachedRegions);
+				foreach(var region in reachedRegions)
+				{
+					var areaInfo = mapShower.GetAreaInfo(region);
+					areaInfo.foregroundColor = pad.unit.side.color;
+				}
 			}
 		}
+		mapShower.Flush();
 	}
 
 	public override void _PhysicsProcess(float delta)
@@ -174,7 +183,7 @@ public class StrategyView : Control
 
 			GD.Print($"movingState={unit.movingState}");
 
-			selectedPad.SyncArrow();
+			selectedPad.SyncArrowShape();
 		}
 	}
 

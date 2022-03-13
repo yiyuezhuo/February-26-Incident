@@ -6,6 +6,7 @@ using Godot;
 using System;
 using YYZ.Data.February26;
 using System.Collections.Generic;
+using System.Linq;
 
 
 public class DataValidator : Node
@@ -52,7 +53,7 @@ public class DataValidator : Node
 
         Inspect(scenarioData.regionLabelMap, false);
 
-        GD.Print($"scenarioData.regions.Count: {scenarioData.regions.Count}");
+        GD.Print($"scenarioData.regions.Count: {scenarioData.regions.Count()}");
         /*
         foreach(var region in scenarioData.regions)
             GD.Print(region);
