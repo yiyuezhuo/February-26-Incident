@@ -1,4 +1,4 @@
-namespace YYZ.APP
+namespace YYZ.App
 {
 
 
