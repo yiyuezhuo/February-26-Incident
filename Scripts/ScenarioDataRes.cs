@@ -32,22 +32,67 @@ public class Side : IContainer<HashSet<Region>, Region>
 }
 
 
-public class Leader : Child<Leader, Unit, List<Leader>>
+public class Leader : Child<Leader, Unit, List<Leader>>, LeaderPad.IData
 {
     LeaderTable.Data data;
 
     public string name {get => data.name;}
     public string nameJap{get => data.nameJap;}
     public Texture portrait{get => data.portrait;}
+    public Rank rank;
+    public float command{get => rank.command;}
 
     public Leader(LeaderTable.Data data)
     {
         this.data = data;
+        switch(data.rank)
+        {
+            case LeaderTable.Rank.Captain:
+                rank = new Captain();
+                break;
+            case LeaderTable.Rank.Lieutenant:
+                rank = new Lieutenant();
+                break;
+            case LeaderTable.Rank.SecondLieutenant:
+                rank = new SecondLieutenant();
+                break;
+            case LeaderTable.Rank.Officer:
+                rank = new Officer();
+                break;
+        }
     }
 
     // public Unit parent;
     // public override string ToString() => $"Leader({name}, {nameJap}, {parent})";
     public override string ToString() => $"Leader({name}, {nameJap})";
+
+    public abstract class Rank
+    {
+        /// <summary>
+        /// The command capacity, it's determined by regression at this time.
+        /// </summary>
+        public abstract float command{get;}
+    }
+
+    public class Captain : Rank
+    {
+        public override float command{get => 155;}
+    }
+
+    public class Lieutenant : Rank
+    {
+        public override float command{get => 57;}
+    }
+
+    public class SecondLieutenant : Rank
+    {
+        public override float command{get => 30;}
+    }
+
+    public class Officer : Rank
+    {
+        public override float command{get => 10;}
+    }
 }
 
 public class ScenarioData

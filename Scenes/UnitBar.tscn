@@ -1,54 +1,39 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scenes/PageBackground.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/LeaderPad.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scripts/UnitBar.cs" type="Script" id=3]
+[ext_resource path="res://Scenes/UnitInfoPad.tscn" type="PackedScene" id=4]
 
-[node name="PageBackground" instance=ExtResource( 1 )]
-anchor_top = 1.0
+[node name="UnitBar" instance=ExtResource( 1 )]
 anchor_right = 1.0
-anchor_bottom = 1.0
-margin_top = -114.0
-margin_bottom = 0.0
+margin_bottom = 114.0
+script = ExtResource( 3 )
+unitInfoPadPath = NodePath("MarginContainer/PadContainer/UnitInfoPad")
+leaderPadContainerPath = NodePath("MarginContainer/PadContainer/LeaderPadContainer")
+leaderPadScene = ExtResource( 2 )
 
 [node name="NinePatchRect" parent="." index="0"]
 margin_right = 1024.0
-margin_bottom = 114.0
+margin_bottom = 150.0
 
 [node name="MarginContainer" type="MarginContainer" parent="." index="1"]
 margin_right = 1024.0
-margin_bottom = 114.0
+margin_bottom = 150.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" index="0"]
+[node name="PadContainer" type="HBoxContainer" parent="MarginContainer" index="0"]
 margin_right = 1024.0
-margin_bottom = 114.0
+margin_bottom = 150.0
+rect_min_size = Vector2( 0, 150 )
 
-[node name="UnitInfo" type="PanelContainer" parent="MarginContainer/HBoxContainer" index="0"]
-margin_right = 136.0
-margin_bottom = 114.0
+[node name="UnitInfoPad" parent="MarginContainer/PadContainer" index="0" instance=ExtResource( 4 )]
+margin_right = 107.0
+margin_bottom = 150.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/UnitInfo" index="0"]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 129.0
-margin_bottom = 107.0
+[node name="LeaderPadContainer" type="HBoxContainer" parent="MarginContainer/PadContainer" index="1"]
+margin_left = 111.0
+margin_right = 231.0
+margin_bottom = 150.0
 
-[node name="StrengthLabel" type="Label" parent="MarginContainer/HBoxContainer/UnitInfo/VBoxContainer" index="0"]
-margin_right = 122.0
-margin_bottom = 14.0
-text = "Strength:100"
-
-[node name="CommandLabel" type="Label" parent="MarginContainer/HBoxContainer/UnitInfo/VBoxContainer" index="1"]
-margin_top = 18.0
-margin_right = 122.0
-margin_bottom = 32.0
-text = "Command:100/120"
-
-[node name="FatigueLabel" type="Label" parent="MarginContainer/HBoxContainer/UnitInfo/VBoxContainer" index="2"]
-margin_top = 36.0
-margin_right = 122.0
-margin_bottom = 50.0
-text = "Fatigue:10%"
-
-[node name="LeaderPad" parent="MarginContainer/HBoxContainer" index="1" instance=ExtResource( 2 )]
-margin_left = 140.0
-margin_right = 254.0
+[node name="LeaderPad" parent="MarginContainer/PadContainer/LeaderPadContainer" index="0" instance=ExtResource( 2 )]
+margin_bottom = 150.0

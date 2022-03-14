@@ -13,6 +13,7 @@ public class StrategyView : Control
 	[Export] NodePath mapViewPath;
 	[Export] NodePath timePlayerPath;
 	[Export] NodePath nameViewButtonPath;
+	[Export] NodePath unitBarPath;
 	// [Export] NodePath debugProgressLongArrowPath;
 	
 	[Export] PackedScene mapImageScene;
@@ -23,6 +24,9 @@ public class StrategyView : Control
 	MapView mapView;
 	MapShower mapShower;
 	TimePlayer timePlayer;
+	UnitBar unitBar;
+
+	// States
 
 	StrategyPad selectedPad;
 	List<StrategyPad> pads = new List<StrategyPad>();
@@ -41,7 +45,7 @@ public class StrategyView : Control
 		scenarioData = scenarioDataRes.GetInstance();
 		mapView = (MapView)GetNode(mapViewPath);
 		timePlayer = (TimePlayer)GetNode(timePlayerPath);
-
+		unitBar = (UnitBar)GetNode(unitBarPath);
 
 		timePlayer.simulationEvent += SimulationHandler;
 		mapShower = (MapShower)mapView.GetMapShower();
@@ -52,6 +56,7 @@ public class StrategyView : Control
 		nameViewButton.Connect("pressed", this, nameof(OnNameViewButtonPressed));
 
 		// Non-binding setup
+
 		foreach(var unit in scenarioData.units)
 		{
 			var pad = mapImageScene.Instance<StrategyPad>();
@@ -187,6 +192,9 @@ public class StrategyView : Control
 		}
 	}
 
+	/// <summary>
+	/// The handler is called when "selected" state of a Unit is updated.
+	/// </summary>
 	public void OnUnitSelectedUpdate(object sender, bool selected)
 	{
 		var pad = (StrategyPad)sender; // for testing usage of sender, may refactor it later.
@@ -201,10 +209,14 @@ public class StrategyView : Control
 			}
 			pad.SetSelected(true);
 			selectedPad = pad;
+
+			unitBar.SetData(pad.unit);
 		}
 		else
 		{
 			selectedPad = pad;
+
+			unitBar.SetData(null);
 		}
 	}
 

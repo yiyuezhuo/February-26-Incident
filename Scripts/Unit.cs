@@ -84,7 +84,7 @@ public class MovingState
     
 }
 
-public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>
+public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData
 {
     UnitTable.Data data;
 
@@ -92,6 +92,11 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
     public string nameJap{get => data.nameJap;}
     public Side side;
     public float strength{get; set;}
+    public float fatigue{get; set;}
+    public float command{get => children.Sum(leader => leader.command);}
+
+    IEnumerable<LeaderPad.IData> UnitBar.IData.children{get => children;}
+
     public float moveSpeedMPerMin = 25; // 25m/min -> 1.5km/h
     public static float mPerPixel = 6; // 6m = 1 unit pixel distance
     public float moveSpeedPiexelPerMin {get => moveSpeedMPerMin / mPerPixel;}

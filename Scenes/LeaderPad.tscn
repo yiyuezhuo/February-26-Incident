@@ -11,16 +11,19 @@ bg_color = Color( 0, 0, 0, 0.392157 )
 bg_color = Color( 0, 0, 0, 0.392157 )
 
 [node name="LeaderPad" type="PanelContainer"]
-margin_right = 114.0
-margin_bottom = 114.0
+margin_right = 120.0
+margin_bottom = 130.0
+rect_min_size = Vector2( 130, 150 )
 script = ExtResource( 3 )
+nameLabelPath = NodePath("Control/Name")
+nameJapLabelPath = NodePath("Control/NameJap")
+portraitPath = NodePath("Portrait")
 
 [node name="Portrait" type="TextureRect" parent="."]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 107.0
-margin_bottom = 107.0
-rect_min_size = Vector2( 100, 100 )
+margin_right = 123.0
+margin_bottom = 143.0
 texture = ExtResource( 1 )
 expand = true
 stretch_mode = 6
@@ -28,17 +31,14 @@ stretch_mode = 6
 [node name="Control" type="Control" parent="."]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 107.0
-margin_bottom = 107.0
+margin_right = 123.0
+margin_bottom = 143.0
 
 [node name="NameJap" type="Label" parent="Control"]
 anchor_left = 1.0
-anchor_top = 0.5
 anchor_right = 1.0
-anchor_bottom = 0.5
-margin_left = -16.0
-margin_top = -50.0
-margin_bottom = 50.0
+anchor_bottom = 1.0
+margin_left = -14.0
 custom_fonts/font = ExtResource( 2 )
 custom_styles/normal = SubResource( 1 )
 text = "安
@@ -49,13 +49,10 @@ align = 1
 valign = 1
 
 [node name="Name" type="Label" parent="Control"]
-anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -50.0
 margin_top = -14.0
-margin_right = 50.0
 custom_styles/normal = SubResource( 2 )
 text = "Teruzo Ando"
 align = 1

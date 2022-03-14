@@ -93,18 +93,42 @@ public class LeaderTable : DataTable<LeaderTable.Item, LeaderTable.Data> // Dict
         public string nameJap{get => item.Name_Jap;}
         public string id{get; set;}
         public Texture portrait;
+        public Rank rank;
 
         public void Setup(Item item, string root)
         {
             this.item = item;
             this.id = UrlToId(item.ID);
             this.portrait = UrlToTexture(item.Portrait, root);
+
+            /*
+            if(item.Rank == "")
+                rank = Rank.Officer;
+            else
+            {
+                var ok = Enum.TryParse(item.Rank.Replace(" ", ""), out rank);
+                GD.Print($"ok={ok}");
+            }
+            */
+
+            if(!Enum.TryParse(item.Rank.Replace(" ", ""), out rank))
+                rank = Rank.Officer;
+            
+            GD.Print($"{item.Rank} => {rank}");
         }
 
         public override string ToString()
         {
             return $"Leader({name}, {nameJap})";
         }
+    }
+
+    public enum Rank // In "pure data" layer, we leave a enum only. The "explanation" will be given in more concrete layer.
+    {
+        Captain,
+        Lieutenant,
+        SecondLieutenant,
+        Officer // dummy rank for rebel commander who doesn't have a regular rank.
     }
 }
 
