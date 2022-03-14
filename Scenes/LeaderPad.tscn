@@ -1,0 +1,61 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://NotionData/Tables 1cacc/Leaders Ta 3f9c1/Teruzo_Ando.jpg" type="Texture" id=1]
+[ext_resource path="res://fonts/nico_font.tres" type="DynamicFont" id=2]
+[ext_resource path="res://Scripts/LeaderPad.cs" type="Script" id=3]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0, 0, 0, 0.392157 )
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.392157 )
+
+[node name="LeaderPad" type="PanelContainer"]
+margin_right = 114.0
+margin_bottom = 114.0
+script = ExtResource( 3 )
+
+[node name="Portrait" type="TextureRect" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 107.0
+margin_bottom = 107.0
+rect_min_size = Vector2( 100, 100 )
+texture = ExtResource( 1 )
+expand = true
+stretch_mode = 6
+
+[node name="Control" type="Control" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 107.0
+margin_bottom = 107.0
+
+[node name="NameJap" type="Label" parent="Control"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -16.0
+margin_top = -50.0
+margin_bottom = 50.0
+custom_fonts/font = ExtResource( 2 )
+custom_styles/normal = SubResource( 1 )
+text = "安
+藤
+輝
+三"
+align = 1
+valign = 1
+
+[node name="Name" type="Label" parent="Control"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -50.0
+margin_top = -14.0
+margin_right = 50.0
+custom_styles/normal = SubResource( 2 )
+text = "Teruzo Ando"
+align = 1
