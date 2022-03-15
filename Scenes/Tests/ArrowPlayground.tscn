@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://MapData/TokyoBaseTex.png" type="Texture" id=1]
 [ext_resource path="res://Shaders/GradientShader.tres" type="Shader" id=2]
 [ext_resource path="res://addons/MapKit/Shaders/InsetGradient.gdshader" type="Shader" id=3]
+[ext_resource path="res://addons/MapKit/Scenes/Widgets/ProgressLongArrow.tscn" type="PackedScene" id=4]
 
 [sub_resource type="Gradient" id=1]
 offsets = PoolRealArray( 0, 0.340067, 0.606061, 1 )
@@ -35,6 +36,20 @@ colors = PoolColorArray( 0, 0, 0, 1, 0.47138, 0.47138, 0.47138, 1, 0.54164, 0.54
 [sub_resource type="ShaderMaterial" id=8]
 shader = ExtResource( 3 )
 shader_param/inset_color = Color( 1, 0.3, 0.3, 1 )
+shader_param/outside_color = Color( 1, 0, 0, 1 )
+shader_param/percent = null
+
+[sub_resource type="ShaderMaterial" id=9]
+resource_local_to_scene = true
+shader = ExtResource( 3 )
+shader_param/inset_color = Color( 0.392157, 0.827451, 0.109804, 1 )
+shader_param/outside_color = Color( 1, 0, 0, 1 )
+shader_param/percent = 0.5
+
+[sub_resource type="ShaderMaterial" id=10]
+resource_local_to_scene = true
+shader = ExtResource( 3 )
+shader_param/inset_color = Color( 0.392157, 0.827451, 0.109804, 1 )
 shader_param/outside_color = Color( 1, 0, 0, 1 )
 shader_param/percent = null
 
@@ -82,3 +97,15 @@ texture_mode = 2
 material = SubResource( 8 )
 points = PoolVector2Array( 64, 348, 119, 329, 186, 329, 248, 358, 260, 384, 262, 437, 263, 485, 221, 510, 152, 545, 100, 501, 148, 438 )
 texture_mode = 2
+
+[node name="ProgressLongArrow" parent="." instance=ExtResource( 4 )]
+position = Vector2( 369, 450 )
+
+[node name="Body" parent="ProgressLongArrow" index="0"]
+material = SubResource( 9 )
+points = PoolVector2Array( 168, 1, 307, 5, 395, -8, 363, -135 )
+
+[node name="Head" parent="ProgressLongArrow" index="1"]
+material = SubResource( 10 )
+
+[editable path="ProgressLongArrow"]

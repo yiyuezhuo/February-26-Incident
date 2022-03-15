@@ -18,6 +18,7 @@ mapViewPath = NodePath("HBoxContainer/ViewportContainer/Viewport/MapView")
 timePlayerPath = NodePath("TimePlayer")
 nameViewButtonPath = NodePath("BottomContainer/ViewToggleContainer/NameViewButton")
 unitBarPath = NodePath("BottomContainer/UnitBar")
+arrowButtonPath = NodePath("BottomContainer/ViewToggleContainer/ArrowButton")
 mapImageScene = ExtResource( 5 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
@@ -61,11 +62,18 @@ margin_bottom = 20.0
 alignment = 2
 
 [node name="NameViewButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
-margin_left = 1002.0
-margin_right = 1024.0
+margin_left = 977.0
+margin_right = 999.0
 margin_bottom = 20.0
 hint_tooltip = "Toggle view of region names."
 text = "N"
+
+[node name="ArrowButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
+margin_left = 1003.0
+margin_right = 1024.0
+margin_bottom = 20.0
+hint_tooltip = "Show all arrows (soft select all units)."
+text = "A"
 
 [node name="UnitBar" parent="BottomContainer" instance=ExtResource( 7 )]
 anchor_right = 0.0

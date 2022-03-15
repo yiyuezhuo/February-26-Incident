@@ -54,15 +54,6 @@ public class StrategyPad : TextureRect
         {
             if(clickEvent.ButtonIndex == (int)ButtonList.Left && clickEvent.Pressed)
             {
-                /*
-                if(selectionState == SelectionState.Selected)
-                    selectionState = SelectionState.SoftUnselected;
-                else
-                    selectionState = SelectionState.Unselected;
-                
-                OnSelectionStateUpdated();
-                */
-
                 unitClickEvent?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -75,29 +66,6 @@ public class StrategyPad : TextureRect
     {
         material.SetShaderParam("selected", selectionState == SelectionState.Selected);
     }
-
-    /*
-    public void SetSelected(bool selected)
-    {
-        this.selected = selected;
-        OnSelectionStateUpdated();
-    }
-
-    public void Select()
-    {
-        this.selected = true;
-        OnSelectionStateUpdated();
-    }
-
-    /// <summary>
-    /// Goto a state between selected and unselected. Keep the arrow.
-    /// </summary>
-    public void SoftUnselect()
-    {
-        this.selected = true;
-        OnSelectionStateUpdated();
-    }
-    */
 
     public void SyncArrowPercent()
     {
@@ -123,7 +91,7 @@ public class StrategyPad : TextureRect
     {
         if(arrow != null)
             arrow.QueueFree();
-        if(unit.movingState == null)
+        if(unit.movingState == null || selectionState == SelectionState.Unselected)
         {
             arrow = null;
             return;
@@ -136,11 +104,31 @@ public class StrategyPad : TextureRect
         arrow.SetCurvePositions(controlPoints);
     }
 
-    public enum SelectionState
+    public enum SelectionState // The associated int value are passed as shader param.
     {
-        Unselected,
-        SoftSelected, // A state between selected and unselected. Keep the arrow.
-        Selected,
+        Unselected = 0,
+        SoftSelected = 1, // A state between selected and unselected. Keep the arrow.
+        Selected = 2,
+    }
+
+    public void TryForceDeselect()
+    {
+        if(selectionState != StrategyPad.SelectionState.Unselected)
+        {
+            selectionState = StrategyPad.SelectionState.Unselected;
+            OnSelectionStateUpdated(); // TODO: We don't need call this when state == SoftSelected at this time. But the situation may change soon.
+            SyncArrowShape();
+        }
+    }
+
+    public void TrySoftSelect()
+    {
+        if(selectionState == StrategyPad.SelectionState.Unselected)
+        {
+            selectionState = StrategyPad.SelectionState.SoftSelected;
+            OnSelectionStateUpdated(); // TODO: We don't need call this when state == SoftSelected at this time. But the situation may change soon.
+            SyncArrowShape();
+        }
     }
 }
 

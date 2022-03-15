@@ -14,6 +14,7 @@ public class StrategyView : Control
 	[Export] NodePath timePlayerPath;
 	[Export] NodePath nameViewButtonPath;
 	[Export] NodePath unitBarPath;
+	[Export] NodePath arrowButtonPath;
 	
 	[Export] PackedScene mapImageScene;
 
@@ -33,7 +34,8 @@ public class StrategyView : Control
 	bool showRegionName = false;
 	List<Label> regionNameLabels = new List<Label>();
 
-	Node mapContainer{get => mapView;}
+	Node mapContainer; //{get => mapView;}
+	Node arrowContainer; //{get => mapView;}
 
 	public override void _Ready()
 	{
@@ -50,12 +52,21 @@ public class StrategyView : Control
 		var nameViewButton = (Button)GetNode(nameViewButtonPath);
 		nameViewButton.Connect("pressed", this, nameof(OnNameViewButtonPressed));
 
+		var arrowButton = (Button)GetNode(arrowButtonPath);
+		arrowButton.Connect("pressed", this, nameof(SoftSelectAllPads));
+
+		arrowContainer = new Node();
+		mapView.AddChild(arrowContainer);
+		// So arrow's "z-index" is lowerer than other widgets.
+		mapContainer = new Node();
+		mapView.AddChild(mapContainer);
+
 		// Non-binding setup
 
 		foreach(var unit in scenarioData.units)
 		{
 			var pad = mapImageScene.Instance<StrategyPad>();
-			pad.arrowContainer = mapView;
+			pad.arrowContainer = arrowContainer;
 			pad.RectPosition = unit.parent.center;
 			pad.Texture = unit.children[0].portrait;
 			pad.unit = unit;
@@ -139,8 +150,8 @@ public class StrategyView : Control
 	public void OnAreaClick(object sender, Region area)
 	{
 		// selectedPad.SetSelected(false);
-
 		GD.Print($"StrategyView.OnAreaClick {area}");
+		ForceDeselectAllSelection(); // TODO: Add a option to disable this behavior?
 	}
 
 	public void OnAreaRightClick(object sender, Region area)
@@ -199,7 +210,27 @@ public class StrategyView : Control
 
 		pad.selectionState = StrategyPad.SelectionState.Selected;
 		pad.OnSelectionStateUpdated();
+
+		unitBar.SetData(pad.unit);
+
 		selectedPad = pad;
+	}
+
+	/// <summary>
+	/// Transform states of "Selected" and "SoftSelected" to "Deselected".
+	/// </summary>
+	void ForceDeselectAllSelection()
+	{
+		foreach(var pad in padMap.Values)
+		{
+			pad.TryForceDeselect();
+		}
+	}
+
+	void SoftSelectAllPads()
+	{
+		foreach(var pad in padMap.Values)
+			pad.TrySoftSelect();
 	}
 
 	/// <summary>
@@ -221,40 +252,15 @@ public class StrategyView : Control
 		{
 			SelectPad(pad);
 		}
-
-		/*
-		if(selected)
-		{
-			if(selectedPad != null)
-			{
-				selectedPad.SetSelected(false); 
-			}
-			pad.SetSelected(true);
-			selectedPad = pad;
-
-			unitBar.SetData(pad.unit);
-		}
-		else
-		{
-			selectedPad = pad;
-
-			unitBar.SetData(null);
-		}
-		*/
 	}
 
+	/// <summary>
+	/// Move Top StrategyPad to bottom and return new top StrategyPad.
+	/// The size of stack is expected to be >= 2.
+	/// </summary>
 	public StrategyPad ToggleStack(Region region)
 	{
-		// TODO: Consider Linq Aggregate?
-		/*
-		StrategyPad minPad = null;
-		StrategyPad maxPad = null;
-		int minPadIdx = int.MaxValue;
-		int maxPadIdx = int.MinValue;
-		*/
-
 		var pads = (from unit in region.children select padMap[unit]).ToList();
-		// var indexs = pads.Select(pad => pad.GetIndex()).ToList();
 		pads.Sort((x, y) => x.GetIndex().CompareTo(y.GetIndex()));
 
 		var maxPad = pads[pads.Count-1];
@@ -262,42 +268,7 @@ public class StrategyView : Control
 		mapContainer.MoveChild(maxPad, minPad.GetIndex());
 
 		return pads[pads.Count-2];
-
-
-		/*
-		foreach(var pad in pads)
-		{
-			var idx = pad.GetIndex();
-
-			GD.Print($"pad: {pad}, idx: {idx}");
-
-			if(idx < minPadIdx)
-			{
-				minPad = pad;
-				minPadIdx = idx;
-			}
-			if(idx > maxPadIdx)
-			{
-				maxPad = pad;
-				maxPadIdx = idx;
-			}
-		}
-
-		mapContainer.MoveChild(maxPad, minPadIdx);
-		return pads.MaxBy(pad => pad.GetIndex());
-		*/
 	}
-
-	/*
-	void TryClearSelectedPad()
-	{
-		if(selectedPad != null)
-		{
-			selectedPad.SetSelected(false);
-			selectedPad = null;
-		}
-	}
-	*/
 }
 
 

@@ -2,7 +2,7 @@ shader_type canvas_item;
 
 uniform bool selected;
 uniform vec4 selected_color : hint_color = vec4(1,0,0,1);
-uniform bool hovering;
+uniform bool hovering;                
 uniform vec4 hovering_color : hint_color = vec4(1, 0.7, 0.7, 1);
 
 void fragment(){
