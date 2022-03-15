@@ -101,16 +101,6 @@ public class LeaderTable : DataTable<LeaderTable.Item, LeaderTable.Data> // Dict
             this.id = UrlToId(item.ID);
             this.portrait = UrlToTexture(item.Portrait, root);
 
-            /*
-            if(item.Rank == "")
-                rank = Rank.Officer;
-            else
-            {
-                var ok = Enum.TryParse(item.Rank.Replace(" ", ""), out rank);
-                GD.Print($"ok={ok}");
-            }
-            */
-
             if(!Enum.TryParse(item.Rank.Replace(" ", ""), out rank))
                 rank = Rank.Officer;
             

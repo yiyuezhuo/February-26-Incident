@@ -32,8 +32,9 @@ margin_bottom = 150.0
 
 [node name="LeaderPadContainer" type="HBoxContainer" parent="MarginContainer/PadContainer" index="1"]
 margin_left = 111.0
-margin_right = 231.0
+margin_right = 241.0
 margin_bottom = 150.0
 
 [node name="LeaderPad" parent="MarginContainer/PadContainer/LeaderPadContainer" index="0" instance=ExtResource( 2 )]
+margin_right = 130.0
 margin_bottom = 150.0

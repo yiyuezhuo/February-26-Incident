@@ -5,7 +5,6 @@ namespace YYZ.App
 using Godot;
 using System;
 
-// using YYZ.Data.February26;
 using System.Linq;
 using System.Collections.Generic; 
 
@@ -16,22 +15,28 @@ public class StrategyPad : TextureRect
     public Node arrowContainer;
 
     ShaderMaterial material;
-    bool selected = false;
+    // bool selected = false;
+    public SelectionState selectionState = SelectionState.Unselected;
 
     public Unit unit;
 
-    public event EventHandler<bool> unitSelectedUpdateEvent;
+    public event EventHandler unitClickEvent;
 
     public MapKit.Widgets.ProgressLongArrow arrow;
 
     public override void _Ready()
     {
-        // material = (ShaderMaterial)Material.Duplicate();
+        // material = (ShaderMaterial)Material.Duplicate(); // "Local to scene" is enabled.
         material = (ShaderMaterial)Material;
 
         Connect("mouse_entered", this, nameof(OnMouseEnter));
         Connect("mouse_exited", this, nameof(OnMouseExited));
+
+        // var p = Mathf.Min(width / Texture.GetWidth(), height / Texture.GetHeight());
+        // SetScale(new Vector2(p));
     }
+
+    public override string ToString() => $"StrategyPad({unit})";
 
     public void OnMouseEnter()
     {
@@ -42,19 +47,23 @@ public class StrategyPad : TextureRect
     {
         material.SetShaderParam("hovering", false);
     }
-
-    public override void _GuiInput(InputEvent @event)
+    public override void _GuiInput(InputEvent @event) // unit selection toggle -> stack toggle
     {
         var clickEvent = @event as InputEventMouseButton;
         if(clickEvent != null)
         {
             if(clickEvent.ButtonIndex == (int)ButtonList.Left && clickEvent.Pressed)
             {
-                selected = !selected;
-                // material.SetShaderParam("selected", selected);
-                OnSelectedUpdated();
+                /*
+                if(selectionState == SelectionState.Selected)
+                    selectionState = SelectionState.SoftUnselected;
+                else
+                    selectionState = SelectionState.Unselected;
+                
+                OnSelectionStateUpdated();
+                */
 
-                unitSelectedUpdateEvent?.Invoke(this, selected);
+                unitClickEvent?.Invoke(this, EventArgs.Empty);
             }
         }
     }
@@ -62,16 +71,33 @@ public class StrategyPad : TextureRect
     /// <summary>
     /// Any effect other than event invoking.
     /// </summary>
-    public void OnSelectedUpdated()
+    public void OnSelectionStateUpdated()
     {
-        material.SetShaderParam("selected", selected);
+        material.SetShaderParam("selected", selectionState == SelectionState.Selected);
     }
 
+    /*
     public void SetSelected(bool selected)
     {
         this.selected = selected;
-        OnSelectedUpdated();
+        OnSelectionStateUpdated();
     }
+
+    public void Select()
+    {
+        this.selected = true;
+        OnSelectionStateUpdated();
+    }
+
+    /// <summary>
+    /// Goto a state between selected and unselected. Keep the arrow.
+    /// </summary>
+    public void SoftUnselect()
+    {
+        this.selected = true;
+        OnSelectionStateUpdated();
+    }
+    */
 
     public void SyncArrowPercent()
     {
@@ -108,6 +134,13 @@ public class StrategyPad : TextureRect
 
         var controlPoints = unit.movingState.path.Select(x => x.center);
         arrow.SetCurvePositions(controlPoints);
+    }
+
+    public enum SelectionState
+    {
+        Unselected,
+        SoftSelected, // A state between selected and unselected. Keep the arrow.
+        Selected,
     }
 }
 

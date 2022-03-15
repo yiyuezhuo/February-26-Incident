@@ -64,6 +64,7 @@ alignment = 2
 margin_left = 1002.0
 margin_right = 1024.0
 margin_bottom = 20.0
+hint_tooltip = "Toggle view of region names."
 text = "N"
 
 [node name="UnitBar" parent="BottomContainer" instance=ExtResource( 7 )]

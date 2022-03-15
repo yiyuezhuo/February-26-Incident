@@ -2,10 +2,10 @@ namespace YYZ.App
 {
 
 using Godot;
-// using YYZ.Data.February26;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class StrategyView : Control
 {
@@ -14,7 +14,6 @@ public class StrategyView : Control
 	[Export] NodePath timePlayerPath;
 	[Export] NodePath nameViewButtonPath;
 	[Export] NodePath unitBarPath;
-	// [Export] NodePath debugProgressLongArrowPath;
 	
 	[Export] PackedScene mapImageScene;
 
@@ -29,16 +28,12 @@ public class StrategyView : Control
 	// States
 
 	StrategyPad selectedPad;
-	List<StrategyPad> pads = new List<StrategyPad>();
+	// List<StrategyPad> pads = new List<StrategyPad>();
+	Dictionary<Unit, StrategyPad> padMap = new Dictionary<Unit, StrategyPad>();
 	bool showRegionName = false;
 	List<Label> regionNameLabels = new List<Label>();
 
-	// MapKit.Widgets.ProgressLongArrow debugProgressLongArrow;
-	// float debugPercentAcc = 0f;
-
-	// MapKit.Widgets.ProgressLongArrow focusedProgressLongArrow;
-
-	// HashSet<MapKit.Widgets.ProgressLongArrow> trackedArrows = new HashSet<MapKit.Widgets.ProgressLongArrow>();
+	Node mapContainer{get => mapView;}
 
 	public override void _Ready()
 	{
@@ -61,16 +56,14 @@ public class StrategyView : Control
 		{
 			var pad = mapImageScene.Instance<StrategyPad>();
 			pad.arrowContainer = mapView;
-			// var node = new TextureRect();
 			pad.RectPosition = unit.parent.center;
 			pad.Texture = unit.children[0].portrait;
 			pad.unit = unit;
 
-			pad.unitSelectedUpdateEvent += OnUnitSelectedUpdate;
+			pad.unitClickEvent += OnUnitClick;
 
-			// GD.Print($"node={node}");
-			pads.Add(pad);
-			mapView.AddChild(pad);
+			padMap[unit] = pad;
+			mapContainer.AddChild(pad);
 		}
 
 		foreach(var region in scenarioData.regions)
@@ -98,7 +91,7 @@ public class StrategyView : Control
 				label.Align = Label.AlignEnum.Center;
 
 				regionNameLabels.Add(label);
-				mapView.AddChild(label);
+				mapContainer.AddChild(label);
 				label.RectPosition = region.center - label.RectSize / 2; // RectSize get desired value when it actually enter the tree.
 			}
 		}
@@ -120,8 +113,7 @@ public class StrategyView : Control
 
 	public void SimulationStep() // 1 min -> 1 call
 	{
-		// debugPercentAcc += 0.01f;
-		foreach(var pad in pads)
+		foreach(var pad in padMap.Values)
 		{
 			if(pad.unit.isMoving)
 			{
@@ -138,8 +130,7 @@ public class StrategyView : Control
 
 	public override void _PhysicsProcess(float delta)
 	{
-		// debugProgressLongArrow.SetPercent(debugPercentAcc);
-		foreach(var pad in pads)
+		foreach(var pad in padMap.Values)
 		{
 			pad.SyncArrowPercent();
 		}
@@ -147,6 +138,8 @@ public class StrategyView : Control
 
 	public void OnAreaClick(object sender, Region area)
 	{
+		// selectedPad.SetSelected(false);
+
 		GD.Print($"StrategyView.OnAreaClick {area}");
 	}
 
@@ -192,15 +185,44 @@ public class StrategyView : Control
 		}
 	}
 
+	void SoftDeselectSelectedPad()
+	{
+		selectedPad.selectionState = StrategyPad.SelectionState.SoftSelected;
+		selectedPad.OnSelectionStateUpdated();
+		selectedPad = null;
+	}
+
+	void SelectPad(StrategyPad pad)
+	{
+		if(!(selectedPad is null))
+			SoftDeselectSelectedPad();
+
+		pad.selectionState = StrategyPad.SelectionState.Selected;
+		pad.OnSelectionStateUpdated();
+		selectedPad = pad;
+	}
+
 	/// <summary>
 	/// The handler is called when "selected" state of a Unit is updated.
 	/// </summary>
-	public void OnUnitSelectedUpdate(object sender, bool selected)
+	public void OnUnitClick(object sender, EventArgs _)
 	{
 		var pad = (StrategyPad)sender; // for testing usage of sender, may refactor it later.
 
-		GD.Print($"StrategyView.OnUnitSelectedUpdate {pad}, {pad.unit}, {selected}");
+		GD.Print($"StrategyView {nameof(OnUnitClick)}: {pad}, {pad.unit}");
 
+		if(pad.selectionState == StrategyPad.SelectionState.Selected && pad.unit.parent.children.Count >= 2)
+		{
+			SoftDeselectSelectedPad();
+			var nextTopPad = ToggleStack(pad.unit.parent);
+			SelectPad(nextTopPad);
+		}
+		else
+		{
+			SelectPad(pad);
+		}
+
+		/*
 		if(selected)
 		{
 			if(selectedPad != null)
@@ -218,8 +240,55 @@ public class StrategyView : Control
 
 			unitBar.SetData(null);
 		}
+		*/
 	}
 
+	public StrategyPad ToggleStack(Region region)
+	{
+		// TODO: Consider Linq Aggregate?
+		/*
+		StrategyPad minPad = null;
+		StrategyPad maxPad = null;
+		int minPadIdx = int.MaxValue;
+		int maxPadIdx = int.MinValue;
+		*/
+
+		var pads = (from unit in region.children select padMap[unit]).ToList();
+		// var indexs = pads.Select(pad => pad.GetIndex()).ToList();
+		pads.Sort((x, y) => x.GetIndex().CompareTo(y.GetIndex()));
+
+		var maxPad = pads[pads.Count-1];
+		var minPad = pads[0];
+		mapContainer.MoveChild(maxPad, minPad.GetIndex());
+
+		return pads[pads.Count-2];
+
+
+		/*
+		foreach(var pad in pads)
+		{
+			var idx = pad.GetIndex();
+
+			GD.Print($"pad: {pad}, idx: {idx}");
+
+			if(idx < minPadIdx)
+			{
+				minPad = pad;
+				minPadIdx = idx;
+			}
+			if(idx > maxPadIdx)
+			{
+				maxPad = pad;
+				maxPadIdx = idx;
+			}
+		}
+
+		mapContainer.MoveChild(maxPad, minPadIdx);
+		return pads.MaxBy(pad => pad.GetIndex());
+		*/
+	}
+
+	/*
 	void TryClearSelectedPad()
 	{
 		if(selectedPad != null)
@@ -227,8 +296,8 @@ public class StrategyView : Control
 			selectedPad.SetSelected(false);
 			selectedPad = null;
 		}
-
 	}
+	*/
 }
 
 
