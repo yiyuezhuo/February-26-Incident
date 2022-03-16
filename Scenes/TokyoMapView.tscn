@@ -17,3 +17,6 @@ material = ExtResource( 5 )
 texture = ExtResource( 4 )
 script = ExtResource( 7 )
 mapDataResource = ExtResource( 3 )
+
+[node name="Camera2D" parent="." index="1"]
+position = Vector2( -179, 235 )

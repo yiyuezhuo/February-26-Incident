@@ -73,6 +73,17 @@ public class StrategyPad : TextureRect
             arrow.SetPercent(unit.movingState.movedDistance / unit.movingState.totalDistance);
     }
 
+    public void SyncArrowAlpha()
+    {
+        if(arrow != null)
+        {
+            if(selectionState == SelectionState.SoftSelected)
+                arrow.SetAlpha(0.5f);
+            else
+                arrow.SetAlpha(1.0f);
+        }
+    }
+
     public void GoForward(float movement, out List<Region> reachedRegions)
     {
         var completed = unit.GoForward(movement, out reachedRegions);
@@ -128,6 +139,7 @@ public class StrategyPad : TextureRect
             selectionState = StrategyPad.SelectionState.SoftSelected;
             OnSelectionStateUpdated(); // TODO: We don't need call this when state == SoftSelected at this time. But the situation may change soon.
             SyncArrowShape();
+            SyncArrowAlpha();
         }
     }
 }

@@ -18,7 +18,7 @@ public class StrategyView : Control
 	
 	[Export] PackedScene mapImageScene;
 
-	[Export] float pixelDistance = 6; // 6m = 1 pixel distance.
+	// [Export] float pixelDistance = 6; // 6m = 1 pixel distance.
 
 	ScenarioData scenarioData;
 	MapView mapView;
@@ -171,11 +171,8 @@ public class StrategyView : Control
 				if(!cacheHit)
 				{
 					var extendsRequest = unit.movingState != null && Input.IsActionPressed("shift");
-
 					var pathfinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
-
 					var src = extendsRequest ? unit.movingState.destination : unit.parent;
-
 					var path = pathfinding.PathFindingAStar(src, area);
 
 					if(path.Count == 0)
@@ -200,7 +197,9 @@ public class StrategyView : Control
 	{
 		selectedPad.selectionState = StrategyPad.SelectionState.SoftSelected;
 		selectedPad.OnSelectionStateUpdated();
+		selectedPad.SyncArrowAlpha();
 		selectedPad = null;
+		
 	}
 
 	void SelectPad(StrategyPad pad)
@@ -212,6 +211,7 @@ public class StrategyView : Control
 		pad.OnSelectionStateUpdated();
 
 		unitBar.SetData(pad.unit);
+		pad.SyncArrowAlpha();
 
 		selectedPad = pad;
 	}
