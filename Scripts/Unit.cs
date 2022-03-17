@@ -20,7 +20,7 @@ public class MovingState
         return $"MovingState[{path.Count}]({movedDistance}/{nextDistance}/{totalDistance}, {ps})";
     }
 
-    public event EventHandler updated; // This event should be used only for UI updating.
+    public event EventHandler<bool> updated; // This event should be used only for UI updating. bool denotes if it's a "small" (progression only / path is not modified) update.
     public bool active{get => path.Count > 0;}
 
     /// <summary>
@@ -48,7 +48,7 @@ public class MovingState
     {
         _Extends(path);
 
-        updated?.Invoke(this, EventArgs.Empty);
+        updated?.Invoke(this, false);
     }
 
     public void ResetToPath(List<Region> path)
@@ -56,7 +56,7 @@ public class MovingState
         _Reset();
         _Extends(path);
 
-        updated?.Invoke(this, EventArgs.Empty);
+        updated?.Invoke(this, false);
     }
 
     void _Reset()
@@ -72,7 +72,7 @@ public class MovingState
     {
         _Reset();
 
-        updated?.Invoke(this, EventArgs.Empty);
+        updated?.Invoke(this, false);
     } 
 
     /// <summary>
@@ -95,7 +95,7 @@ public class MovingState
                 if(path.Count == 1)
                 {
                     _Reset();
-                    updated?.Invoke(this, EventArgs.Empty);
+                    updated?.Invoke(this, false);
                     return reachedRegions;
                 }
                 nextDistance = path[0].DistanceTo(path[1]);
@@ -105,7 +105,7 @@ public class MovingState
                 movement = 0;
             }
         }
-        updated?.Invoke(this, EventArgs.Empty);
+        updated?.Invoke(this, reachedRegions.Count == 0);
         return reachedRegions;
     }
 

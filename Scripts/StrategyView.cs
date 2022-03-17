@@ -2,7 +2,6 @@ namespace YYZ.App
 {
 
 using Godot;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -18,8 +17,6 @@ public class StrategyView : Control
 	
 	[Export] PackedScene mapImageScene;
 
-	// [Export] float pixelDistance = 6; // 6m = 1 pixel distance.
-
 	ScenarioData scenarioData;
 	MapView mapView;
 	MapShower mapShower;
@@ -29,7 +26,6 @@ public class StrategyView : Control
 	// States
 
 	StrategyPad selectedPad;
-	// List<StrategyPad> pads = new List<StrategyPad>();
 	Dictionary<Unit, StrategyPad> padMap = new Dictionary<Unit, StrategyPad>();
 	bool showRegionName = false;
 	List<Label> regionNameLabels = new List<Label>();
@@ -142,15 +138,17 @@ public class StrategyView : Control
 		mapShower.Flush();
 	}
 
+	/*
 	public override void _PhysicsProcess(float delta)
 	{
-		/*
+		
 		foreach(var pad in padMap.Values)
 		{
 			pad.SyncArrowPercent();
 		}
-		*/
+		
 	}
+	*/
 
 	public void OnAreaClick(object sender, Region area)
 	{
@@ -183,8 +181,6 @@ public class StrategyView : Control
 					if(path.Count == 0)
 						return; // don't update arrow
 
-					// var movingState = new MovingState(path);
-
 					if(extendsRequest)
 						unit.movingState.Extends(path);
 					else
@@ -193,16 +189,13 @@ public class StrategyView : Control
 			}
 
 			GD.Print($"movingState={unit.movingState}");
-
-			selectedPad.SyncArrowShape();
 		}
 	}
 
 	void SoftDeselectSelectedPad()
 	{
 		selectedPad.selectionState = StrategyPad.SelectionState.SoftSelected;
-		selectedPad.OnSelectionStateUpdated();
-		selectedPad.SyncArrowAlpha();
+		selectedPad.TrySetArrowAlpha();
 		selectedPad = null;
 		
 	}
@@ -213,10 +206,9 @@ public class StrategyView : Control
 			SoftDeselectSelectedPad();
 
 		pad.selectionState = StrategyPad.SelectionState.Selected;
-		pad.OnSelectionStateUpdated();
 
 		unitBar.SetData(pad.unit);
-		pad.SyncArrowAlpha();
+		pad.TrySetArrowAlpha();
 
 		selectedPad = pad;
 	}
