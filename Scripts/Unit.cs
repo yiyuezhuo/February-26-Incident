@@ -151,22 +151,13 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
     /// </summary>
     public void GoForward(float movement)
     {
-        // if(movingState == null)
-        //     return null;
         var reachedRegions = movingState.GoForward(movement);
         if(reachedRegions.Count > 0)
         {
             var src = parent;
             MoveTo(reachedRegions[reachedRegions.Count - 1]);
-            moveEvent.Invoke(this, new MovePath(parent, reachedRegions));
+            moveEvent.Invoke(this, new MovePath(src, reachedRegions));
         }
-        /*
-        foreach(var region in reachedRegions)
-        {
-            region.MoveTo(side);
-        }
-        */
-        // return reachedRegions;
     }
 
     public void GoForward() => GoForward(moveSpeedPiexelPerMin);
@@ -174,6 +165,7 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
     public class MovePath
     {
         public Region src;
+        public Region dst{get => reachedRegions[reachedRegions.Count-1];}
         public List<Region> reachedRegions;
 
         public MovePath(Region src, List<Region> reachedRegions)

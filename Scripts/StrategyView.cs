@@ -27,6 +27,7 @@ public class StrategyView : Control
 
 	StrategyPad selectedPad;
 	Dictionary<Unit, StrategyPad> padMap = new Dictionary<Unit, StrategyPad>();
+	Dictionary<Region, Label> depthLabelMap = new Dictionary<Region, Label>();
 	bool showRegionName = false;
 	List<Label> regionNameLabels = new List<Label>();
 
@@ -85,6 +86,33 @@ public class StrategyView : Control
 				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
 		}
 		mapShower.Flush();
+
+		foreach(var region in scenarioData.regions)
+			UpdateStackDepthLabel(region);
+	}
+
+	void UpdateStackDepthLabel(Region region)
+	{
+		if(depthLabelMap.TryGetValue(region, out var depthLabel))
+		{
+			if(region.children.Count == 0)
+			{
+				depthLabel.QueueFree();
+				depthLabelMap.Remove(region);
+			}
+			else
+			{
+				depthLabel.Text = region.children.Count.ToString();
+			}
+		}
+		else if(region.children.Count > 0)
+		{
+			depthLabel = new Label();
+			depthLabel.Text = region.children.Count.ToString();
+			depthLabel.RectPosition = region.center + new Vector2(0, 50f); // TODO: introduce condif instead of hard-coded offset.
+			mapContainer.AddChild(depthLabel);
+			depthLabelMap[region] = depthLabel;
+		}
 	}
 
 	public void OnUnitMoveEvent(object sender, Unit.MovePath path)
@@ -99,6 +127,8 @@ public class StrategyView : Control
 		}
 
 		// Add stack depth indicator updates.
+		UpdateStackDepthLabel(path.src);
+		UpdateStackDepthLabel(path.dst);
 	}
 
 	public void OnNameViewButtonPressed()

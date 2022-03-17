@@ -129,18 +129,6 @@ public class StrategyPad : TextureRect
         }
     }
 
-    /*
-    public void GoForward(float movement)
-    {
-        var reachedRegions = unit.GoForward(movement);
-        if(reachedRegions.Count > 0)
-        {
-            RectPosition = reachedRegions[reachedRegions.Count-1].center;
-        }
-        return reachedRegions;
-    }
-    */
-
     public void OnUnitMoveEvent(object sender, Unit.MovePath movePath)
     {
         var regions = movePath.reachedRegions;
