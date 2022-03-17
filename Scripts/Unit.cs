@@ -109,22 +109,6 @@ public class MovingState
         return reachedRegions;
     }
 
-    /*
-    /// <summary>
-    /// Python list "extend" like (inplace) method.
-    /// </summary>
-    public void Extends(MovingState followedState)
-    {
-        // if(path[path.Count-1].Equals(followedState.path[0]))
-        //     throw new ArgumentException("Extended tail and extending head should be the same region");
-        
-        path.AddRange(followedState.path.Skip(1));
-        totalDistance += followedState.totalDistance;
-
-        updated.Invoke(this, EventArgs.Empty);
-    }
-    */
-
     public Region destination{get => path[path.Count-1];}
 }
 
@@ -141,11 +125,15 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
 
     IEnumerable<LeaderPad.IData> UnitBar.IData.children{get => children;}
 
+    // "Constants"
+
     public float moveSpeedMPerMin = 25; // 25m/min -> 1.5km/h
     public static float mPerPixel = 6; // 6m = 1 unit pixel distance
     public float moveSpeedPiexelPerMin {get => moveSpeedMPerMin / mPerPixel;}
 
     public MovingState movingState{get;} = new MovingState();
+
+    public event EventHandler<MovePath> moveEvent;
 
     public Unit(UnitTable.Data data)
     {
@@ -161,23 +149,39 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
     /// <summary>
     /// return value denotes whether region is updated.
     /// </summary>
-    public List<Region> GoForward(float movement)
+    public void GoForward(float movement)
     {
         // if(movingState == null)
         //     return null;
         var reachedRegions = movingState.GoForward(movement);
         if(reachedRegions.Count > 0)
         {
+            var src = parent;
             MoveTo(reachedRegions[reachedRegions.Count - 1]);
+            moveEvent.Invoke(this, new MovePath(parent, reachedRegions));
         }
+        /*
         foreach(var region in reachedRegions)
         {
             region.MoveTo(side);
         }
-        return reachedRegions;
+        */
+        // return reachedRegions;
     }
 
-    // public bool isMoving {get => movingState.actived;}
+    public void GoForward() => GoForward(moveSpeedPiexelPerMin);
+
+    public class MovePath
+    {
+        public Region src;
+        public List<Region> reachedRegions;
+
+        public MovePath(Region src, List<Region> reachedRegions)
+        {
+            this.src = src;
+            this.reachedRegions = reachedRegions;
+        }
+    }
 }
 
 

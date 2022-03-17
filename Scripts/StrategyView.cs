@@ -69,6 +69,8 @@ public class StrategyView : Control
 
 			unit.movingState.updated += pad.OnMovingStateUpdated;
 			pad.unitClickEvent += OnUnitClick;
+			unit.moveEvent += pad.OnUnitMoveEvent;
+			unit.moveEvent += OnUnitMoveEvent;
 
 			padMap[unit] = pad;
 			mapContainer.AddChild(pad);
@@ -83,6 +85,20 @@ public class StrategyView : Control
 				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
 		}
 		mapShower.Flush();
+	}
+
+	public void OnUnitMoveEvent(object sender, Unit.MovePath path)
+	{
+		var unit = (Unit)sender;
+		foreach(var region in path.reachedRegions)
+		{
+			region.MoveTo(unit.side);
+
+			var areaInfo = mapShower.GetAreaInfo(region);
+			areaInfo.foregroundColor = unit.side.color;
+		}
+
+		// Add stack depth indicator updates.
 	}
 
 	public void OnNameViewButtonPressed()
@@ -117,6 +133,7 @@ public class StrategyView : Control
 	{
 		for(var i=0; i<n; i++)
 			SimulationStep();
+		mapShower.Flush(); // GoForward may trigger some handlers to call areaInfo, so we flush at every
 	}
 
 	public void SimulationStep() // 1 min -> 1 call
@@ -125,17 +142,17 @@ public class StrategyView : Control
 		{
 			if(pad.unit.movingState.active)
 			{
+				pad.unit.GoForward();
+				/*
 				var reachedRegions = pad.GoForward(pad.unit.moveSpeedPiexelPerMin);
 				foreach(var region in reachedRegions)
 				{
-					region.MoveTo(pad.unit.side);
-
 					var areaInfo = mapShower.GetAreaInfo(region);
 					areaInfo.foregroundColor = pad.unit.side.color;
 				}
+				*/
 			}
 		}
-		mapShower.Flush();
 	}
 
 	/*

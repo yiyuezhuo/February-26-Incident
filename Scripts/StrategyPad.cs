@@ -129,7 +129,8 @@ public class StrategyPad : TextureRect
         }
     }
 
-    public List<Region> GoForward(float movement)
+    /*
+    public void GoForward(float movement)
     {
         var reachedRegions = unit.GoForward(movement);
         if(reachedRegions.Count > 0)
@@ -137,6 +138,13 @@ public class StrategyPad : TextureRect
             RectPosition = reachedRegions[reachedRegions.Count-1].center;
         }
         return reachedRegions;
+    }
+    */
+
+    public void OnUnitMoveEvent(object sender, Unit.MovePath movePath)
+    {
+        var regions = movePath.reachedRegions;
+        RectPosition = regions[regions.Count-1].center;
     }
 
     public enum SelectionState // The associated int value are passed as shader param.
