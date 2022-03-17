@@ -71,6 +71,7 @@ public class StrategyView : Control
 			pad.Texture = unit.children[0].portrait;
 			pad.unit = unit;
 
+			unit.movingState.updated += pad.OnMovingStateUpdated;
 			pad.unitClickEvent += OnUnitClick;
 
 			padMap[unit] = pad;
@@ -126,11 +127,13 @@ public class StrategyView : Control
 	{
 		foreach(var pad in padMap.Values)
 		{
-			if(pad.unit.isMoving)
+			if(pad.unit.movingState.active)
 			{
-				pad.GoForward(pad.unit.moveSpeedPiexelPerMin, out var reachedRegions);
+				var reachedRegions = pad.GoForward(pad.unit.moveSpeedPiexelPerMin);
 				foreach(var region in reachedRegions)
 				{
+					region.MoveTo(pad.unit.side);
+
 					var areaInfo = mapShower.GetAreaInfo(region);
 					areaInfo.foregroundColor = pad.unit.side.color;
 				}
@@ -141,10 +144,12 @@ public class StrategyView : Control
 
 	public override void _PhysicsProcess(float delta)
 	{
+		/*
 		foreach(var pad in padMap.Values)
 		{
 			pad.SyncArrowPercent();
 		}
+		*/
 	}
 
 	public void OnAreaClick(object sender, Region area)
@@ -163,14 +168,14 @@ public class StrategyView : Control
 
 			if(unit.parent.Equals(area)) // cancel movement when right click to area that unit lived in.
 			{
-				unit.movingState = null; // Then SyncArrow will destory arrow if it existed.
+				unit.movingState.Reset(); // Then SyncArrow will destory arrow if it existed.
 			}
 			else
 			{
-				var cacheHit = unit.movingState != null && unit.movingState.path[unit.movingState.path.Count-1].Equals(area);
+				var cacheHit = unit.movingState.active && unit.movingState.destination.Equals(area);
 				if(!cacheHit)
 				{
-					var extendsRequest = unit.movingState != null && Input.IsActionPressed("shift");
+					var extendsRequest = unit.movingState.active && Input.IsActionPressed("shift");
 					var pathfinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
 					var src = extendsRequest ? unit.movingState.destination : unit.parent;
 					var path = pathfinding.PathFindingAStar(src, area);
@@ -178,12 +183,12 @@ public class StrategyView : Control
 					if(path.Count == 0)
 						return; // don't update arrow
 
-					var movingState = new MovingState(path);
+					// var movingState = new MovingState(path);
 
 					if(extendsRequest)
-						unit.movingState.Extends(movingState);
+						unit.movingState.Extends(path);
 					else
-						unit.movingState = movingState;
+						unit.movingState.ResetToPath(path);
 				}
 			}
 

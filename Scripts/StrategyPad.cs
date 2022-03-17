@@ -26,14 +26,10 @@ public class StrategyPad : TextureRect
 
     public override void _Ready()
     {
-        // material = (ShaderMaterial)Material.Duplicate(); // "Local to scene" is enabled.
         material = (ShaderMaterial)Material;
 
         Connect("mouse_entered", this, nameof(OnMouseEnter));
         Connect("mouse_exited", this, nameof(OnMouseExited));
-
-        // var p = Mathf.Min(width / Texture.GetWidth(), height / Texture.GetHeight());
-        // SetScale(new Vector2(p));
     }
 
     public override string ToString() => $"StrategyPad({unit})";
@@ -47,6 +43,23 @@ public class StrategyPad : TextureRect
     {
         material.SetShaderParam("hovering", false);
     }
+
+    /// <summary>
+    /// Update arrow related UI.
+    /// </summary>
+    public void OnMovingStateUpdated(object sender, EventArgs _)
+    {
+        var movingState = (MovingState)sender;
+        if(!movingState.active)
+        {
+            arrow?.QueueFree();
+            arrow = null;
+            return;
+        }
+
+        
+    }
+
     public override void _GuiInput(InputEvent @event) // unit selection toggle -> stack toggle
     {
         var clickEvent = @event as InputEventMouseButton;
@@ -78,21 +91,22 @@ public class StrategyPad : TextureRect
         if(arrow != null)
         {
             if(selectionState == SelectionState.SoftSelected)
-                arrow.SetAlpha(0.5f);
+                arrow.SetAlpha(0.7f);
             else
                 arrow.SetAlpha(1.0f);
         }
     }
 
-    public void GoForward(float movement, out List<Region> reachedRegions)
+    public List<Region> GoForward(float movement)
     {
-        var completed = unit.GoForward(movement, out reachedRegions);
+        var reachedRegions = unit.GoForward(movement);
         if(reachedRegions.Count > 0)
         {
             RectPosition = reachedRegions[reachedRegions.Count-1].center;
             SyncArrowShape();
         }
         SyncArrowPercent();
+        return reachedRegions;
     }
 
     /// <summary>
@@ -102,7 +116,7 @@ public class StrategyPad : TextureRect
     {
         if(arrow != null)
             arrow.QueueFree();
-        if(unit.movingState == null || selectionState == SelectionState.Unselected)
+        if(!unit.movingState.active || selectionState == SelectionState.Unselected)
         {
             arrow = null;
             return;

@@ -5,13 +5,14 @@ namespace YYZ.App
 using YYZ.Data.February26;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class MovingState
 {
-    public List<Region> path;
-    public float movedDistance;
-    public float nextDistance;
-    public float totalDistance;
+    public List<Region> path = new List<Region>(); // (Current, ..., Destination)
+    public float movedDistance = 0f;
+    public float nextDistance = 0f;
+    public float totalDistance = 0f;
 
     public override string ToString()
     {
@@ -19,28 +20,68 @@ public class MovingState
         return $"MovingState[{path.Count}]({movedDistance}/{nextDistance}/{totalDistance}, {ps})";
     }
 
-    public MovingState(IEnumerable<Region> path)
-    {
-        this.path = path.ToList();
+    public event EventHandler updated; // This event should be used only for UI updating.
+    public bool active{get => path.Count > 0;}
 
-        movedDistance = 0f;
-        totalDistance = 0f;
-        for(int i=0; i<this.path.Count-1; i++)
+    /// <summary>
+    /// [] + [p_1, p_2] => [p_1, p_2]
+    /// [p_1, p_2] + [p_2, p_3] => [p_1, p_2, p_3]
+    /// [p_1, p_2] + [p_3, p_4] is not valid.
+    /// </summary>
+    public void _Extends(List<Region> path)
+    {
+        if(!active)
         {
-            var dist = this.path[i].DistanceTo(this.path[i+1]);
-            if(i==0)
-                nextDistance = dist;
-            totalDistance += dist;
+            this.path.AddRange(path);
+            nextDistance = path[0].DistanceTo(path[1]);
         }
+        else
+        {
+            this.path.AddRange(path.Skip(1));
+        }
+        
+        for(int i=0; i<path.Count-1; i++)
+            totalDistance += path[i].DistanceTo(path[i+1]);
     }
+
+    public void Extends(List<Region> path)
+    {
+        _Extends(path);
+
+        updated?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ResetToPath(List<Region> path)
+    {
+        _Reset();
+        _Extends(path);
+
+        updated?.Invoke(this, EventArgs.Empty);
+    }
+
+    void _Reset()
+    {
+        path.Clear();
+        
+        movedDistance = 0f;
+        nextDistance = 0f;
+        totalDistance = 0f;
+    }
+
+    public void Reset()
+    {
+        _Reset();
+
+        updated?.Invoke(this, EventArgs.Empty);
+    } 
 
     /// <summary>
     /// lastReached = `null` denotes no location update happens.
     /// returned bool denotes if the path is "completed"
     /// </summary>
-    public bool GoForward(float movement, out List<Region> reachedRegions)
+    public List<Region> GoForward(float movement)
     {
-        reachedRegions = new List<Region>();
+        var reachedRegions = new List<Region>();
         // assert path.Count >= 1
         while(movement > 0)
         {
@@ -53,20 +94,22 @@ public class MovingState
                 reachedRegions.Add(path[0]);
                 if(path.Count == 1)
                 {
-                    return true;
+                    _Reset();
+                    updated?.Invoke(this, EventArgs.Empty);
+                    return reachedRegions;
                 }
                 nextDistance = path[0].DistanceTo(path[1]);
-                
-                
             }
             else{
                 movedDistance += movement;
                 movement = 0;
             }
         }
-        return false;
+        updated?.Invoke(this, EventArgs.Empty);
+        return reachedRegions;
     }
 
+    /*
     /// <summary>
     /// Python list "extend" like (inplace) method.
     /// </summary>
@@ -77,11 +120,12 @@ public class MovingState
         
         path.AddRange(followedState.path.Skip(1));
         totalDistance += followedState.totalDistance;
+
+        updated.Invoke(this, EventArgs.Empty);
     }
+    */
 
     public Region destination{get => path[path.Count-1];}
-
-    
 }
 
 public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData
@@ -101,7 +145,7 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
     public static float mPerPixel = 6; // 6m = 1 unit pixel distance
     public float moveSpeedPiexelPerMin {get => moveSpeedMPerMin / mPerPixel;}
 
-    public MovingState movingState;
+    public MovingState movingState{get;} = new MovingState();
 
     public Unit(UnitTable.Data data)
     {
@@ -117,13 +161,11 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
     /// <summary>
     /// return value denotes whether region is updated.
     /// </summary>
-    public bool GoForward(float movement, out List<Region> reachedRegions)
+    public List<Region> GoForward(float movement)
     {
         // if(movingState == null)
         //     return null;
-        var completed = movingState.GoForward(movement, out reachedRegions);
-        if (completed)
-            movingState = null;
+        var reachedRegions = movingState.GoForward(movement);
         if(reachedRegions.Count > 0)
         {
             MoveTo(reachedRegions[reachedRegions.Count - 1]);
@@ -132,10 +174,10 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
         {
             region.MoveTo(side);
         }
-        return completed;
+        return reachedRegions;
     }
 
-    public bool isMoving {get => movingState != null;}
+    // public bool isMoving {get => movingState.actived;}
 }
 
 
