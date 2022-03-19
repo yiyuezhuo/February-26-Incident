@@ -1,8 +1,14 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://NotionData/Tables 1cacc/Leaders Ta 3f9c1/Teruzo_Ando.jpg" type="Texture" id=1]
 [ext_resource path="res://fonts/nico_font.tres" type="DynamicFont" id=2]
 [ext_resource path="res://Scripts/LeaderPad.cs" type="Script" id=3]
+[ext_resource path="res://Shaders/PortraitPad.gdshader" type="Shader" id=4]
+
+[sub_resource type="ShaderMaterial" id=3]
+resource_local_to_scene = true
+shader = ExtResource( 4 )
+shader_param/highlight = false
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.392157 )
@@ -15,15 +21,17 @@ margin_right = 120.0
 margin_bottom = 130.0
 rect_min_size = Vector2( 130, 150 )
 script = ExtResource( 3 )
+portraitPath = NodePath("Portrait")
 nameLabelPath = NodePath("Control/Name")
 nameJapLabelPath = NodePath("Control/NameJap")
-portraitPath = NodePath("Portrait")
 
 [node name="Portrait" type="TextureRect" parent="."]
+material = SubResource( 3 )
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 123.0
 margin_bottom = 143.0
+mouse_filter = 2
 texture = ExtResource( 1 )
 expand = true
 stretch_mode = 6
@@ -33,6 +41,7 @@ margin_left = 7.0
 margin_top = 7.0
 margin_right = 123.0
 margin_bottom = 143.0
+mouse_filter = 2
 
 [node name="NameJap" type="Label" parent="Control"]
 anchor_left = 1.0

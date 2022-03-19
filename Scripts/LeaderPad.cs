@@ -6,40 +6,36 @@ using Godot;
 using System;
 using System.Linq;
 
-public class LeaderPad : Control
+public class LeaderPad : PortraitPad
 {
     [Export] NodePath nameLabelPath;
     [Export] NodePath nameJapLabelPath;
-    [Export] NodePath portraitPath;
     Label nameLabel;
     Label nameJapLabel;
-    TextureRect portrait;
 
     public override void _Ready()
     {
+        base._Ready();
+
         nameLabel = (Label)GetNode(nameLabelPath);
         nameJapLabel = (Label)GetNode(nameJapLabelPath);
-        portrait = (TextureRect)GetNode(portraitPath);
-    }
-
-    public void SetData(string name, string nameJap, Texture portraitTex)
-    {
-        nameLabel.Text = name;
-        nameJapLabel.Text = VertialTransform(nameJap);
-        portrait.Texture = portraitTex;
     }
 
     static string VertialTransform(string s) => string.Join("\n", from c in s select c);
 
-    public void SetData(IData data) => SetData(data.name, data.nameJap, data.portrait);
+    public void SetData(IData data)
+    {
+        base.SetData(data);
 
-    public interface IData
+        nameLabel.Text = data.name;
+        nameJapLabel.Text = VertialTransform(data.nameJap);
+    }
+
+    public new interface IData : PortraitPad.IData
     {
         string name{get;}
         string nameJap{get;}
-        Texture portrait{get;}
     }
-
 }
 
 

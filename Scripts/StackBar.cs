@@ -34,7 +34,7 @@ public class StackBar : Node
             unitPadContainer.AddChild(unitPad);
             unitPad.SetData(unitPadData);
             // unitPad.Connect("")
-            unitPad.unitClickEvent += OnUnitClick;
+            unitPad.clicked += OnUnitClick;
 
             unitPadList.Add(unitPad);
         }

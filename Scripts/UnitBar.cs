@@ -4,6 +4,7 @@ namespace YYZ.App
 
 using Godot;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 public class UnitBar : Control
@@ -14,6 +15,7 @@ public class UnitBar : Control
 
     UnitInfoPad unitInfoPad;
     Control leaderPadContainer;
+    List<LeaderPad> leaderPadList = new List<LeaderPad>();
     
     public override void _Ready()
     {
@@ -38,6 +40,7 @@ public class UnitBar : Control
                 leaderPadContainer.AddChild(leaderPad);
 
                 leaderPad.SetData(leaderData); // Nodes filled here are initialized after leaderPad is added to tree.
+                leaderPad.clicked += OnLeadPadClicked;
             }
         }
     }
@@ -51,6 +54,23 @@ public class UnitBar : Control
     public interface IData : UnitInfoPad.IData
     {
         IEnumerable<LeaderPad.IData> children{get;}
+    }
+
+    void OnLeadPadClicked(object sender, EventArgs _)
+    {
+        var leaderPad = (LeaderPad)sender;
+
+        leaderPad.Highlight(!leaderPad.highlighted);
+    }
+
+    // public List<bool> GetHighlightedStates() => leaderPadContainer.GetChildren().Select(pad => pad.highlighted.ToList();
+    // Godot.Array doesn't support Linq?
+    public List<bool> GetHighlightedStates()
+    {
+        var ret = new List<bool>();
+        foreach(LeaderPad pad in leaderPadContainer.GetChildren())
+            ret.Add(pad.highlighted);
+        return ret;
     }
 
 }
