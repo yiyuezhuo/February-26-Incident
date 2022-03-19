@@ -48,6 +48,7 @@ public class StrategyView : Control
 		mapShower = (MapShower)mapView.GetMapShower();
 		mapShower.areaClickEvent += OnAreaClick;
 		mapShower.areaRightClickEvent += OnAreaRightClick;
+		stackBar.unitClickEvent += OnStackUnitClick;
 
 		var nameViewButton = (Button)GetNode(nameViewButtonPath);
 		nameViewButton.Connect("pressed", this, nameof(OnNameViewButtonPressed));
@@ -70,6 +71,7 @@ public class StrategyView : Control
 			pad.RectPosition = unit.parent.center;
 			pad.Texture = unit.children[0].portrait;
 			pad.unit = unit;
+			pad.propogateTo = this; // Hack Godot's broken Event propogation system.
 
 			unit.movingState.updated += pad.OnMovingStateUpdated;
 			pad.unitClickEvent += OnUnitClick;
@@ -132,6 +134,24 @@ public class StrategyView : Control
 		// Add stack depth indicator updates.
 		UpdateStackDepthLabel(path.src);
 		UpdateStackDepthLabel(path.dst);
+
+		var pad = padMap[unit];
+		if(selectedPad != null && selectedPad.Equals(pad))
+		{
+			stackBar.SetData(pad.unit.parent);
+			SetStackUnitFocus(pad.unit);
+		}
+	}
+
+	public void OnStackUnitClick(object sender, int idx)
+	{
+		GD.Print($"OnStackUnitClick {idx}");
+
+		var unit = selectedPad.unit.parent.children[idx];
+
+		SoftDeselectSelectedPad();
+		SelectPad(padMap[unit]);
+		SetStackUnitFocus(unit);
 	}
 
 	public void OnNameViewButtonPressed()
@@ -268,8 +288,8 @@ public class StrategyView : Control
 		if(pad.selectionState == StrategyPad.SelectionState.Selected && pad.unit.parent.children.Count >= 2)
 		{
 			SoftDeselectSelectedPad();
-			var nextTopPad = ToggleStack(pad.unit.parent);
-			SelectPad(nextTopPad);
+			pad = ToggleStack(pad.unit.parent); // next pad
+			SelectPad(pad);
 		}
 		else
 		{
@@ -280,6 +300,14 @@ public class StrategyView : Control
 			if(stackChanged)
 				stackBar.SetData(pad.unit.parent);
 		}
+
+		SetStackUnitFocus(pad.unit);
+	}
+
+	void SetStackUnitFocus(Unit unit)
+	{
+		var idx = unit.parent.children.IndexOf(unit);
+		stackBar.SetFocus(idx);	
 	}
 
 	/// <summary>
@@ -296,6 +324,15 @@ public class StrategyView : Control
 		mapContainer.MoveChild(maxPad, minPad.GetIndex());
 
 		return pads[pads.Count-2];
+	}
+
+	public override void _GuiInput(InputEvent @event)
+	{
+		mapView._UnhandledInput(@event); 
+		// Weird hack, but it seems that Godot can't propogate event into _unhandled_input level after it's accepted in _GuiInput phase:
+		// https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html
+		// We can set mouse filter to `ignore` for every intermedia controls. But since we need StrategyPad and MapView both to accept events,
+		// the ignore way does not work.
 	}
 }
 

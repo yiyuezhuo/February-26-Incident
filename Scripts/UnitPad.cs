@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class UnitPad : Node
+public class UnitPad : Control
 {
     [Export] NodePath portraitPath;
     [Export] NodePath strengthLabelPath;
@@ -12,6 +12,8 @@ public class UnitPad : Node
     Label fatigueLabel;
 
     ShaderMaterial portraitMaterial;
+
+    public event EventHandler unitClickEvent;
 
     public override void _Ready()
     {
@@ -39,6 +41,17 @@ public class UnitPad : Node
     public void Highlight(bool highlight)
     {
         portraitMaterial.SetShaderParam("highlight", highlight);
+    }
+
+    public override void _GuiInput(InputEvent @event)
+    {
+
+        // GD.Print(@event);
+        var clickEvent = @event as InputEventMouseButton;
+        if(clickEvent != null && clickEvent.ButtonIndex == (int)ButtonList.Left && clickEvent.Pressed)
+        {
+            unitClickEvent?.Invoke(this, EventArgs.Empty);
+        }
     }
 
 }

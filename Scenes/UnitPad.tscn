@@ -28,6 +28,7 @@ margin_left = 7.0
 margin_top = 7.0
 margin_right = 123.0
 margin_bottom = 143.0
+mouse_filter = 2
 texture = ExtResource( 1 )
 expand = true
 stretch_mode = 6
@@ -37,6 +38,7 @@ margin_left = 7.0
 margin_top = 7.0
 margin_right = 123.0
 margin_bottom = 143.0
+mouse_filter = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control"]
 anchor_top = 1.0
@@ -46,7 +48,7 @@ margin_top = -14.0
 
 [node name="StrengthLabel" type="Label" parent="Control/HBoxContainer"]
 margin_right = 56.0
-margin_bottom = 19.0
+margin_bottom = 18.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 2 )
 custom_styles/normal = SubResource( 2 )
@@ -55,7 +57,7 @@ text = "150"
 [node name="FatigueLabel" type="Label" parent="Control/HBoxContainer"]
 margin_left = 60.0
 margin_right = 116.0
-margin_bottom = 19.0
+margin_bottom = 18.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 2 )
 custom_styles/normal = SubResource( 2 )

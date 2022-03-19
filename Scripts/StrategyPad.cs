@@ -32,6 +32,8 @@ public class StrategyPad : TextureRect
 
     public MapKit.Widgets.ProgressLongArrow arrow;
 
+    public Control propogateTo;
+
     public override void _Ready()
     {
         material = (ShaderMaterial)Material;
@@ -88,6 +90,7 @@ public class StrategyPad : TextureRect
         arrow.SetPercent(unit.movingState.movedDistance / unit.movingState.totalDistance);
     }
 
+    
     public override void _GuiInput(InputEvent @event) // unit selection toggle -> stack toggle
     {
         var clickEvent = @event as InputEventMouseButton;
@@ -96,9 +99,13 @@ public class StrategyPad : TextureRect
             if(clickEvent.ButtonIndex == (int)ButtonList.Left && clickEvent.Pressed)
             {
                 unitClickEvent?.Invoke(this, EventArgs.Empty);
+                return; // Disable Propogating for Left-clicking only.
             }
         }
+
+        propogateTo?._GuiInput(@event);
     }
+    
 
     /// <summary>
     /// Any effect other than event invoking.

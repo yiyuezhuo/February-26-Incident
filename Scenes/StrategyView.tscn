@@ -13,10 +13,9 @@
 [node name="StrategyView" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 2
 script = ExtResource( 2 )
 scenarioDataRes = ExtResource( 3 )
-mapViewPath = NodePath("HBoxContainer/ViewportContainer/Viewport/MapView")
+mapViewPath = NodePath("ViewportContainer/Viewport/MapView")
 timePlayerPath = NodePath("TimePlayer")
 nameViewButtonPath = NodePath("BottomContainer/ViewToggleContainer/NameViewButton")
 unitBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/UnitBar")
@@ -24,22 +23,18 @@ stackBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/StackBar")
 arrowButtonPath = NodePath("BottomContainer/ViewToggleContainer/ArrowButton")
 mapImageScene = ExtResource( 5 )
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
-margin_right = 40.0
-margin_bottom = 40.0
+[node name="ViewportContainer" type="ViewportContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
 mouse_filter = 2
+size_flags_horizontal = 3
 
-[node name="ViewportContainer" type="ViewportContainer" parent="HBoxContainer"]
-margin_right = 1000.0
-margin_bottom = 700.0
-mouse_filter = 2
-
-[node name="Viewport" type="Viewport" parent="HBoxContainer/ViewportContainer"]
-size = Vector2( 1000, 700 )
+[node name="Viewport" type="Viewport" parent="ViewportContainer"]
+size = Vector2( 1600, 900 )
 handle_input_locally = false
 render_target_update_mode = 3
 
-[node name="MapView" parent="HBoxContainer/ViewportContainer/Viewport" instance=ExtResource( 1 )]
+[node name="MapView" parent="ViewportContainer/Viewport" instance=ExtResource( 1 )]
 
 [node name="TimePlayer" parent="." instance=ExtResource( 6 )]
 anchor_left = 1.0
@@ -60,31 +55,31 @@ anchor_bottom = 1.0
 margin_top = -174.0
 
 [node name="ViewToggleContainer" type="HBoxContainer" parent="BottomContainer"]
-margin_right = 1024.0
+margin_right = 1600.0
 margin_bottom = 20.0
 alignment = 2
 
 [node name="NameViewButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
-margin_left = 977.0
-margin_right = 999.0
+margin_left = 1553.0
+margin_right = 1575.0
 margin_bottom = 20.0
 hint_tooltip = "Toggle view of region names."
 text = "N"
 
 [node name="ArrowButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
-margin_left = 1003.0
-margin_right = 1024.0
+margin_left = 1579.0
+margin_right = 1600.0
 margin_bottom = 20.0
 hint_tooltip = "Show all arrows (soft select all units)."
 text = "A"
 
 [node name="PageBackground" parent="BottomContainer" instance=ExtResource( 8 )]
 margin_top = 24.0
-margin_right = 1024.0
+margin_right = 1600.0
 margin_bottom = 174.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="BottomContainer/PageBackground"]
-margin_right = 1024.0
+margin_right = 1600.0
 margin_bottom = 150.0
 
 [node name="StackBar" parent="BottomContainer/PageBackground/HBoxContainer" instance=ExtResource( 9 )]
