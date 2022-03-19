@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Scripts/StackBar.cs" type="Script" id=1]
+[ext_resource path="res://Scenes/UnitPad.tscn" type="PackedScene" id=2]
+
+[node name="StackBar" type="MarginContainer"]
+margin_right = 1024.0
+margin_bottom = 150.0
+script = ExtResource( 1 )
+unitPadContainerPath = NodePath("LeaderPadContainer")
+unitPadPackedScene = ExtResource( 2 )
+
+[node name="LeaderPadContainer" type="HBoxContainer" parent="."]
+margin_right = 1024.0
+margin_bottom = 150.0
+
+[node name="UnitPad" parent="LeaderPadContainer" instance=ExtResource( 2 )]
+margin_right = 130.0
+margin_bottom = 150.0

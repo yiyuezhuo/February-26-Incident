@@ -9,7 +9,7 @@ using Godot;
 /// <summary>
 /// App layer Region representation.
 /// </summary>
-public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit>, Unit>, MapKit.IRegion<Region>, MapKit.IArea
+public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit>, Unit>, MapKit.IRegion<Region>, MapKit.IArea, StackBar.IData
 {
     // MapKit.IRegion properties
     public Color baseColor{get; set;}
@@ -20,6 +20,7 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public AreaTable.Data areaData; // Most of time, it's null.
 
     public List<Unit> children{get; set;} = new List<Unit>();
+    IEnumerable<UnitPad.IData> StackBar.IData.children{get => children;}
 
     string GetAreaDataDesc() => areaData != null ? areaData.ToString() : "[No Area Data]";
     public string ToLabelString() => areaData != null ? areaData.name : center.ToString();

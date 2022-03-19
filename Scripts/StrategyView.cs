@@ -13,6 +13,7 @@ public class StrategyView : Control
 	[Export] NodePath timePlayerPath;
 	[Export] NodePath nameViewButtonPath;
 	[Export] NodePath unitBarPath;
+	[Export] NodePath stackBarPath;
 	[Export] NodePath arrowButtonPath;
 	
 	[Export] PackedScene mapImageScene;
@@ -22,6 +23,7 @@ public class StrategyView : Control
 	MapShower mapShower;
 	TimePlayer timePlayer;
 	UnitBar unitBar;
+	StackBar stackBar;
 
 	// States
 
@@ -40,6 +42,7 @@ public class StrategyView : Control
 		mapView = (MapView)GetNode(mapViewPath);
 		timePlayer = (TimePlayer)GetNode(timePlayerPath);
 		unitBar = (UnitBar)GetNode(unitBarPath);
+		stackBar = (StackBar)GetNode(stackBarPath);
 
 		timePlayer.simulationEvent += SimulationHandler;
 		mapShower = (MapShower)mapView.GetMapShower();
@@ -173,33 +176,12 @@ public class StrategyView : Control
 			if(pad.unit.movingState.active)
 			{
 				pad.unit.GoForward();
-				/*
-				var reachedRegions = pad.GoForward(pad.unit.moveSpeedPiexelPerMin);
-				foreach(var region in reachedRegions)
-				{
-					var areaInfo = mapShower.GetAreaInfo(region);
-					areaInfo.foregroundColor = pad.unit.side.color;
-				}
-				*/
 			}
 		}
 	}
 
-	/*
-	public override void _PhysicsProcess(float delta)
-	{
-		
-		foreach(var pad in padMap.Values)
-		{
-			pad.SyncArrowPercent();
-		}
-		
-	}
-	*/
-
 	public void OnAreaClick(object sender, Region area)
 	{
-		// selectedPad.SetSelected(false);
 		GD.Print($"StrategyView.OnAreaClick {area}");
 		ForceDeselectAllSelection(); // TODO: Add a option to disable this behavior?
 	}
@@ -244,7 +226,6 @@ public class StrategyView : Control
 		selectedPad.selectionState = StrategyPad.SelectionState.SoftSelected;
 		selectedPad.TrySetArrowAlpha();
 		selectedPad = null;
-		
 	}
 
 	void SelectPad(StrategyPad pad)
@@ -266,9 +247,7 @@ public class StrategyView : Control
 	void ForceDeselectAllSelection()
 	{
 		foreach(var pad in padMap.Values)
-		{
 			pad.TryForceDeselect();
-		}
 	}
 
 	void SoftSelectAllPads()
@@ -294,7 +273,12 @@ public class StrategyView : Control
 		}
 		else
 		{
+			var stackChanged = selectedPad is null || !pad.unit.parent.Equals(selectedPad.unit.parent);
+			
 			SelectPad(pad);
+
+			if(stackChanged)
+				stackBar.SetData(pad.unit.parent);
 		}
 	}
 

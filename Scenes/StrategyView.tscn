@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Scenes/TokyoMapView.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scripts/StrategyView.cs" type="Script" id=2]
@@ -7,6 +7,8 @@
 [ext_resource path="res://Scenes/StrategyPad.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scenes/TimePlayer.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Scenes/UnitBar.tscn" type="PackedScene" id=7]
+[ext_resource path="res://Scenes/PageBackground.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Scenes/StackBar.tscn" type="PackedScene" id=9]
 
 [node name="StrategyView" type="Control"]
 anchor_right = 1.0
@@ -17,7 +19,8 @@ scenarioDataRes = ExtResource( 3 )
 mapViewPath = NodePath("HBoxContainer/ViewportContainer/Viewport/MapView")
 timePlayerPath = NodePath("TimePlayer")
 nameViewButtonPath = NodePath("BottomContainer/ViewToggleContainer/NameViewButton")
-unitBarPath = NodePath("BottomContainer/UnitBar")
+unitBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/UnitBar")
+stackBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/StackBar")
 arrowButtonPath = NodePath("BottomContainer/ViewToggleContainer/ArrowButton")
 mapImageScene = ExtResource( 5 )
 
@@ -75,8 +78,18 @@ margin_bottom = 20.0
 hint_tooltip = "Show all arrows (soft select all units)."
 text = "A"
 
-[node name="UnitBar" parent="BottomContainer" instance=ExtResource( 7 )]
-anchor_right = 0.0
+[node name="PageBackground" parent="BottomContainer" instance=ExtResource( 8 )]
 margin_top = 24.0
 margin_right = 1024.0
 margin_bottom = 174.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="BottomContainer/PageBackground"]
+margin_right = 1024.0
+margin_bottom = 150.0
+
+[node name="StackBar" parent="BottomContainer/PageBackground/HBoxContainer" instance=ExtResource( 9 )]
+margin_right = 130.0
+
+[node name="UnitBar" parent="BottomContainer/PageBackground/HBoxContainer" instance=ExtResource( 7 )]
+margin_left = 134.0
+margin_right = 375.0

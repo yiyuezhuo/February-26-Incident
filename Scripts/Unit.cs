@@ -6,6 +6,7 @@ using YYZ.Data.February26;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Godot;
 
 public class MovingState
 {
@@ -112,7 +113,7 @@ public class MovingState
     public Region destination{get => path[path.Count-1];}
 }
 
-public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData
+public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData, UnitPad.IData
 {
     UnitTable.Data data;
 
@@ -122,6 +123,7 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
     public float strength{get; set;}
     public float fatigue{get; set;}
     public float command{get => children.Sum(leader => leader.command);}
+    public Texture portrait{get => children[0].portrait;}
 
     IEnumerable<LeaderPad.IData> UnitBar.IData.children{get => children;}
 

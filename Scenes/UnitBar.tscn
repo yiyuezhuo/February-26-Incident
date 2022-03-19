@@ -1,40 +1,31 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://Scenes/PageBackground.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/LeaderPad.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Scripts/UnitBar.cs" type="Script" id=3]
 [ext_resource path="res://Scenes/UnitInfoPad.tscn" type="PackedScene" id=4]
 
-[node name="UnitBar" instance=ExtResource( 1 )]
-anchor_right = 1.0
-margin_bottom = 114.0
+[node name="UnitBar" type="MarginContainer"]
+margin_right = 1024.0
+margin_bottom = 150.0
 script = ExtResource( 3 )
-unitInfoPadPath = NodePath("MarginContainer/PadContainer/UnitInfoPad")
-leaderPadContainerPath = NodePath("MarginContainer/PadContainer/LeaderPadContainer")
+unitInfoPadPath = NodePath("PadContainer/UnitInfoPad")
+leaderPadContainerPath = NodePath("PadContainer/LeaderPadContainer")
 leaderPadScene = ExtResource( 2 )
 
-[node name="NinePatchRect" parent="." index="0"]
-margin_right = 1024.0
-margin_bottom = 150.0
-
-[node name="MarginContainer" type="MarginContainer" parent="." index="1"]
-margin_right = 1024.0
-margin_bottom = 150.0
-
-[node name="PadContainer" type="HBoxContainer" parent="MarginContainer" index="0"]
+[node name="PadContainer" type="HBoxContainer" parent="."]
 margin_right = 1024.0
 margin_bottom = 150.0
 rect_min_size = Vector2( 0, 150 )
 
-[node name="UnitInfoPad" parent="MarginContainer/PadContainer" index="0" instance=ExtResource( 4 )]
+[node name="UnitInfoPad" parent="PadContainer" instance=ExtResource( 4 )]
 margin_right = 107.0
 margin_bottom = 150.0
 
-[node name="LeaderPadContainer" type="HBoxContainer" parent="MarginContainer/PadContainer" index="1"]
+[node name="LeaderPadContainer" type="HBoxContainer" parent="PadContainer"]
 margin_left = 111.0
 margin_right = 241.0
 margin_bottom = 150.0
 
-[node name="LeaderPad" parent="MarginContainer/PadContainer/LeaderPadContainer" index="0" instance=ExtResource( 2 )]
+[node name="LeaderPad" parent="PadContainer/LeaderPadContainer" instance=ExtResource( 2 )]
 margin_right = 130.0
 margin_bottom = 150.0
