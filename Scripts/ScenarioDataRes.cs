@@ -213,8 +213,7 @@ public class ScenarioData
         foreach(var unitData in unitTable.Values) // Here we assume all units are rebels.
         {
             var unit = new UnitFromTable(unitData);
-            units.Add(unit);
-            unit.destroyed += OnUnitDestroyed;
+            RegisterUnit(unit);
             unitDataToUnit[unitData] = unit;
             unit.side = rebelSide;
 
@@ -246,6 +245,12 @@ public class ScenarioData
                 region.MoveTo(rebelSide);
             }
         }
+    }
+
+    public void RegisterUnit(Unit unit)
+    {
+        units.Add(unit);
+        unit.destroyed += OnUnitDestroyed;
     }
 
     void OnUnitDestroyed(object sender, Unit unit)

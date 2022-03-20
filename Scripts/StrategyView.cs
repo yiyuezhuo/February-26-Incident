@@ -35,6 +35,7 @@ public class StrategyView : Control
 	bool showRegionName = false;
 	List<Label> regionNameLabels = new List<Label>();
 	TransferRequest currentTransferRequest;
+	CreateRequest currentCreateRequest; // This request is not relevent to `currentTransferRequest`.
 
 	Node mapContainer; //{get => mapView;}
 	Node arrowContainer; //{get => mapView;}
@@ -89,6 +90,9 @@ public class StrategyView : Control
 			UpdateStackDepthLabel(region);
 	}
 
+	/// <summary>
+	/// Create a StrategyPad and other wraps for a "bare" unit.
+	/// </summary>
 	void CreateStrategyPad(Unit unit)
 	{
 		var pad = mapImageScene.Instance<StrategyPad>();
@@ -219,50 +223,80 @@ public class StrategyView : Control
 		ForceDeselectAllSelection(); // TODO: Add a option to disable this behavior?
 	}
 
-	/*
-	Unit TryDetach()
+	/// <summary>
+	/// If any leaders are selected, a detaching unit starts constructing (it will be built after strength assignment),
+	/// otherwise, original unit will be selected.
+	/// </summary>
+	Unit TryDetachTo(Region area)
 	{
 		var detachRequest = GetDetachRequest();
-		if(detachRequest.selectedLeaderList.Count == 0)
+		if(detachRequest.selectedLeaderList.Count == 0 || detachRequest.strengthDetermined)
+		{
 			return selectedPad.unit;
+		} 
 
+		currentCreateRequest = new CreateRequest(detachRequest, area);
+		AskDetachedStrength(detachRequest.src.strength);
+
+		return null;
 	}
-	*/
+
+	void CreateUnit(CreateRequest createRequest)
+	{
+		var src = createRequest.detachRequest.src;
+
+		var unit = new UnitProcedure(src.side, 0, 0);
+		unit.EnterTo(src.parent);
+		var transferRequest = new TransferRequest(createRequest.detachRequest, unit);
+		TransferPower(transferRequest);
+
+		CreateStrategyPad(unit);
+		scenarioData.RegisterUnit(unit); // TODO: Factory hooker refactor?
+
+		PointUnitTo(unit, createRequest.dstArea);
+		SelectPad(padMap[unit]);
+
+		UpdateStackDepthLabel(unit.parent);
+	}
 
 	void OnAreaRightClick(object sender, Region area)
 	{
 		GD.Print($"StrategyView.OnAreaRightClick {area}");
 		if(selectedPad != null)
 		{
-			var unit = selectedPad.unit;
-			// TryDetach
-
-			if(unit.parent.Equals(area)) // cancel movement when right click to area that unit lived in.
-			{
-				unit.movingState.Reset();
-			}
-			else
-			{
-				var cacheHit = unit.movingState.active && unit.movingState.destination.Equals(area);
-				if(!cacheHit)
-				{
-					var extendsRequest = unit.movingState.active && Input.IsActionPressed("shift");
-					var pathfinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
-					var src = extendsRequest ? unit.movingState.destination : unit.parent;
-					var path = pathfinding.PathFindingAStar(src, area);
-
-					if(path.Count == 0)
-						return; // don't update arrow
-
-					if(extendsRequest)
-						unit.movingState.Extends(path);
-					else
-						unit.movingState.ResetToPath(path);
-				}
-			}
-
-			GD.Print($"movingState={unit.movingState}");
+			var unit = TryDetachTo(area);
+			if(unit != null)
+				PointUnitTo(unit, area);
 		}
+	}
+
+	void PointUnitTo(Unit unit, Region area)
+	{
+		if(unit.parent.Equals(area)) // cancel movement when right click to area that unit lived in.
+		{
+			unit.movingState.Reset();
+		}
+		else
+		{
+			var cacheHit = unit.movingState.active && unit.movingState.destination.Equals(area);
+			if(!cacheHit)
+			{
+				var extendsRequest = unit.movingState.active && Input.IsActionPressed("shift");
+				var pathfinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
+				var src = extendsRequest ? unit.movingState.destination : unit.parent;
+				var path = pathfinding.PathFindingAStar(src, area);
+
+				if(path.Count == 0)
+					return; // don't update arrow
+
+				if(extendsRequest)
+					unit.movingState.Extends(path);
+				else
+					unit.movingState.ResetToPath(path);
+			}
+		}
+
+		GD.Print($"movingState={unit.movingState}");
 	}
 
 	void SoftDeselectSelectedPad()
@@ -360,6 +394,18 @@ public class StrategyView : Control
 		}
 	}
 
+	class CreateRequest
+	{
+		public DetachRequest detachRequest;
+		public Region dstArea;
+
+		public CreateRequest(DetachRequest detachRequest, Region dstArea)
+		{
+			this.detachRequest = detachRequest;
+			this.dstArea = dstArea;
+		}
+	}
+
 	DetachRequest GetDetachRequest()
 	{
 		var srcUnit = selectedPad.unit;
@@ -385,21 +431,39 @@ public class StrategyView : Control
 
 		if(!detachRequest.strengthDetermined)
 		{
-			strengthDetachDialog.Popup_();
-			strengthDetachDialog.Setup(detachRequest.src.strength);
+			AskDetachedStrength(detachRequest.src.strength);
 		}
 		else
 		{
 			TransferPower(currentTransferRequest);
+			currentTransferRequest = null;
 		}
+	}
+
+	void AskDetachedStrength(float strength)
+	{
+		strengthDetachDialog.Popup_();
+		strengthDetachDialog.Setup(strength);
 	}
 
 	void ApplyDetach(object sender, float value)
 	{
 		GD.Print($"ApplyDetach {value}");
 		
-		currentTransferRequest.detachRequest.strength = value;
-		TransferPower(currentTransferRequest);
+		if(currentTransferRequest != null)
+		{
+			currentTransferRequest.detachRequest.strength = value;
+			TransferPower(currentTransferRequest);
+			currentTransferRequest = null;
+		}
+		else if(currentCreateRequest != null)
+		{
+			currentCreateRequest.detachRequest.strength = value;
+			CreateUnit(currentCreateRequest);
+			currentCreateRequest = null;
+		}
+
+		// GD.Print($"currentTransferRequest={currentTransferRequest}, currentCreateRequest={currentCreateRequest}");
 	}
 
 	void TransferPower(TransferRequest request)
@@ -413,6 +477,10 @@ public class StrategyView : Control
 		{
 			leader.MoveTo(dst);
 		}
+		
+		var dn = dst.strength + dst.children.Count;
+		var sn = strength + selectedLeaderList.Count;
+		dst.fatigue = ((dn * dst.fatigue) + (sn * src.fatigue)) / (dn + sn);
 		
 		dst.strength += strength;
 		src.strength -= strength;
