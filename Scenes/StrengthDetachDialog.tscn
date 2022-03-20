@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/StrengthDetachDialog.cs" type="Script" id=1]
+
+[node name="StrengthDetachDialog" type="ConfirmationDialog"]
+margin_right = 250.0
+margin_bottom = 87.5
+rect_min_size = Vector2( 250, 87.5 )
+window_title = "Detach strength"
+script = ExtResource( 1 )
+sliderPath = NodePath("StrengthSlider")
+labelPath = NodePath("StrengthLabel")
+
+[node name="StrengthSlider" type="HSlider" parent="."]
+margin_left = 6.0
+margin_top = 21.0
+margin_right = 240.0
+margin_bottom = 64.5
+
+[node name="StrengthLabel" type="Label" parent="."]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 242.0
+margin_bottom = 51.5
+text = "100"

@@ -260,13 +260,6 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
         return CreateStrap(CreateInitImage(colorInit), material, paramName);
     }
 
-    /*
-    static ImageTextureStrap CreateStrap(ImageTextureStrap strap, ShaderMaterial material, string paramName)
-    {
-        return CreateStrap((Image)strap.image.Duplicate(), material, paramName);
-    }
-    */
-
     static Image CreateInitImage(Color colorInit)
     {
         /*
@@ -325,28 +318,10 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
     /// </summary>
     public void OnRaycastHit(Vector2 p)
     {
-        //GD.Print($"OnRaycstHit:{p}");
-        
-        /*
-        var baseColorSelectedNullable = Pos2Color(p);
-        //Debug.Log($"baseColorSelectedNullable={baseColorSelectedNullable}");
-        if(baseColorSelectedNullable == null)
-        {
-            return;
-        }
-        var baseColorSelected = baseColorSelectedNullable.Value;
-        // Debug.Log($"baseColorSelected={baseColorSelected}");
-        var areaSelected = mapData.ColorToArea(baseColorSelected);
-        //Debug.Log($"areaSelected={areaSelected}");
-        */
         var areaSelected = GetAreaFromPos(p);
         if(areaSelected == null)
             return;
-        // if(areaSelected.Equals(default(TArea)))
-        //     return;
-
-        // Debug.Log($"{areaLastSelected == null}, {areaSelected != areaLastSelected}, bc:{areaSelected.baseColor} rc:{areaSelected.remapColor}");
-        // GD.Print($"areaSelected={areaSelected}, areaLastSelected={areaLastSelected}");
+        
         if(!areaSelected.Equals(areaLastSelected))
         {
             // GD.Print($"Area select:{areaSelected}");
@@ -385,24 +360,14 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
     public void OnRightClick(Vector2 pos)
     {
         var areaSelected = GetAreaFromPos(pos);
-
-        areaRightClickEvent?.Invoke(this, areaSelected);
+        if(areaSelected != null)
+            areaRightClickEvent?.Invoke(this, areaSelected);
     }
-    
-    /*
-    public void OnSwitchMode(int mode)
-    {   var material = (ShaderMaterial)Material;
-        material.SetShaderParam("_Mode", mode);
-    }
-    */
 
     public Color? Pos2Color(Vector2 p)
     {
-        //Debug.Log("Pos2Color");
         return mapData.Pos2Color(p);
     }
-
-    // public Vector2 MapToWorld(Vector2 mapPos) => mapData.MapToWorld(mapPos);
 }
 
 

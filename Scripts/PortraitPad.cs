@@ -12,6 +12,7 @@ public class PortraitPad : Control
     protected ShaderMaterial portraitMaterial;
 
     public event EventHandler clicked;
+    public event EventHandler rightClicked;
     public bool highlighted;
 
     public override void _Ready()
@@ -44,8 +45,18 @@ public class PortraitPad : Control
     {
 
         var clickEvent = @event as InputEventMouseButton;
-        if(clickEvent != null && clickEvent.ButtonIndex == (int)ButtonList.Left && clickEvent.Pressed)
-            clicked?.Invoke(this, EventArgs.Empty);
+        if(clickEvent != null  && clickEvent.Pressed)
+        {
+            switch((ButtonList)clickEvent.ButtonIndex)
+            {
+                case ButtonList.Left:
+                    clicked?.Invoke(this, EventArgs.Empty);
+                    break;
+                case ButtonList.Right:
+                    rightClicked?.Invoke(this, EventArgs.Empty);
+                    break;
+            }
+        }
     }
 }
 

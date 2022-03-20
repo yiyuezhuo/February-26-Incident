@@ -15,6 +15,7 @@ public class StrategyView : Control
 	[Export] NodePath unitBarPath;
 	[Export] NodePath stackBarPath;
 	[Export] NodePath arrowButtonPath;
+	[Export] NodePath strengthDetachDialogPath;
 	
 	[Export] PackedScene mapImageScene;
 
@@ -24,6 +25,7 @@ public class StrategyView : Control
 	TimePlayer timePlayer;
 	UnitBar unitBar;
 	StackBar stackBar;
+	StrengthDetachDialog strengthDetachDialog;
 
 	// States
 
@@ -32,6 +34,7 @@ public class StrategyView : Control
 	Dictionary<Region, Label> depthLabelMap = new Dictionary<Region, Label>();
 	bool showRegionName = false;
 	List<Label> regionNameLabels = new List<Label>();
+	TransferRequest currentTransferRequest;
 
 	Node mapContainer; //{get => mapView;}
 	Node arrowContainer; //{get => mapView;}
@@ -43,12 +46,15 @@ public class StrategyView : Control
 		timePlayer = (TimePlayer)GetNode(timePlayerPath);
 		unitBar = (UnitBar)GetNode(unitBarPath);
 		stackBar = (StackBar)GetNode(stackBarPath);
+		strengthDetachDialog = (StrengthDetachDialog)GetNode(strengthDetachDialogPath);
 
 		timePlayer.simulationEvent += SimulationHandler;
 		mapShower = (MapShower)mapView.GetMapShower();
 		mapShower.areaClickEvent += OnAreaClick;
 		mapShower.areaRightClickEvent += OnAreaRightClick;
-		stackBar.unitClickEvent += OnStackUnitClick;
+		stackBar.clicked += OnStackUnitClick;
+		stackBar.rightClicked += OnStackUnitRightClicked;
+		strengthDetachDialog.confirmed += ApplyDetach;
 
 		var nameViewButton = (Button)GetNode(nameViewButtonPath);
 		nameViewButton.Connect("pressed", this, nameof(OnNameViewButtonPressed));
@@ -302,6 +308,103 @@ public class StrategyView : Control
 		}
 
 		SetStackUnitFocus(pad.unit);
+	}
+
+	class DetachRequest
+	{
+		public Unit src;
+		public List<Leader> selectedLeaderList;
+		public DetachRequest(Unit src, List<Leader> selectedLeaderList)
+		{
+			this.src = src;
+			this.selectedLeaderList = selectedLeaderList;
+		}
+
+		bool isFullDetach{get => src.children.Count == selectedLeaderList.Count;}
+		float? strengthSuggested;
+		public bool strengthDetermined{get =>  isFullDetach || strengthSuggested != null;}
+		public float strength
+		{
+			get => isFullDetach ? src.strength : strengthSuggested.Value;
+			set => strengthSuggested = value;
+		}
+	}
+
+	class TransferRequest
+	{
+		public DetachRequest detachRequest;
+		public Unit dst;
+
+		public TransferRequest(DetachRequest detachRequest, Unit dst)
+		{
+			this.detachRequest = detachRequest;
+			this.dst = dst;
+		}
+	}
+
+	public void OnStackUnitRightClicked(object sender, int idx)
+	{
+		// merge unit
+		var srcUnit = selectedPad.unit;
+
+		var highlightList = unitBar.GetHighlightedStates();
+		var selectedLeaderList = new List<Leader>();
+
+		for(int i=0; i<srcUnit.children.Count; i++)
+			if(highlightList[i])
+				selectedLeaderList.Add(srcUnit.children[i]);
+
+		var detachRequest = new DetachRequest(srcUnit, selectedLeaderList);
+
+		var dstUnit = selectedPad.unit.parent.children[idx];
+		currentTransferRequest = new TransferRequest(detachRequest, dstUnit);
+
+		if(!detachRequest.strengthDetermined)
+		{
+			strengthDetachDialog.Popup_();
+			strengthDetachDialog.Setup(srcUnit.strength);
+		}
+		else
+		{
+			TransferPower(currentTransferRequest);
+		}
+	}
+
+	public void ApplyDetach(object sender, float value)
+	{
+		GD.Print($"ApplyDetach {value}");
+		
+		currentTransferRequest.detachRequest.strength = value;
+		TransferPower(currentTransferRequest);
+	}
+
+	void TransferPower(TransferRequest request)
+	{
+		var src = request.detachRequest.src;
+		var selectedLeaderList = request.detachRequest.selectedLeaderList;
+		var strength = request.detachRequest.strength;
+		var dst = request.dst;
+
+		foreach(var leader in selectedLeaderList)
+		{
+			leader.MoveTo(dst);
+		}
+		
+		dst.strength += strength;
+		src.strength -= strength;
+
+		if(src.children.Count == 0 && src.strength == 0)
+		{
+			src.Destory();
+			padMap[src].QueueFree();
+			UpdateStackDepthLabel(dst.parent);
+		}
+
+		stackBar.SetData(dst.parent);
+		if(src.destoryed)
+			SelectPad(padMap[dst]);
+		else
+			SelectPad(padMap[src]);
 	}
 
 	void SetStackUnitFocus(Unit unit)

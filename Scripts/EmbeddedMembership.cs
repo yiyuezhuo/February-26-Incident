@@ -36,6 +36,12 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
             parent.children.Remove(This);
         EnterTo(container);
     }
+    public void Destory()
+    {
+        parent.children.Remove(This);
+        parent = default(TP);
+    }
+    public bool destoryed{get => EqualityComparer<TP>.Default.Equals(parent, default(TP));}
 
     public string ToHierarchy() => $"{this} ∋ {parent}";
 }

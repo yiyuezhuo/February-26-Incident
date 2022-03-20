@@ -14,7 +14,8 @@ public class StackBar : Node
     List<UnitPad> unitPadList = new List<UnitPad>();
     UnitPad focusing;
 
-    public EventHandler<int> unitClickEvent;
+    public EventHandler<int> clicked;
+    public EventHandler<int> rightClicked;
 
     public override void _Ready()
     {
@@ -34,7 +35,8 @@ public class StackBar : Node
             unitPadContainer.AddChild(unitPad);
             unitPad.SetData(unitPadData);
             // unitPad.Connect("")
-            unitPad.clicked += OnUnitClick;
+            unitPad.clicked += OnClick;
+            unitPad.rightClicked += OnRightClicked;
 
             unitPadList.Add(unitPad);
         }
@@ -60,12 +62,14 @@ public class StackBar : Node
         focusing.Highlight(true);
     }
 
-    public void OnUnitClick(object sender, EventArgs _)
+    void OnClick(object sender, EventArgs _)
     {
         var unitPad = (UnitPad)sender;
         var idx = unitPadList.IndexOf(unitPad);
-        unitClickEvent?.Invoke(this, idx);
+        clicked?.Invoke(this, idx);
     }
+
+    void OnRightClicked(object sender, EventArgs _) => rightClicked?.Invoke(this, unitPadList.IndexOf((UnitPad)sender));
 }
 
 
