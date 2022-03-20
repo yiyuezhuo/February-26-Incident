@@ -48,8 +48,8 @@ public class StrategyPad : TextureRect
     {
         this.arrowContainer = arrowContainer;
         RectPosition = unit.parent.center;
-        Texture = unit.children[0].portrait;
         this.unit = unit;
+        SyncPortrait();
         this.propogateTo = propogateTo; // Hack Godot's broken Event propogation system.
 
         unit.movingState.updated += OnMovingStateUpdated;
@@ -57,6 +57,18 @@ public class StrategyPad : TextureRect
         unit.moveStateUpdated += OnUnitMoveEvent;
         unit.destroyed += OnUnitDestroyed;
         unit.moveStateUpdated += OnUnitMoveEvent;
+        unit.childrenUpdated += OnUnitChildrenUpdate;
+    }
+
+    public void OnUnitChildrenUpdate(object sender, EventArgs _)
+    {
+        if(unit.children.Count > 0)
+            SyncPortrait();
+    }
+
+    public void SyncPortrait()
+    {
+        Texture = unit.children[0].portrait;
     }
 
     public void OnMouseEnter()

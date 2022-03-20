@@ -5,6 +5,7 @@ namespace YYZ.App
 using YYZ.Data.February26;
 using System.Collections.Generic;
 using Godot;
+using System;
 
 /// <summary>
 /// App layer Region representation.
@@ -21,6 +22,7 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
 
     public List<Unit> children{get; set;} = new List<Unit>();
     IEnumerable<UnitPad.IData> StackBar.IData.children{get => children;}
+    public event EventHandler<Region> childrenUpdated;
 
     string GetAreaDataDesc() => areaData != null ? areaData.ToString() : "[No Area Data]";
     public string ToLabelString() => areaData != null ? areaData.name : center.ToString();
@@ -30,6 +32,11 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
 
     public float DistanceTo(Region other) => center.DistanceTo(other.center);
     public bool movable{get => areaData == null || areaData.movable;}
+
+    public void OnChildrenUpdated()
+    {
+        childrenUpdated?.Invoke(this, this);
+    }
 }
 
 

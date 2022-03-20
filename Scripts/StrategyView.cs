@@ -83,6 +83,8 @@ public class StrategyView : Control
 				areaInfo.foregroundColor = region.parent.color;
 			else
 				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
+
+			region.childrenUpdated += OnRegionChildrenUpdated;
 		}
 		mapShower.Flush();
 
@@ -109,7 +111,6 @@ public class StrategyView : Control
 
 	void OnUnitDestroyed(object sender, Unit unit)
 	{
-		// padMap[unit].QueueFree();
 		padMap.Remove(unit);
 	}
 
@@ -137,6 +138,11 @@ public class StrategyView : Control
 		}
 	}
 
+	void OnRegionChildrenUpdated(object sender, Region region)
+	{
+		UpdateStackDepthLabel(region);
+	}
+
 	void OnUnitMoveEvent(object sender, Unit.MovePath path)
 	{
 		var unit = (Unit)sender;
@@ -147,10 +153,6 @@ public class StrategyView : Control
 			var areaInfo = mapShower.GetAreaInfo(region);
 			areaInfo.foregroundColor = unit.side.color;
 		}
-
-		// Add stack depth indicator updates.
-		UpdateStackDepthLabel(path.src);
-		UpdateStackDepthLabel(path.dst);
 
 		var pad = padMap[unit];
 		if(selectedPad != null && selectedPad.Equals(pad))
@@ -256,7 +258,6 @@ public class StrategyView : Control
 		PointUnitTo(unit, createRequest.dstArea);
 		SelectPad(padMap[unit]);
 
-		UpdateStackDepthLabel(unit.parent);
 	}
 
 	void OnAreaRightClick(object sender, Region area)
@@ -462,8 +463,6 @@ public class StrategyView : Control
 			CreateUnit(currentCreateRequest);
 			currentCreateRequest = null;
 		}
-
-		// GD.Print($"currentTransferRequest={currentTransferRequest}, currentCreateRequest={currentCreateRequest}");
 	}
 
 	void TransferPower(TransferRequest request)
@@ -485,14 +484,14 @@ public class StrategyView : Control
 		dst.strength += strength;
 		src.strength -= strength;
 
-		if(src.children.Count == 0 && src.strength == 0)
+		var isFullCombining = src.children.Count == 0 && src.strength == 0;
+		if(isFullCombining)
 		{
 			src.Destroy();
-			UpdateStackDepthLabel(dst.parent);
 		}
 
 		stackBar.SetData(dst.parent);
-		if(src.isDestroyed)
+		if(src.isDestroying)
 			SelectPad(padMap[dst]);
 		else
 			SelectPad(padMap[src]);

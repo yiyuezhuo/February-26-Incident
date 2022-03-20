@@ -29,6 +29,7 @@ public class Side : IContainer<HashSet<Region>, Region>
 
     public override string ToString() => $"Side({name}, {nameJap}, {children.Count})";
     public string ToHierarchy() => ToString();
+    public void OnChildrenUpdated(){}
 }
 
 

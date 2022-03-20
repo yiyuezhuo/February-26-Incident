@@ -136,11 +136,17 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     public MovingState movingState{get;} = new MovingState();
 
     public event EventHandler<MovePath> moveStateUpdated;
+    public event EventHandler childrenUpdated;
 
     public List<Leader> children{get; set;} = new List<Leader>();
 
     // public override string ToString() => $"Unit({name}, {nameJap}, {children.Count}, {parent})";
     public override string ToString() => $"Unit({name}, {nameJap}, {children.Count})";
+
+    public void OnChildrenUpdated()
+    {
+        childrenUpdated?.Invoke(this, EventArgs.Empty);
+    }
 
     /// <summary>
     /// return value denotes whether region is updated.

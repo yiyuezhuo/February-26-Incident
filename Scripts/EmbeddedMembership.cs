@@ -8,6 +8,7 @@ using System;
 public interface IContainerWeak<out TCC, out TC> where TCC : IEnumerable<TC>
 {
     TCC children {get;}
+    void OnChildrenUpdated();
 }
 
 public interface IContainer<out TCC, out TC> : IContainerWeak<TCC, TC> where TCC : ICollection<TC>
@@ -22,17 +23,21 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
     public TP parent{get; set;}
     public void MoveTo(TP container)
     {
+        var parentOri = parent;
         parent.children.Remove(This);
         EnterTo(container);
 
-        moved?.Invoke(this, container);
+        moved?.Invoke(this, parentOri);
+        parentOri.OnChildrenUpdated();
     }
     public void EnterTo(TP container)
     {
+        var parentOri = parent;
         parent = container;
         container.children.Add(This);
 
-        entered?.Invoke(this, container);
+        entered?.Invoke(this, parentOri);
+        container.OnChildrenUpdated();
     }
     public void TryMoveTo(TP container)
     {
@@ -43,13 +48,19 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
     public void Destroy()
     {
         parent.children.Remove(This);
-        parent = default(TP);
+        isDestroying = true;
+        // parent = default(TP); // This attribute may be helpful for some external hookers.
 
+        parent.OnChildrenUpdated();
         destroyed?.Invoke(this, This);
     }
-    public bool isDestroyed{get => EqualityComparer<TP>.Default.Equals(parent, default(TP));}
-    
-    public event EventHandler<TP> moved;
+    public bool isDestroying;
+
+    /// <summary>
+    /// The event is invoke when moving finished, the parameter is the previous location, the new location can be got from sender.
+    /// This event can be also treat as children of parent "updated".
+    /// </summary>
+    public event EventHandler<TP> moved; 
     public event EventHandler<TP> entered;
     public event EventHandler<T> destroyed;
 
