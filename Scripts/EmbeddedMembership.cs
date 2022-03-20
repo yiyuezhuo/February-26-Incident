@@ -3,7 +3,7 @@ namespace YYZ.App
 
 
 using System.Collections.Generic;
-
+using System;
 
 public interface IContainerWeak<out TCC, out TC> where TCC : IEnumerable<TC>
 {
@@ -24,11 +24,15 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
     {
         parent.children.Remove(This);
         EnterTo(container);
+
+        moved?.Invoke(this, container);
     }
     public void EnterTo(TP container)
     {
         parent = container;
         container.children.Add(This);
+
+        entered?.Invoke(this, container);
     }
     public void TryMoveTo(TP container)
     {
@@ -36,12 +40,18 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
             parent.children.Remove(This);
         EnterTo(container);
     }
-    public void Destory()
+    public void Destroy()
     {
         parent.children.Remove(This);
         parent = default(TP);
+
+        destroyed?.Invoke(this, This);
     }
-    public bool destoryed{get => EqualityComparer<TP>.Default.Equals(parent, default(TP));}
+    public bool isDestroyed{get => EqualityComparer<TP>.Default.Equals(parent, default(TP));}
+    
+    public event EventHandler<TP> moved;
+    public event EventHandler<TP> entered;
+    public event EventHandler<T> destroyed;
 
     public string ToHierarchy() => $"{this} ∋ {parent}";
 }

@@ -122,7 +122,7 @@ public class ScenarioData
     {
         mapData = res.mapDataRes.GetInstance();
         SetupTableData(res, out var areaToRegion);
-        SetupAPPData(areaToRegion);
+        SetupAppData(areaToRegion);
     }
 
     void SetupTableData(ScenarioDataRes res, out Dictionary<AreaTable.Data, Region> areaToRegion)
@@ -179,7 +179,7 @@ public class ScenarioData
         }
     }
 
-    void SetupAPPData(Dictionary<AreaTable.Data, Region> areaToRegion)
+    void SetupAppData(Dictionary<AreaTable.Data, Region> areaToRegion)
     {
         // Initialize App layer data
 
@@ -212,8 +212,9 @@ public class ScenarioData
         var unitDataToUnit = new Dictionary<UnitTable.Data, Unit>();
         foreach(var unitData in unitTable.Values) // Here we assume all units are rebels.
         {
-            var unit = new Unit(unitData);
+            var unit = new UnitFromTable(unitData);
             units.Add(unit);
+            unit.destroyed += OnUnitDestroyed;
             unitDataToUnit[unitData] = unit;
             unit.side = rebelSide;
 
@@ -245,6 +246,11 @@ public class ScenarioData
                 region.MoveTo(rebelSide);
             }
         }
+    }
+
+    void OnUnitDestroyed(object sender, Unit unit)
+    {
+        units.Remove(unit);
     }
 }
 

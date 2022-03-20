@@ -44,6 +44,21 @@ public class StrategyPad : TextureRect
 
     public override string ToString() => $"StrategyPad({unit})";
 
+    public void Setup(Unit unit, Node arrowContainer, Control propogateTo=null)
+    {
+        this.arrowContainer = arrowContainer;
+        RectPosition = unit.parent.center;
+        Texture = unit.children[0].portrait;
+        this.unit = unit;
+        this.propogateTo = propogateTo; // Hack Godot's broken Event propogation system.
+
+        unit.movingState.updated += OnMovingStateUpdated;
+        // pad.unitClickEvent += OnUnitClick;
+        unit.moveStateUpdated += OnUnitMoveEvent;
+        unit.destroyed += OnUnitDestroyed;
+        unit.moveStateUpdated += OnUnitMoveEvent;
+    }
+
     public void OnMouseEnter()
     {
         material.SetShaderParam("hovering", true);
@@ -77,6 +92,14 @@ public class StrategyPad : TextureRect
         // So movingState.active == true && selectionState != SelectionState.Unselected in following code: (with arrow being "undefined")
         
         IntializeArrow();
+    }
+
+    void OnUnitDestroyed(object sender, Unit unit)
+    {
+        arrow?.QueueFree();
+        QueueFree();
+        // arrow = null;
+        // TODO: reset movingState?
     }
 
     void IntializeArrow()

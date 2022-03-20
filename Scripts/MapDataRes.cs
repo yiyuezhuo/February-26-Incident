@@ -54,8 +54,6 @@ public class MapData : MapKit.MapData<Region>, PathFinding.IGraph<Region>
                 yield return region;
         }
     }
-
-    // public IEnumerable<Region> GetAllAreas() => areaMap.Values;
 }
 
 

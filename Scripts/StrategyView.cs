@@ -72,20 +72,7 @@ public class StrategyView : Control
 
 		foreach(var unit in scenarioData.units)
 		{
-			var pad = mapImageScene.Instance<StrategyPad>();
-			pad.arrowContainer = arrowContainer;
-			pad.RectPosition = unit.parent.center;
-			pad.Texture = unit.children[0].portrait;
-			pad.unit = unit;
-			pad.propogateTo = this; // Hack Godot's broken Event propogation system.
-
-			unit.movingState.updated += pad.OnMovingStateUpdated;
-			pad.unitClickEvent += OnUnitClick;
-			unit.moveEvent += pad.OnUnitMoveEvent;
-			unit.moveEvent += OnUnitMoveEvent;
-
-			padMap[unit] = pad;
-			mapContainer.AddChild(pad);
+			CreateStrategyPad(unit);
 		}
 
 		foreach(var region in scenarioData.regions)
@@ -100,6 +87,26 @@ public class StrategyView : Control
 
 		foreach(var region in scenarioData.regions)
 			UpdateStackDepthLabel(region);
+	}
+
+	void CreateStrategyPad(Unit unit)
+	{
+		var pad = mapImageScene.Instance<StrategyPad>();
+		pad.Setup(unit, arrowContainer, this);
+
+		pad.unitClickEvent += OnUnitClick;
+
+		padMap[unit] = pad;
+		unit.destroyed += OnUnitDestroyed;
+		unit.moveStateUpdated += OnUnitMoveEvent;
+		
+		mapContainer.AddChild(pad);
+	}
+
+	void OnUnitDestroyed(object sender, Unit unit)
+	{
+		// padMap[unit].QueueFree();
+		padMap.Remove(unit);
 	}
 
 	void UpdateStackDepthLabel(Region region)
@@ -126,7 +133,7 @@ public class StrategyView : Control
 		}
 	}
 
-	public void OnUnitMoveEvent(object sender, Unit.MovePath path)
+	void OnUnitMoveEvent(object sender, Unit.MovePath path)
 	{
 		var unit = (Unit)sender;
 		foreach(var region in path.reachedRegions)
@@ -149,7 +156,7 @@ public class StrategyView : Control
 		}
 	}
 
-	public void OnStackUnitClick(object sender, int idx)
+	void OnStackUnitClick(object sender, int idx)
 	{
 		GD.Print($"OnStackUnitClick {idx}");
 
@@ -160,7 +167,7 @@ public class StrategyView : Control
 		SetStackUnitFocus(unit);
 	}
 
-	public void OnNameViewButtonPressed()
+	void OnNameViewButtonPressed()
 	{
 		showRegionName = !showRegionName;
 		if(showRegionName)
@@ -188,14 +195,14 @@ public class StrategyView : Control
 		}
 	}
 
-	public void SimulationHandler(object sender, int n)
+	void SimulationHandler(object sender, int n)
 	{
 		for(var i=0; i<n; i++)
 			SimulationStep();
 		mapShower.Flush(); // GoForward may trigger some handlers to call areaInfo, so we flush at every
 	}
 
-	public void SimulationStep() // 1 min -> 1 call
+	void SimulationStep() // 1 min -> 1 call
 	{
 		foreach(var pad in padMap.Values)
 		{
@@ -206,22 +213,33 @@ public class StrategyView : Control
 		}
 	}
 
-	public void OnAreaClick(object sender, Region area)
+	void OnAreaClick(object sender, Region area)
 	{
 		GD.Print($"StrategyView.OnAreaClick {area}");
 		ForceDeselectAllSelection(); // TODO: Add a option to disable this behavior?
 	}
 
-	public void OnAreaRightClick(object sender, Region area)
+	/*
+	Unit TryDetach()
+	{
+		var detachRequest = GetDetachRequest();
+		if(detachRequest.selectedLeaderList.Count == 0)
+			return selectedPad.unit;
+
+	}
+	*/
+
+	void OnAreaRightClick(object sender, Region area)
 	{
 		GD.Print($"StrategyView.OnAreaRightClick {area}");
 		if(selectedPad != null)
 		{
 			var unit = selectedPad.unit;
+			// TryDetach
 
 			if(unit.parent.Equals(area)) // cancel movement when right click to area that unit lived in.
 			{
-				unit.movingState.Reset(); // Then SyncArrow will destory arrow if it existed.
+				unit.movingState.Reset();
 			}
 			else
 			{
@@ -285,7 +303,7 @@ public class StrategyView : Control
 	/// <summary>
 	/// The handler is called when "selected" state of a Unit is updated.
 	/// </summary>
-	public void OnUnitClick(object sender, EventArgs _)
+	void OnUnitClick(object sender, EventArgs _)
 	{
 		var pad = (StrategyPad)sender; // for testing usage of sender, may refactor it later.
 
@@ -342,9 +360,8 @@ public class StrategyView : Control
 		}
 	}
 
-	public void OnStackUnitRightClicked(object sender, int idx)
+	DetachRequest GetDetachRequest()
 	{
-		// merge unit
 		var srcUnit = selectedPad.unit;
 
 		var highlightList = unitBar.GetHighlightedStates();
@@ -354,7 +371,14 @@ public class StrategyView : Control
 			if(highlightList[i])
 				selectedLeaderList.Add(srcUnit.children[i]);
 
-		var detachRequest = new DetachRequest(srcUnit, selectedLeaderList);
+		return new DetachRequest(srcUnit, selectedLeaderList);
+	}
+
+	void OnStackUnitRightClicked(object sender, int idx)
+	{
+		// merge unit
+
+		var detachRequest = GetDetachRequest();
 
 		var dstUnit = selectedPad.unit.parent.children[idx];
 		currentTransferRequest = new TransferRequest(detachRequest, dstUnit);
@@ -362,7 +386,7 @@ public class StrategyView : Control
 		if(!detachRequest.strengthDetermined)
 		{
 			strengthDetachDialog.Popup_();
-			strengthDetachDialog.Setup(srcUnit.strength);
+			strengthDetachDialog.Setup(detachRequest.src.strength);
 		}
 		else
 		{
@@ -370,7 +394,7 @@ public class StrategyView : Control
 		}
 	}
 
-	public void ApplyDetach(object sender, float value)
+	void ApplyDetach(object sender, float value)
 	{
 		GD.Print($"ApplyDetach {value}");
 		
@@ -395,13 +419,12 @@ public class StrategyView : Control
 
 		if(src.children.Count == 0 && src.strength == 0)
 		{
-			src.Destory();
-			padMap[src].QueueFree();
+			src.Destroy();
 			UpdateStackDepthLabel(dst.parent);
 		}
 
 		stackBar.SetData(dst.parent);
-		if(src.destoryed)
+		if(src.isDestroyed)
 			SelectPad(padMap[dst]);
 		else
 			SelectPad(padMap[src]);
@@ -417,7 +440,7 @@ public class StrategyView : Control
 	/// Move Top StrategyPad to bottom and return new top StrategyPad.
 	/// The size of stack is expected to be >= 2.
 	/// </summary>
-	public StrategyPad ToggleStack(Region region)
+	StrategyPad ToggleStack(Region region)
 	{
 		var pads = (from unit in region.children select padMap[unit]).ToList();
 		pads.Sort((x, y) => x.GetIndex().CompareTo(y.GetIndex()));

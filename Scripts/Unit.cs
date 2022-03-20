@@ -113,15 +113,15 @@ public class MovingState
     public Region destination{get => path[path.Count-1];}
 }
 
-public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData, UnitPad.IData
+public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData, UnitPad.IData
 {
-    UnitTable.Data data;
+    public abstract string name{get;}
+    public abstract string nameJap{get;}
 
-    public string name{get => data.name;}
-    public string nameJap{get => data.nameJap;}
     public Side side;
     public float strength{get; set;}
     public float fatigue{get; set;}
+
     public float command{get => children.Sum(leader => leader.command);}
     public Texture portrait{get => children[0].portrait;}
 
@@ -135,13 +135,7 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
 
     public MovingState movingState{get;} = new MovingState();
 
-    public event EventHandler<MovePath> moveEvent;
-
-    public Unit(UnitTable.Data data)
-    {
-        this.data  = data;
-        this.strength = data.strength;
-    }
+    public event EventHandler<MovePath> moveStateUpdated;
 
     public List<Leader> children{get; set;} = new List<Leader>();
 
@@ -158,7 +152,7 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
         {
             var src = parent;
             MoveTo(reachedRegions[reachedRegions.Count - 1]);
-            moveEvent.Invoke(this, new MovePath(src, reachedRegions));
+            moveStateUpdated.Invoke(this, new MovePath(src, reachedRegions));
         }
     }
 
@@ -175,6 +169,36 @@ public class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Le
             this.src = src;
             this.reachedRegions = reachedRegions;
         }
+    }
+}
+
+public class UnitFromTable : Unit
+{
+    UnitTable.Data data;
+    
+    public override string name{get => data.name;}
+    public override string nameJap{get => data.nameJap;}
+
+    public UnitFromTable(UnitTable.Data data)
+    {
+        this.data  = data;
+        this.strength = data.strength;
+    }
+
+}
+
+public class UnitProcedure : Unit
+{
+    public override string name{get => "";} // TODO: C# doesn't allow adding setter in child class???
+    // CC: https://stackoverflow.com/questions/82437/why-is-it-impossible-to-override-a-getter-only-property-and-add-a-setter
+    // Since These properties are not needed at this time, 
+    public override string nameJap{get => "";}
+
+    public UnitProcedure(Side side, float strength, float fatigue)
+    {
+        this.side = side;
+        this.strength = strength;
+        this.fatigue = fatigue;
     }
 }
 
