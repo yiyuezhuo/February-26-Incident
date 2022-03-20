@@ -11,7 +11,6 @@ public class StrategyView : Control
 	[Export] ScenarioDataRes scenarioDataRes;
 	[Export] NodePath mapViewPath;
 	[Export] NodePath timePlayerPath;
-	[Export] NodePath nameViewButtonPath;
 	[Export] NodePath unitBarPath;
 	[Export] NodePath stackBarPath;
 	[Export] NodePath arrowButtonPath;
@@ -31,9 +30,6 @@ public class StrategyView : Control
 
 	StrategyPad selectedPad;
 	Dictionary<Unit, StrategyPad> padMap = new Dictionary<Unit, StrategyPad>();
-	Dictionary<Region, Label> depthLabelMap = new Dictionary<Region, Label>();
-	bool showRegionName = false;
-	List<Label> regionNameLabels = new List<Label>();
 	TransferRequest currentTransferRequest;
 	CreateRequest currentCreateRequest; // This request is not relevent to `currentTransferRequest`.
 
@@ -56,9 +52,6 @@ public class StrategyView : Control
 		stackBar.clicked += OnStackUnitClick;
 		stackBar.rightClicked += OnStackUnitRightClicked;
 		strengthDetachDialog.confirmed += ApplyDetach;
-
-		var nameViewButton = (Button)GetNode(nameViewButtonPath);
-		nameViewButton.Connect("pressed", this, nameof(OnNameViewButtonPressed));
 
 		var arrowButton = (Button)GetNode(arrowButtonPath);
 		arrowButton.Connect("pressed", this, nameof(SoftSelectAllPads));
@@ -83,13 +76,8 @@ public class StrategyView : Control
 				areaInfo.foregroundColor = region.parent.color;
 			else
 				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
-
-			region.childrenUpdated += OnRegionChildrenUpdated;
 		}
 		mapShower.Flush();
-
-		foreach(var region in scenarioData.regions)
-			UpdateStackDepthLabel(region);
 	}
 
 	/// <summary>
@@ -112,35 +100,6 @@ public class StrategyView : Control
 	void OnUnitDestroyed(object sender, Unit unit)
 	{
 		padMap.Remove(unit);
-	}
-
-	void UpdateStackDepthLabel(Region region)
-	{
-		if(depthLabelMap.TryGetValue(region, out var depthLabel))
-		{
-			if(region.children.Count == 0)
-			{
-				depthLabel.QueueFree();
-				depthLabelMap.Remove(region);
-			}
-			else
-			{
-				depthLabel.Text = region.children.Count.ToString();
-			}
-		}
-		else if(region.children.Count > 0)
-		{
-			depthLabel = new Label();
-			depthLabel.Text = region.children.Count.ToString();
-			depthLabel.RectPosition = region.center + new Vector2(0, 50f); // TODO: introduce condif instead of hard-coded offset.
-			mapContainer.AddChild(depthLabel);
-			depthLabelMap[region] = depthLabel;
-		}
-	}
-
-	void OnRegionChildrenUpdated(object sender, Region region)
-	{
-		UpdateStackDepthLabel(region);
 	}
 
 	void OnUnitMoveEvent(object sender, Unit.MovePath path)
@@ -171,34 +130,6 @@ public class StrategyView : Control
 		SoftDeselectSelectedPad();
 		SelectPad(padMap[unit]);
 		SetStackUnitFocus(unit);
-	}
-
-	void OnNameViewButtonPressed()
-	{
-		showRegionName = !showRegionName;
-		if(showRegionName)
-		{
-			foreach(var region in scenarioData.regions)
-			{
-				var label = new Label();
-				label.Text = region.ToLabelString();
-				
-				label.AddColorOverride("font_color", new Color(0, 0, 0, 1));
-				label.Align = Label.AlignEnum.Center;
-
-				regionNameLabels.Add(label);
-				mapContainer.AddChild(label);
-				label.RectPosition = region.center - label.RectSize / 2; // RectSize get desired value when it actually enter the tree.
-			}
-		}
-		else
-		{
-			foreach(var label in regionNameLabels)
-			{
-				label.QueueFree(); // TODO: Object Pool seems overkill for this.
-			}
-			regionNameLabels.Clear();
-		}
 	}
 
 	void SimulationHandler(object sender, int n)

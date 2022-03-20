@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Scenes/TokyoMapView.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scripts/StrategyView.cs" type="Script" id=2]
@@ -10,6 +10,8 @@
 [ext_resource path="res://Scenes/PageBackground.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Scenes/StackBar.tscn" type="PackedScene" id=9]
 [ext_resource path="res://Scenes/StrengthDetachDialog.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Scripts/NameViewButton.cs" type="Script" id=11]
+[ext_resource path="res://Scripts/DepthLabelController.cs" type="Script" id=12]
 
 [node name="StrategyView" type="Control"]
 anchor_right = 1.0
@@ -18,12 +20,16 @@ script = ExtResource( 2 )
 scenarioDataRes = ExtResource( 3 )
 mapViewPath = NodePath("ViewportContainer/Viewport/MapView")
 timePlayerPath = NodePath("TimePlayer")
-nameViewButtonPath = NodePath("BottomContainer/ViewToggleContainer/NameViewButton")
 unitBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/UnitBar")
 stackBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/StackBar")
 arrowButtonPath = NodePath("BottomContainer/ViewToggleContainer/ArrowButton")
 strengthDetachDialogPath = NodePath("StrengthDetachDialog")
 mapImageScene = ExtResource( 5 )
+
+[node name="DepthLabelController" type="Node" parent="."]
+script = ExtResource( 12 )
+scenarioDataRes = ExtResource( 3 )
+mapContainerPath = NodePath("../ViewportContainer/Viewport/MapView")
 
 [node name="ViewportContainer" type="ViewportContainer" parent="."]
 anchor_right = 1.0
@@ -67,6 +73,9 @@ margin_right = 1575.0
 margin_bottom = 20.0
 hint_tooltip = "Toggle view of region names."
 text = "N"
+script = ExtResource( 11 )
+scenarioDataRes = ExtResource( 3 )
+mapContainerPath = NodePath("../../../ViewportContainer/Viewport/MapView")
 
 [node name="ArrowButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
 margin_left = 1579.0
