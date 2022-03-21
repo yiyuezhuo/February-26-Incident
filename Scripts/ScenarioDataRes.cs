@@ -18,7 +18,7 @@ public class Side : IContainer<HashSet<Region>, Region>
     public string name{get => data.name;}
     public string nameJap{get => data.nameJap;}
     public Color color{get => data.color;}
-    public Texture picture{get => picture;}
+    public Texture picture{get => data.picture;}
 
     public Side(SideTable.Data data)
     {
@@ -39,7 +39,7 @@ public class Leader : Child<Leader, Unit, List<Leader>>, LeaderPad.IData
 
     public string name {get => data.name;}
     public string nameJap{get => data.nameJap;}
-    public Texture portrait{get => data.portrait;}
+    public Texture portrait{get => data.portrait != null ? data.portrait : parent.side.picture;}
     public Rank rank;
     public float command{get => rank.command;}
 
