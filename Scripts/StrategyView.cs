@@ -145,7 +145,7 @@ public class StrategyView : Control
 		{
 			if(pad.unit.movingState.active)
 			{
-				pad.unit.GoForward();
+				pad.unit.Step();
 			}
 		}
 	}

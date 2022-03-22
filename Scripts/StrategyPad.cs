@@ -118,7 +118,8 @@ public class StrategyPad : TextureRect
 
     void SyncPortrait()
     {
-        Texture = unit.children[0].portrait;
+        // Texture = unit.children[0].portrait;
+        Texture = unit.portrait;
     }
 
     void OnMouseEnter()

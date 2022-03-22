@@ -177,8 +177,8 @@ public class MovingState
 
 public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData, UnitPad.IData
 {
-    public abstract string name{get;}
-    public abstract string nameJap{get;}
+    public virtual string name{get => "[name]";}
+    public virtual string nameJap{get => "[nameJap]";}
 
     public Side side;
     public float strength{get; set;}
@@ -228,9 +228,6 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     public void TransferTo(Unit dst, float strength, List<Leader> selectedLeaderList)
     {
         var src = this;
-		//var src = detachRequest.src;
-		// var selectedLeaderList = detachRequest.selectedLeaderList;
-		// var strength = detachRequest.strength;
 
 		foreach(var leader in selectedLeaderList)
 		{
@@ -251,7 +248,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 		}
     }
 
-    public void GoForward() => GoForward(moveSpeedPiexelPerMin);
+    public void Step() => GoForward(moveSpeedPiexelPerMin);
 
     public class MovePath
     {
@@ -283,10 +280,10 @@ public class UnitFromTable : Unit
 
 public class UnitProcedure : Unit
 {
-    public override string name{get => "";} // TODO: C# doesn't allow adding setter in child class???
+    // public override string name{get => "";} // TODO: C# doesn't allow adding setter in child class???
     // CC: https://stackoverflow.com/questions/82437/why-is-it-impossible-to-override-a-getter-only-property-and-add-a-setter
     // Since These properties are not needed at this time, 
-    public override string nameJap{get => "";}
+    // public override string nameJap{get => "";}
 
     public UnitProcedure(Side side, float strength, float fatigue)
     {
