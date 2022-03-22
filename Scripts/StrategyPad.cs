@@ -12,7 +12,7 @@ public class StrategyPad : TextureRect
 {
     [Export] PackedScene progressLongArrowScene;
 
-    public Node arrowContainer;
+    Node arrowContainer;
 
     ShaderMaterial material;
     SelectionState _selectionState = SelectionState.Unselected;
@@ -28,11 +28,11 @@ public class StrategyPad : TextureRect
 
     public Unit unit;
 
-    public event EventHandler unitClickEvent;
+    public event EventHandler clicked;
 
-    public MapKit.Widgets.ProgressLongArrow arrow;
+    MapKit.Widgets.ProgressLongArrow arrow;
 
-    public Control propogateTo;
+    Control propogateTo;
 
     public override void _Ready()
     {
@@ -42,41 +42,91 @@ public class StrategyPad : TextureRect
         Connect("mouse_exited", this, nameof(OnMouseExited));
     }
 
+    public override void _GuiInput(InputEvent @event) // unit selection toggle -> stack toggle
+    {
+        var clickEvent = @event as InputEventMouseButton;
+        if(clickEvent != null)
+        {
+            if(clickEvent.ButtonIndex == (int)ButtonList.Left && clickEvent.Pressed)
+            {
+                clicked?.Invoke(this, EventArgs.Empty);
+                return; // Disable Propogating for Left-clicking only.
+            }
+        }
+
+        propogateTo?._GuiInput(@event);
+    }
+
     public override string ToString() => $"StrategyPad({unit})";
 
     public void Setup(Unit unit, Node arrowContainer, Control propogateTo=null)
     {
         this.arrowContainer = arrowContainer;
-        RectPosition = unit.parent.center;
+        RectPosition = unit.center;
         this.unit = unit;
         SyncPortrait();
         this.propogateTo = propogateTo; // Hack Godot's broken Event propogation system.
 
         unit.movingState.updated += OnMovingStateUpdated;
-        // pad.unitClickEvent += OnUnitClick;
         unit.moveStateUpdated += OnUnitMoveEvent;
         unit.destroyed += OnUnitDestroyed;
-        unit.moveStateUpdated += OnUnitMoveEvent;
         unit.childrenUpdated += OnUnitChildrenUpdate;
     }
 
-    public void OnUnitChildrenUpdate(object sender, EventArgs _)
+    public enum SelectionState // The associated int value are passed as shader param.
+    {
+        Unselected = 0,
+        SoftSelected = 1, // A state between selected and unselected. Keep the arrow.
+        Selected = 2,
+    }
+
+    public void TrySetArrowAlpha()
+    {
+        if(arrow != null)
+        {
+            if(selectionState == SelectionState.SoftSelected)
+                arrow.SetAlpha(0.6f);
+            else
+                arrow.SetAlpha(1.0f);
+        }
+    }
+
+    public void TryForceDeselect()
+    {
+        if(selectionState != StrategyPad.SelectionState.Unselected)
+        {
+            selectionState = StrategyPad.SelectionState.Unselected;
+        }
+    }
+
+    public void TrySoftSelect()
+    {
+        if(selectionState == StrategyPad.SelectionState.Unselected)
+        {
+            selectionState = StrategyPad.SelectionState.SoftSelected;
+            TrySetArrowAlpha();
+        }
+    }
+
+    // Private methods
+
+    void OnUnitChildrenUpdate(object sender, EventArgs _)
     {
         if(unit.children.Count > 0)
             SyncPortrait();
     }
 
-    public void SyncPortrait()
+    void SyncPortrait()
     {
         Texture = unit.children[0].portrait;
     }
 
-    public void OnMouseEnter()
+    void OnMouseEnter()
     {
         material.SetShaderParam("hovering", true);
     }
 
-    public void OnMouseExited()
+    void OnMouseExited()
     {
         material.SetShaderParam("hovering", false);
     }
@@ -84,7 +134,7 @@ public class StrategyPad : TextureRect
     /// <summary>
     /// Update arrow related UI.
     /// </summary>
-    public void OnMovingStateUpdated(object sender, bool progressionOnlyUpdate)
+    void OnMovingStateUpdated(object sender, bool progressionOnlyUpdate)
     {
         var movingState = (MovingState)sender;
 
@@ -126,22 +176,7 @@ public class StrategyPad : TextureRect
     }
 
     
-    public override void _GuiInput(InputEvent @event) // unit selection toggle -> stack toggle
-    {
-        var clickEvent = @event as InputEventMouseButton;
-        if(clickEvent != null)
-        {
-            if(clickEvent.ButtonIndex == (int)ButtonList.Left && clickEvent.Pressed)
-            {
-                unitClickEvent?.Invoke(this, EventArgs.Empty);
-                return; // Disable Propogating for Left-clicking only.
-            }
-        }
-
-        propogateTo?._GuiInput(@event);
-    }
     
-
     /// <summary>
     /// Any effect other than event invoking.
     /// </summary>
@@ -160,46 +195,12 @@ public class StrategyPad : TextureRect
         }
     }
 
-    public void TrySetArrowAlpha()
-    {
-        if(arrow != null)
-        {
-            if(selectionState == SelectionState.SoftSelected)
-                arrow.SetAlpha(0.6f);
-            else
-                arrow.SetAlpha(1.0f);
-        }
-    }
-
-    public void OnUnitMoveEvent(object sender, Unit.MovePath movePath)
+    void OnUnitMoveEvent(object sender, Unit.MovePath movePath)
     {
         var regions = movePath.reachedRegions;
         RectPosition = regions[regions.Count-1].center;
     }
 
-    public enum SelectionState // The associated int value are passed as shader param.
-    {
-        Unselected = 0,
-        SoftSelected = 1, // A state between selected and unselected. Keep the arrow.
-        Selected = 2,
-    }
-
-    public void TryForceDeselect()
-    {
-        if(selectionState != StrategyPad.SelectionState.Unselected)
-        {
-            selectionState = StrategyPad.SelectionState.Unselected;
-        }
-    }
-
-    public void TrySoftSelect()
-    {
-        if(selectionState == StrategyPad.SelectionState.Unselected)
-        {
-            selectionState = StrategyPad.SelectionState.SoftSelected;
-            TrySetArrowAlpha();
-        }
-    }
 }
 
 

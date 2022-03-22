@@ -8,6 +8,68 @@ using System.Linq;
 using System;
 using Godot;
 
+public class DetachRequest
+{
+    public Unit src;
+    public List<Leader> selectedLeaderList;
+    public DetachRequest(Unit src, List<Leader> selectedLeaderList)
+    {
+        this.src = src;
+        this.selectedLeaderList = selectedLeaderList;
+    }
+
+    bool isFullDetach{get => src.children.Count == selectedLeaderList.Count;}
+    float? strengthSuggested;
+    public bool strengthDetermined{get =>  isFullDetach || strengthSuggested != null;}
+    public float strength
+    {
+        get => isFullDetach ? src.strength : strengthSuggested.Value;
+        set => strengthSuggested = value;
+    }
+}
+
+public class TransferRequest
+{
+    public DetachRequest detachRequest;
+    public Unit dst;
+
+    public TransferRequest(DetachRequest detachRequest, Unit dst)
+    {
+        this.detachRequest = detachRequest;
+        this.dst = dst;
+    }
+
+	public void Apply()
+	{
+        detachRequest.src.TransferTo(dst, detachRequest.strength, detachRequest.selectedLeaderList);
+	}
+
+}
+
+public class CreateRequest
+{
+    public DetachRequest detachRequest;
+    public Region dstArea;
+
+    public CreateRequest(DetachRequest detachRequest, Region dstArea)
+    {
+        this.detachRequest = detachRequest;
+        this.dstArea = dstArea;
+    }
+
+    public Unit Apply()
+    {
+		var src = detachRequest.src;
+
+		var unit = new UnitProcedure(src.side, 0, 0);
+		unit.EnterTo(src.parent);
+		var transferRequest = new TransferRequest(detachRequest, unit);
+		transferRequest.Apply();
+
+        return unit;
+    }
+}
+
 public class MovingState
 {
     public List<Region> path = new List<Region>(); // (Current, ..., Destination)
@@ -124,14 +186,15 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 
     public float command{get => children.Sum(leader => leader.command);}
     public Texture portrait{get => children[0].portrait;}
+    public Vector2 center{get => parent.center;}
 
     IEnumerable<LeaderPad.IData> UnitBar.IData.children{get => children;}
 
     // "Constants"
 
-    public float moveSpeedMPerMin = 25; // 25m/min -> 1.5km/h
-    public static float mPerPixel = 6; // 6m = 1 unit pixel distance
-    public float moveSpeedPiexelPerMin {get => moveSpeedMPerMin / mPerPixel;}
+    float moveSpeedMPerMin = 25; // 25m/min -> 1.5km/h
+    static float mPerPixel = 6; // 6m = 1 unit pixel distance
+    float moveSpeedPiexelPerMin {get => moveSpeedMPerMin / mPerPixel;}
 
     public MovingState movingState{get;} = new MovingState();
 
@@ -151,7 +214,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     /// <summary>
     /// return value denotes whether region is updated.
     /// </summary>
-    public void GoForward(float movement)
+    void GoForward(float movement)
     {
         var reachedRegions = movingState.GoForward(movement);
         if(reachedRegions.Count > 0)
@@ -160,6 +223,32 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
             MoveTo(reachedRegions[reachedRegions.Count - 1]);
             moveStateUpdated.Invoke(this, new MovePath(src, reachedRegions));
         }
+    }
+
+    public void TransferTo(Unit dst, float strength, List<Leader> selectedLeaderList)
+    {
+        var src = this;
+		//var src = detachRequest.src;
+		// var selectedLeaderList = detachRequest.selectedLeaderList;
+		// var strength = detachRequest.strength;
+
+		foreach(var leader in selectedLeaderList)
+		{
+			leader.MoveTo(dst);
+		}
+		
+		var dn = dst.strength + dst.children.Count;
+		var sn = strength + selectedLeaderList.Count;
+		dst.fatigue = ((dn * dst.fatigue) + (sn * src.fatigue)) / (dn + sn);
+		
+		dst.strength += strength;
+		src.strength -= strength;
+
+		var isFullCombining = src.children.Count == 0 && src.strength == 0;
+		if(isFullCombining)
+		{
+			src.Destroy();
+		}
     }
 
     public void GoForward() => GoForward(moveSpeedPiexelPerMin);
@@ -190,7 +279,6 @@ public class UnitFromTable : Unit
         this.data  = data;
         this.strength = data.strength;
     }
-
 }
 
 public class UnitProcedure : Unit

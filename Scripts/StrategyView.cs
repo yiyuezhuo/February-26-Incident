@@ -88,7 +88,7 @@ public class StrategyView : Control
 		var pad = mapImageScene.Instance<StrategyPad>();
 		pad.Setup(unit, arrowContainer, this);
 
-		pad.unitClickEvent += OnUnitClick;
+		pad.clicked += OnUnitClick;
 
 		padMap[unit] = pad;
 		unit.destroyed += OnUnitDestroyed;
@@ -176,19 +176,13 @@ public class StrategyView : Control
 
 	void CreateUnit(CreateRequest createRequest)
 	{
-		var src = createRequest.detachRequest.src;
-
-		var unit = new UnitProcedure(src.side, 0, 0);
-		unit.EnterTo(src.parent);
-		var transferRequest = new TransferRequest(createRequest.detachRequest, unit);
-		TransferPower(transferRequest);
+		var unit = createRequest.Apply();
 
 		CreateStrategyPad(unit);
 		scenarioData.RegisterUnit(unit); // TODO: Factory hooker refactor?
 
 		PointUnitTo(unit, createRequest.dstArea);
 		SelectPad(padMap[unit]);
-
 	}
 
 	void OnAreaRightClick(object sender, Region area)
@@ -294,50 +288,6 @@ public class StrategyView : Control
 		SetStackUnitFocus(pad.unit);
 	}
 
-	class DetachRequest
-	{
-		public Unit src;
-		public List<Leader> selectedLeaderList;
-		public DetachRequest(Unit src, List<Leader> selectedLeaderList)
-		{
-			this.src = src;
-			this.selectedLeaderList = selectedLeaderList;
-		}
-
-		bool isFullDetach{get => src.children.Count == selectedLeaderList.Count;}
-		float? strengthSuggested;
-		public bool strengthDetermined{get =>  isFullDetach || strengthSuggested != null;}
-		public float strength
-		{
-			get => isFullDetach ? src.strength : strengthSuggested.Value;
-			set => strengthSuggested = value;
-		}
-	}
-
-	class TransferRequest
-	{
-		public DetachRequest detachRequest;
-		public Unit dst;
-
-		public TransferRequest(DetachRequest detachRequest, Unit dst)
-		{
-			this.detachRequest = detachRequest;
-			this.dst = dst;
-		}
-	}
-
-	class CreateRequest
-	{
-		public DetachRequest detachRequest;
-		public Region dstArea;
-
-		public CreateRequest(DetachRequest detachRequest, Region dstArea)
-		{
-			this.detachRequest = detachRequest;
-			this.dstArea = dstArea;
-		}
-	}
-
 	DetachRequest GetDetachRequest()
 	{
 		var srcUnit = selectedPad.unit;
@@ -398,28 +348,10 @@ public class StrategyView : Control
 
 	void TransferPower(TransferRequest request)
 	{
+		request.Apply();
+
 		var src = request.detachRequest.src;
-		var selectedLeaderList = request.detachRequest.selectedLeaderList;
-		var strength = request.detachRequest.strength;
 		var dst = request.dst;
-
-		foreach(var leader in selectedLeaderList)
-		{
-			leader.MoveTo(dst);
-		}
-		
-		var dn = dst.strength + dst.children.Count;
-		var sn = strength + selectedLeaderList.Count;
-		dst.fatigue = ((dn * dst.fatigue) + (sn * src.fatigue)) / (dn + sn);
-		
-		dst.strength += strength;
-		src.strength -= strength;
-
-		var isFullCombining = src.children.Count == 0 && src.strength == 0;
-		if(isFullCombining)
-		{
-			src.Destroy();
-		}
 
 		stackBar.SetData(dst.parent);
 		if(src.isDestroying)
