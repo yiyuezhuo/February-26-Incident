@@ -175,6 +175,10 @@ public class MovingState
     public Region destination{get => path[path.Count-1];}
 }
 
+/// <summary>
+/// Unit is designed to be a complex but "configurable" object, just like ParticleMaterial. So for behavior branching, we favor states and tags over inheriatance and interfaces.
+/// BTW, thanks to the fact that I can't see a simple way to refactor this at this time...
+/// </summary>
 public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData, UnitPad.IData
 {
     public virtual string name{get => "[name]";}
@@ -290,6 +294,18 @@ public class UnitProcedure : Unit
         this.side = side;
         this.strength = strength;
         this.fatigue = fatigue;
+    }
+}
+
+/// <summary>
+/// UnitFromObjective uses a normal Region as parent but a dummy leader as child.
+/// </summary>
+public class UnitFromObjective: Unit
+{
+    public UnitFromObjective(ObjectiveTable.Data data)
+    {
+        var dummyLeader = new LeaderProcedure(data.name, data.nameJap, data.picture, 1);
+        dummyLeader.EnterTo(this);
     }
 }
 

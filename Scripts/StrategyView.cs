@@ -182,6 +182,8 @@ public class StrategyView : Control
 		scenarioData.RegisterUnit(unit); // TODO: Factory hooker refactor?
 
 		PointUnitTo(unit, createRequest.dstArea);
+
+		stackBar.SetData(unit.parent);
 		SelectPad(padMap[unit]);
 	}
 

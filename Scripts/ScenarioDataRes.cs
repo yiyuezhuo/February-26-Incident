@@ -33,17 +33,31 @@ public class Side : IContainer<HashSet<Region>, Region>
 }
 
 
-public class Leader : Child<Leader, Unit, List<Leader>>, LeaderPad.IData
+public abstract class Leader : Child<Leader, Unit, List<Leader>>, LeaderPad.IData
 {
     LeaderTable.Data data;
 
-    public string name {get => data.name;}
-    public string nameJap{get => data.nameJap;}
-    public Texture portrait{get => data.portrait != null ? data.portrait : parent.side.picture;}
-    public Rank rank;
-    public float command{get => rank.command;}
+    public abstract string name {get;}
+    public abstract string nameJap{get;}
+    public abstract Texture portrait{get;}
+    public abstract float command{get;}
 
-    public Leader(LeaderTable.Data data)
+    // public override string ToString() => $"Leader({name}, {nameJap}, {parent})";
+    public override string ToString() => $"Leader({name}, {nameJap})";
+}
+
+public class LeaderFromTable: Leader
+{
+    LeaderTable.Data data;
+
+    public override string name {get => data.name;}
+    public override string nameJap{get => data.nameJap;}
+    public override Texture portrait{get => data.portrait != null ? data.portrait : parent.side.picture;}
+    public override float command{get => rank.command;}
+
+    Rank rank;
+
+    public LeaderFromTable(LeaderTable.Data data)
     {
         this.data = data;
         switch(data.rank)
@@ -62,10 +76,6 @@ public class Leader : Child<Leader, Unit, List<Leader>>, LeaderPad.IData
                 break;
         }
     }
-
-    // public Unit parent;
-    // public override string ToString() => $"Leader({name}, {nameJap}, {parent})";
-    public override string ToString() => $"Leader({name}, {nameJap})";
 
     public abstract class Rank
     {
@@ -93,6 +103,28 @@ public class Leader : Child<Leader, Unit, List<Leader>>, LeaderPad.IData
     public class Officer : Rank
     {
         public override float command{get => 10;}
+    }
+
+}
+
+public class LeaderProcedure: Leader
+{
+    string _name;
+    string _nameJap;
+    Texture _portrait;
+    float _command;
+
+    public override string name {get => _name;}
+    public override string nameJap{get => _nameJap;}
+    public override Texture portrait{get => _portrait;}
+    public override float command{get => _command;}
+
+    public LeaderProcedure(string name, string nameJap, Texture portrait, float command)
+    {
+        _name = name;
+        _nameJap = nameJap;
+        _portrait = portrait;
+        _command = command;
     }
 }
 
@@ -226,7 +258,7 @@ public class ScenarioData
         var leaderDataToLeader = new Dictionary<LeaderTable.Data, Leader>();
         foreach(var leaderData in leaderTable.Values)
         {
-            var leader = new Leader(leaderData);
+            var leader = new LeaderFromTable(leaderData);
             leaders.Add(leader);
             leaderDataToLeader[leaderData] = leader;
             // EnterTo is delegated to assignment
@@ -244,6 +276,19 @@ public class ScenarioData
             if(region.children.Count > 0) // All "units" belong to Rebel at this time.
             {
                 region.MoveTo(rebelSide);
+            }
+        }
+
+        // Objective "units"
+        foreach(var objectiveData in objectiveTable.Values)
+        {
+            // Skip off-map objectives
+            if(objectiveData.area != null)
+            {
+                var unit = new UnitFromObjective(objectiveData);
+                RegisterUnit(unit);
+                unit.side = govSide;
+                unit.EnterTo(areaToRegion[objectiveData.area]);
             }
         }
     }
