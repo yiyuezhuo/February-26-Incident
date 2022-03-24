@@ -8,6 +8,7 @@ using System.Linq;
 using System;
 using Godot;
 using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Statistics;
 
 
 public class DetachRequest
@@ -196,6 +197,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     public Vector2 center{get => parent.center;}
 
     IEnumerable<LeaderPad.IData> UnitBar.IData.children{get => children;}
+    Texture UnitPad.IData.flagTex{get => side.picture;}
 
     // "Constants"
 
@@ -321,6 +323,15 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
         {
             var firepowerOnStrength = firepower * w[children.Count];
             var killed = Sample(strength, (float)firepowerOnStrength, killFactor, killVolative);
+
+            /*
+            // Test randomness
+            var samples = new float[1000];
+            for(int i=0; i<1000; i++)
+                samples[i] = Sample(strength, (float)firepowerOnStrength, killFactor, killVolative);
+            GD.Print($"draw={killed}, mean={Statistics.Mean(samples)}, std={Statistics.StandardDeviation(samples)}");
+            */
+
             strength -= killed;
         }
     }
