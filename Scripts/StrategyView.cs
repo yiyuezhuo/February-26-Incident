@@ -71,9 +71,7 @@ public class StrategyView : Control
 		// Non-binding setup
 
 		foreach(var unit in scenarioData.units)
-		{
 			CreateStrategyPad(unit);
-		}
 
 		foreach(var region in scenarioData.regions)
 		{
@@ -94,8 +92,8 @@ public class StrategyView : Control
 		{
 			selectedPad.unit.TakeDirectFire(100f);
 
-			stackBar.SetData(selectedPad.unit.parent);
-			unitBar.SetData(selectedPad.unit);
+			stackBar.SetData(selectedPad?.unit.parent);
+			unitBar.SetData(selectedPad?.unit);
 		}
 	}
 
@@ -118,6 +116,12 @@ public class StrategyView : Control
 
 	void OnUnitDestroyed(object sender, Unit unit)
 	{
+		if(padMap[unit].Equals(selectedPad))
+		{
+			selectedPad = null;
+			stackBar.SetData(null);
+			unitBar.SetData(null);
+		}
 		padMap.Remove(unit);
 	}
 
@@ -161,12 +165,11 @@ public class StrategyView : Control
 	void SimulationStep() // 1 min -> 1 call
 	{
 		foreach(var pad in padMap.Values)
-		{
-			if(pad.unit.movingState.active)
-			{
-				pad.unit.Step();
-			}
-		}
+			pad.unit.StepPre();
+		foreach(var pad in padMap.Values)
+			pad.unit.Step();
+		foreach(var pad in padMap.Values.ToList())
+			pad.unit.StepPost();
 	}
 
 	void OnAreaClick(object sender, Region area)

@@ -203,7 +203,8 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
     public string PathToString(List<IndexT> path)
     {
         string s = "";
-        foreach(IndexT p in path){
+        foreach(IndexT p in path)
+        {
             s += p.ToString() + ","; // TODO: Use `Join` or `StringBuilder`
         }
         return $"Path({path.Count}):{s}";

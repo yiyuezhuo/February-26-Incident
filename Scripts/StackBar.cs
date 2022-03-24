@@ -29,6 +29,9 @@ public class StackBar : Node
     {
         ClearChildren();
         
+        if(data is null)
+            return;
+        
         foreach(var unitPadData in data.children)
         {
             var unitPad = unitPadPackedScene.Instance<UnitPad>();

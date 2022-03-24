@@ -42,7 +42,6 @@ public class DataValidator : Node
         };
         
         foreach(var table in tables)
-
         {
             // var verbose = table == tables[tables.Length - 1];
             // var verbose = true;
@@ -64,29 +63,19 @@ public class DataValidator : Node
         // Full verbose
         
         foreach(var containers in new IEnumerable< IContainerWeak<IEnumerable<object>, object> >[]{scenarioData.sides, scenarioData.regions, scenarioData.units})
-        { 
             foreach(var container in containers)
-            {
                 foreach (var el in container.children)
-                {
                     GD.Print($"{container} ∋ {el}");
-                }
-            }
-        }
     }
 
     public void Inspect<TK, TV>(Dictionary<TV, TK> dict, bool verbose)
     {
         GD.Print($"{dict.GetType().Name}: Count -> {dict.Count}");
         if(verbose)
-        {
             // GD.Print($"this={this}");
             foreach(var KV in dict)
-            {
                 // GD.Print($"KV={KV}");
                 GD.Print($"{KV.Key} => {KV.Value}");
-            }
-        }
     }
 }
 
