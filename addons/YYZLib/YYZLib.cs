@@ -80,5 +80,21 @@ namespace YYZ
         }
     }
 
-    
+    public static class Random
+    {
+        static System.Random random;
+        public static System.Random GetRandom()
+        {
+            if(random == null)
+                random = new System.Random();
+
+            return random;
+        }
+
+        public static float NextFloat()
+        {
+            var rnd = GetRandom();
+            return (float)rnd.NextDouble();
+        }
+    }
 }

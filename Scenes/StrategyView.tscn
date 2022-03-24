@@ -23,6 +23,7 @@ timePlayerPath = NodePath("TimePlayer")
 unitBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/UnitBar")
 stackBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/StackBar")
 arrowButtonPath = NodePath("BottomContainer/ViewToggleContainer/ArrowButton")
+artilleryFireButtonPath = NodePath("BottomContainer/ViewToggleContainer/ArtilleryFireButton")
 strengthDetachDialogPath = NodePath("StrengthDetachDialog")
 mapImageScene = ExtResource( 5 )
 
@@ -68,8 +69,8 @@ margin_bottom = 20.0
 alignment = 2
 
 [node name="NameViewButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
-margin_left = 1553.0
-margin_right = 1575.0
+margin_left = 1530.0
+margin_right = 1552.0
 margin_bottom = 20.0
 hint_tooltip = "Toggle view of region names."
 text = "N"
@@ -78,11 +79,18 @@ scenarioDataRes = ExtResource( 3 )
 mapContainerPath = NodePath("../../../ViewportContainer/Viewport/MapView")
 
 [node name="ArrowButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
-margin_left = 1579.0
-margin_right = 1600.0
+margin_left = 1556.0
+margin_right = 1577.0
 margin_bottom = 20.0
 hint_tooltip = "Show all arrows (soft select all units)."
 text = "A"
+
+[node name="ArtilleryFireButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
+margin_left = 1581.0
+margin_right = 1600.0
+margin_bottom = 20.0
+hint_tooltip = "[DEBUG only] Artillery fire on selected unit."
+text = "F"
 
 [node name="PageBackground" parent="BottomContainer" instance=ExtResource( 8 )]
 margin_top = 24.0
@@ -98,7 +106,7 @@ margin_right = 130.0
 
 [node name="UnitBar" parent="BottomContainer/PageBackground/HBoxContainer" instance=ExtResource( 7 )]
 margin_left = 134.0
-margin_right = 375.0
+margin_right = 392.0
 
 [node name="StrengthDetachDialog" parent="." instance=ExtResource( 10 )]
 anchor_left = 0.5

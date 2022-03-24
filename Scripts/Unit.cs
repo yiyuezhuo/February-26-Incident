@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using Godot;
+using MathNet.Numerics.Distributions;
+
 
 public class DetachRequest
 {
@@ -187,6 +189,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     public Side side;
     public float strength{get; set;}
     public float fatigue{get; set;}
+    public float suppression{get; set;}
 
     public float command{get => children.Sum(leader => leader.command);}
     public Texture portrait{get => children[0].portrait;}
@@ -252,6 +255,76 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 		}
     }
 
+    float strengthWithLeaders{get => strength + children.Count;}
+    float commandEfficiency{get => Mathf.Min(command / strengthWithLeaders, 2);}
+
+    float GetCasualtiesModifer()
+    {
+        var fatigueModifer = fatigue * 2f + 1.0f; // 100% -> 300%
+        var suppressionModifer = suppression * 0.2f + 1.0f; // 100% -> 120%
+        var commandModifer = commandEfficiency < 1.0f ? commandEfficiency * -0.1f + 1.1f : (commandEfficiency - 1f) * -0.05f; // 110% -> 100% -> 95%
+        return fatigueModifer * suppressionModifer * commandModifer;
+    }
+
+    float GetFireEfficiencyModifer()
+    {
+        var fatigueModifer = fatigue * -1f + 1f; // 100% -> 0%
+        var suppressionModifier = suppression * -0.7f + 1f; // 100% -> 30%
+        var commandModifer = commandEfficiency < 1f ? commandEfficiency * 0.3f + 0.7f : (commandEfficiency - 1f) * 0.1f; // 70% -> 100% -> 110%
+        return fatigueModifer * suppressionModifier * commandModifer;
+    }
+
+    static float killFactor = 0.001f;
+    static float killVolative = 0.001f;
+    static float suppressionFactor = 0.2f;
+    static float suppressionVolative = 0.02f;
+    static float fatigueFactor = 0.05f;
+    static float fatigueVolative = 0.02f;
+
+    float Sample(float upper, float firepower, float factor, float volative)
+    {
+        return (float)(new TruncatedNormal(YYZ.Random.GetRandom(), 0, upper, firepower * factor, firepower * volative)).Sample();
+    }
+
+    public void TakeDirectFire(float firepower)
+    {
+        // TODO: use correlated sample rather than following indepent sampling.
+        // var killRaw = Sample(strengthWithLeaders, firepower, killFactor, killVolative);
+        var suppressionDelta = Sample(strengthWithLeaders, firepower, suppressionFactor, suppressionVolative);
+        var fatigueDelta = Sample(strengthWithLeaders, firepower, fatigueFactor, fatigueVolative);
+
+        suppression = Mathf.Min(suppression + suppressionDelta / strengthWithLeaders, 1f);
+        fatigue = Mathf.Min(fatigue + fatigueDelta / strengthWithLeaders, 1f);
+
+        var alpha = strength > 0 ? new double[children.Count + 1] : new double[children.Count];
+
+        for(int i=0; i<children.Count; i++) // TODO: refactor strength > 0 branch
+            alpha[i] = 1;
+
+        if(strength > 0)
+            alpha[children.Count] = strength;
+
+        var diriDist = new Dirichlet(alpha);
+        var w = diriDist.Sample();
+        var expDist = new Exponential(2); // rate = 2
+        for(var i=0; i<children.Count; i++)
+        {
+            var fortune = expDist.Sample();
+            var firepowerInflicted = firepower * w[i];
+            if(fortune < firepowerInflicted * killFactor)
+            {
+                GD.Print($"{children[i]} is killed"); // true leader kill will be implemented later.
+            }
+        }
+
+        if(strength > 0)
+        {
+            var firepowerOnStrength = firepower * w[children.Count];
+            var killed = Sample(strength, (float)firepowerOnStrength, killFactor, killVolative);
+            strength -= killed;
+        }
+    }
+
     public void Step() => GoForward(moveSpeedPiexelPerMin);
 
     public class MovePath
@@ -294,6 +367,8 @@ public class UnitProcedure : Unit
         this.side = side;
         this.strength = strength;
         this.fatigue = fatigue;
+
+        // suppression = 0;
     }
 }
 
@@ -306,6 +381,16 @@ public class UnitFromObjective: Unit
     {
         var dummyLeader = new LeaderProcedure(data.name, data.nameJap, data.picture, 1);
         dummyLeader.EnterTo(this);
+
+        if(data.isBuilding) // TODO: We may define a strength field in NotionData.
+        {
+            // strength
+            strength = YYZ.Random.NextFloat() * 30;
+        }
+        else
+        {
+            strength = YYZ.Random.NextFloat() * 10;
+        }
     }
 }
 

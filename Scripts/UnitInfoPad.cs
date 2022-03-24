@@ -11,15 +11,18 @@ public class UnitInfoPad : Control
     [Export] NodePath strengthLabelPath;
     [Export] NodePath commandLabelPath;
     [Export] NodePath fatigueLabelPath;
+    [Export] NodePath suppressionLabelPath;
     Label strengthLabel;
     Label commandlabel;
     Label fatigueLabel;
+    Label suppressionLabel;
 
     public override void _Ready()
     {
         strengthLabel = (Label)GetNode(strengthLabelPath);
         commandlabel = (Label)GetNode(commandLabelPath);
         fatigueLabel = (Label)GetNode(fatigueLabelPath);
+        suppressionLabel = (Label)GetNode(suppressionLabelPath);
 
         SetData(null); // Clear dummy data for editor preview.
     }
@@ -32,6 +35,7 @@ public class UnitInfoPad : Control
         strengthLabel.Text = data is null ? "" : "Strength: " + data.strength.ToString("N0");
         commandlabel.Text = data is null ? "" : "Command: " + data.command.ToString("N0");
         fatigueLabel.Text = data is null ? "" : "Fatigue:" + data.fatigue.ToString("P");
+        suppressionLabel.Text = data is null ? "" : "Suppression:" + data.suppression.ToString("P");
     }
 
     public interface IData
@@ -39,6 +43,7 @@ public class UnitInfoPad : Control
         float strength{get;}
         float command{get;}
         float fatigue{get;}
+        float suppression{get;}
     }
 }
 

@@ -194,6 +194,7 @@ public class ObjectiveTable : DataTable<ObjectiveTable.Item, ObjectiveTable.Data
         public string Picture{get; set;}
         public string Area{get; set;}
         public string ID{get; set;}
+        public string Tags{get; set;}
     }
 
     public class Data : IData
@@ -206,6 +207,7 @@ public class ObjectiveTable : DataTable<ObjectiveTable.Item, ObjectiveTable.Data
         public Texture picture;
         public AreaTable.Data area; // This kind of value will be "linked" after initialization (include `Setup`).
         public string areaId;
+        public bool isBuilding;
 
         public void Setup(Item item, string root)
         {
@@ -215,6 +217,7 @@ public class ObjectiveTable : DataTable<ObjectiveTable.Item, ObjectiveTable.Data
             id = UrlToId(item.ID);
             areaId = UrlToId(item.Area);
             // `area` will be linked in later phase.
+            isBuilding = item.Tags.Contains("Building");
         }
 
         public override string ToString() => $"Objective({name}, {nameJap})";

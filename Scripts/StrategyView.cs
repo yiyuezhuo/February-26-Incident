@@ -14,6 +14,7 @@ public class StrategyView : Control
 	[Export] NodePath unitBarPath;
 	[Export] NodePath stackBarPath;
 	[Export] NodePath arrowButtonPath;
+	[Export] NodePath artilleryFireButtonPath;
 	[Export] NodePath strengthDetachDialogPath;
 	
 	[Export] PackedScene mapImageScene;
@@ -25,6 +26,7 @@ public class StrategyView : Control
 	UnitBar unitBar;
 	StackBar stackBar;
 	StrengthDetachDialog strengthDetachDialog;
+	// Button artilleryFireButton;
 
 	// States
 
@@ -44,6 +46,7 @@ public class StrategyView : Control
 		unitBar = (UnitBar)GetNode(unitBarPath);
 		stackBar = (StackBar)GetNode(stackBarPath);
 		strengthDetachDialog = (StrengthDetachDialog)GetNode(strengthDetachDialogPath);
+		
 
 		timePlayer.simulationEvent += SimulationHandler;
 		mapShower = (MapShower)mapView.GetMapShower();
@@ -55,6 +58,9 @@ public class StrategyView : Control
 
 		var arrowButton = (Button)GetNode(arrowButtonPath);
 		arrowButton.Connect("pressed", this, nameof(SoftSelectAllPads));
+
+		var artilleryFireButton = (Button)GetNode(artilleryFireButtonPath);
+		artilleryFireButton.Connect("pressed", this, nameof(OnArtilleryButtonPressed));
 
 		arrowContainer = new Node();
 		mapView.AddChild(arrowContainer);
@@ -78,6 +84,19 @@ public class StrategyView : Control
 				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
 		}
 		mapShower.Flush();
+	}
+
+	void OnArtilleryButtonPressed()
+	{
+		GD.Print("OnArtilleryButtonPressed");
+		// Call a "instant" fire on selected unit.
+		if(selectedPad != null)
+		{
+			selectedPad.unit.TakeDirectFire(100f);
+
+			stackBar.SetData(selectedPad.unit.parent);
+			unitBar.SetData(selectedPad.unit);
+		}
 	}
 
 	/// <summary>
@@ -190,7 +209,7 @@ public class StrategyView : Control
 	void OnAreaRightClick(object sender, Region area)
 	{
 		GD.Print($"StrategyView.OnAreaRightClick {area}");
-		if(selectedPad != null)
+		if(selectedPad != null && selectedPad.unit.side.Equals(scenarioData.rebelSide)) // We may disable rebelSize check for debugging purpose.
 		{
 			var unit = TryDetachTo(area);
 			if(unit != null)
