@@ -37,6 +37,20 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     {
         childrenUpdated?.Invoke(this, this);
     }
+
+    HashSet<Unit> overlapSet = new HashSet<Unit>();
+
+    public void StepPre()
+    {
+        overlapSet.Clear();
+    }
+
+    public void AddOverlap(Unit unit)
+    {
+        overlapSet.Add(unit);
+    }
+
+    public IEnumerable<Unit> GetOverlap() => overlapSet;
 }
 
 

@@ -159,17 +159,21 @@ public class StrategyView : Control
 	{
 		for(var i=0; i<n; i++)
 			SimulationStep();
+		
 		mapShower.Flush(); // GoForward may trigger some handlers to call areaInfo, so we flush at every
+		
 	}
 
 	void SimulationStep() // 1 min -> 1 call
 	{
-		foreach(var pad in padMap.Values)
-			pad.unit.StepPre();
-		foreach(var pad in padMap.Values)
-			pad.unit.Step();
-		foreach(var pad in padMap.Values.ToList())
-			pad.unit.StepPost();
+		foreach(var region in scenarioData.regions)
+			region.StepPre();
+		foreach(var unit in scenarioData.units)
+			unit.StepPre();
+		foreach(var unit in scenarioData.units)
+			unit.Step();
+		foreach(var unit in scenarioData.units.ToList())
+			unit.StepPost();
 	}
 
 	void OnAreaClick(object sender, Region area)

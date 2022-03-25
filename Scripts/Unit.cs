@@ -216,6 +216,8 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 
     public List<Leader> children{get; set;} = new List<Leader>();
 
+    bool isFiredLastStep;
+
     // public override string ToString() => $"Unit({name}, {nameJap}, {children.Count}, {parent})";
     public override string ToString() => $"Unit({name}, {nameJap}, {children.Count})";
 
@@ -364,14 +366,29 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 
     public void StepPre()
     {
+        parent.AddOverlap(this);
+        if(movingState.active)
+            movingState.nextRegion.AddOverlap(this);
+
         totalTakenFire = 0;
+
+        if(!isFiredLastStep)
+            if(!movingState.active)
+                fatigue = Mathf.Max(fatigue - 0.01f, 0);
+            else
+                fatigue = Mathf.Min(fatigue + 0.001f, 1f);
+        else
+            fatigue = Mathf.Min(fatigue + 0.005f, 1f);
+            
+        // suppression *= 0.5f;
+        suppression = Mathf.Max(suppression - 0.1f, 0f);
     }
 
     public void Step()
     {
         if(movingState.active)
             GoForward(moveSpeedPiexelPerMin); // TODO: engage decrease movement speed.
-        UpdateFireTargetMap();
+        DistributeFirepower();
     }
 
     public void StepPost()
@@ -381,25 +398,39 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     
     static float fireAlpha = 1f;
 
-    public void UpdateFireTargetMap()
+    public void DistributeFirepower()
     {
         var overlapRegions = new List<Region>(){parent};
         if(movingState.active)
             overlapRegions.Add(movingState.nextRegion);
 
-        var units = new List<Unit>();
-        var weights = new List<float>();
+        var unitsSet = new HashSet<Unit>();
+
         foreach(var region in overlapRegions)
-            foreach(var unit in region.children)
+            foreach(var unit in region.GetOverlap())
                 if(!unit.side.Equals(side))
-                {
-                    units.Add(unit);
-                    weights.Add(unit.strengthWithLeaders);
-                }
+                    unitsSet.Add(unit);
+
+        var units = unitsSet.ToList();
+        var weights = (from unit in units select unit.strengthWithLeaders).ToList();
+
+        /*
+        if(parent.areaData != null && parent.areaData.name.Contains("Prime"))
+            GD.Print("pause");
+        */
+        /*
+        if(name.Contains("Makino Nobuaki Assassin Group"))
+            GD.Print("pause");
+        */
         
         if(units.Count == 0)
+        {
+            isFiredLastStep = false;
             return;
-        
+        }
+
+        isFiredLastStep = true;
+
         var cons = weights.Sum() / fireAlpha;
         var alpha = weights.Select(s => (double)(s / cons)).ToArray<double>();
         var dist = new Dirichlet(alpha);
