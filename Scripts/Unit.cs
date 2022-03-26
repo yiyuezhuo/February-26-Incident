@@ -268,7 +268,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 
     float GetCasualtiesModifer()
     {
-        var fatigueModifer = fatigue * 2f + 1.0f; // 100% -> 300%
+        var fatigueModifer = fatigue * 4f + 1.0f; // 100% -> 500%
         var suppressionModifer = suppression * 0.2f + 1.0f; // 100% -> 120%
         var commandModifer = commandEfficiency < 1.0f ? commandEfficiency * -0.1f + 1.1f : (commandEfficiency - 1f) * -0.05f + 1f; // 110% -> 100% -> 95%
         return fatigueModifer * suppressionModifer * commandModifer;
@@ -276,17 +276,17 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 
     float GetFireEfficiencyModifer()
     {
-        var fatigueModifer = fatigue * -1f + 1f; // 100% -> 0%
-        var suppressionModifier = suppression * -0.7f + 1f; // 100% -> 30%
+        var fatigueModifer = fatigue * -0.5f + 1f; // 100% -> 50%
+        var suppressionModifier = suppression * -0.5f + 1f; // 100% -> 50%
         var commandModifer = commandEfficiency < 1f ? commandEfficiency * 0.3f + 0.7f : (commandEfficiency - 1f) * 0.1f + 1f; // 70% -> 100% -> 110%
         return fatigueModifer * suppressionModifier * commandModifer;
     }
 
-    static float killFactor = 0.001f;
-    static float killVolative = 0.001f;
+    static float killFactor = 0.0015f;
+    static float killVolative = 0.0045f;
     static float suppressionFactor = 0.2f;
     static float suppressionVolative = 0.02f;
-    static float fatigueFactor = 0.05f;
+    static float fatigueFactor = 0.02f;
     static float fatigueVolative = 0.02f;
 
     float Sample(float upper, float firepower, float factor, float volative)
@@ -378,7 +378,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
             else
                 fatigue = Mathf.Min(fatigue + 0.001f, 1f);
         else
-            fatigue = Mathf.Min(fatigue + 0.005f, 1f);
+            fatigue = Mathf.Min(fatigue + 0.0001f, 1f); // 
             
         // suppression *= 0.5f;
         suppression = Mathf.Max(suppression - 0.1f, 0f);

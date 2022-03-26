@@ -116,11 +116,18 @@ public class StrategyView : Control
 
 	void OnUnitDestroyed(object sender, Unit unit)
 	{
-		if(padMap[unit].Equals(selectedPad))
+		if(selectedPad != null)
 		{
-			selectedPad = null;
-			stackBar.SetData(null);
-			unitBar.SetData(null);
+			if(unit.Equals(selectedPad.unit))
+			{
+				selectedPad = null;
+				stackBar.SetData(null);
+				unitBar.SetData(null);
+			}
+			else if(selectedPad.unit.parent.Equals(unit.parent))
+			{
+				// stackBar.SetData(unit.parent)
+			}
 		}
 		padMap.Remove(unit);
 	}
@@ -161,7 +168,9 @@ public class StrategyView : Control
 			SimulationStep();
 		
 		mapShower.Flush(); // GoForward may trigger some handlers to call areaInfo, so we flush at every
-		
+
+		stackBar.SetData(selectedPad?.unit.parent);
+		unitBar.SetData(selectedPad?.unit);
 	}
 
 	void SimulationStep() // 1 min -> 1 call
@@ -381,7 +390,7 @@ public class StrategyView : Control
 		var src = request.detachRequest.src;
 		var dst = request.dst;
 
-		stackBar.SetData(dst.parent);
+		stackBar.SetData(dst.parent); // force update.
 		if(src.isDestroying)
 			SelectPad(padMap[dst]);
 		else

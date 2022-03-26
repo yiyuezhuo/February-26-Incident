@@ -14,6 +14,8 @@ public class StackBar : Node
     List<UnitPad> unitPadList = new List<UnitPad>();
     UnitPad focusing;
 
+    IData data;
+
     public EventHandler<int> clicked;
     public EventHandler<int> rightClicked;
 
@@ -23,6 +25,11 @@ public class StackBar : Node
 
         foreach(Node node in unitPadContainer.GetChildren())
             node.QueueFree();
+    }
+
+    public void Update()
+    {
+        
     }
 
     public void SetData(IData data)
