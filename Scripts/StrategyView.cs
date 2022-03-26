@@ -126,7 +126,7 @@ public class StrategyView : Control
 			}
 			else if(selectedPad.unit.parent.Equals(unit.parent))
 			{
-				// stackBar.SetData(unit.parent)
+				stackBar.SetData(unit.parent);
 			}
 		}
 		padMap.Remove(unit);
