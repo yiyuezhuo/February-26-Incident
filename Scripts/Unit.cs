@@ -197,8 +197,6 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     public Texture portrait{get => children[0].portrait;}
     public Vector2 center{get => parent.center;}
 
-    public float totalTakenFire;
-
     IEnumerable<LeaderPad.IData> UnitBar.IData.children{get => children;}
     Texture UnitPad.IData.flagTex{get => side.picture;}
 
@@ -210,13 +208,21 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 
     public MovingState movingState{get;} = new MovingState();
     // public Dictionary<Unit, float> fireTargetMap = new Dictionary<Unit, float>();
+    CombatAgent _agent;
+    public CombatAgent agent
+    {
+        get
+        {
+            if(_agent == null)
+                _agent = new CombatAgent(this);
+            return _agent;
+        }
+    }
 
     public event EventHandler<MovePath> moveStateUpdated;
     public event EventHandler childrenUpdated;
 
     public List<Leader> children{get; set;} = new List<Leader>();
-
-    bool isFiredLastStep;
 
     // public override string ToString() => $"Unit({name}, {nameJap}, {children.Count}, {parent})";
     public override string ToString() => $"Unit({name}, {nameJap}, {children.Count})";
@@ -263,106 +269,8 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 		}
     }
 
-    float strengthWithLeaders{get => strength + children.Count;}
+    public float strengthWithLeaders{get => strength + children.Count;}
     float commandEfficiency{get => Mathf.Min(command / strengthWithLeaders, 2);}
-
-    float GetCasualtiesModifer()
-    {
-        var fatigueModifer = fatigue * 4f + 1.0f; // 100% -> 500%
-        var suppressionModifer = suppression * 0.2f + 1.0f; // 100% -> 120%
-        var commandModifer = commandEfficiency < 1.0f ? commandEfficiency * -0.1f + 1.1f : (commandEfficiency - 1f) * -0.05f + 1f; // 110% -> 100% -> 95%
-        return fatigueModifer * suppressionModifer * commandModifer;
-    }
-
-    float GetFireEfficiencyModifer()
-    {
-        var fatigueModifer = fatigue * -0.5f + 1f; // 100% -> 50%
-        var suppressionModifier = suppression * -0.5f + 1f; // 100% -> 50%
-        var commandModifer = commandEfficiency < 1f ? commandEfficiency * 0.3f + 0.7f : (commandEfficiency - 1f) * 0.1f + 1f; // 70% -> 100% -> 110%
-        return fatigueModifer * suppressionModifier * commandModifer;
-    }
-
-    static float killFactor = 0.0015f;
-    static float killVolative = 0.0045f;
-    static float suppressionFactor = 0.2f;
-    static float suppressionVolative = 0.02f;
-    static float fatigueFactor = 0.02f;
-    static float fatigueVolative = 0.02f;
-
-    float Sample(float upper, float firepower, float factor, float volative)
-    {
-        return (float)(new TruncatedNormal(YYZ.Random.GetRandom(), 0, upper, firepower * factor, firepower * volative)).Sample();
-    }
-
-    public void TakeDirectFire(float firepower)
-    {
-        // TODO: use correlated sample rather than following indepent sampling.
-        // var killRaw = Sample(strengthWithLeaders, firepower, killFactor, killVolative);
-        if(firepower == 0)
-            return;
-        
-        firepower *= GetCasualtiesModifer();
-
-        var suppressionDelta = Sample(strengthWithLeaders, firepower, suppressionFactor, suppressionVolative);
-        var fatigueDelta = Sample(strengthWithLeaders, firepower, fatigueFactor, fatigueVolative);
-
-        suppression = Mathf.Min(suppression + suppressionDelta / strengthWithLeaders, 1f);
-        fatigue = Mathf.Min(fatigue + fatigueDelta / strengthWithLeaders, 1f);
-
-        var alpha = strength > 0 ? new double[children.Count + 1] : new double[children.Count];
-
-        for(int i=0; i<children.Count; i++) // TODO: refactor strength > 0 branch
-            alpha[i] = 1;
-
-        if(strength > 0)
-            alpha[children.Count] = strength;
-
-        var diriDist = new Dirichlet(alpha);
-        var w = diriDist.Sample();
-        var expDist = new Exponential(2); // rate = 2
-        for(var i=0; i<children.Count; i++)
-        {
-            var fortune = expDist.Sample();
-            var firepowerInflicted = firepower * w[i];
-            if(fortune < firepowerInflicted * killFactor)
-            {
-                var leader = children[i];
-                leader.Destroy();
-                GD.Print($"{leader} is killed"); // true leader kill will be implemented later.
-            }
-        }
-
-        if(strength > 0)
-        {
-            var firepowerOnStrength = firepower * w[children.Count];
-            var killed = Sample(strength, (float)firepowerOnStrength, killFactor, killVolative);
-
-            /*
-            // Test randomness
-            var samples = new float[1000];
-            for(int i=0; i<1000; i++)
-                samples[i] = Sample(strength, (float)firepowerOnStrength, killFactor, killVolative);
-            GD.Print($"draw={killed}, mean={Statistics.Mean(samples)}, std={Statistics.StandardDeviation(samples)}");
-            */
-
-            strength -= killed;
-        }
-
-        // Elect a leader if no leader lives. If no leader is elected, the unit is destroyed.
-        if(children.Count == 0)
-        {
-            if(strength >= 1)
-            {
-                strength -= 1;
-                var leader = new LeaderProcedure("Unamed Hero", "", side.picture, 1);
-                leader.EnterTo(this);
-            }
-            else
-            {
-                Destroy();
-            }
-        }
-    }
 
     public void StepPre()
     {
@@ -370,80 +278,20 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
         if(movingState.active)
             movingState.nextRegion.AddOverlap(this);
 
-        totalTakenFire = 0;
-
-        if(!isFiredLastStep)
-            if(!movingState.active)
-                fatigue = Mathf.Max(fatigue - 0.01f, 0);
-            else
-                fatigue = Mathf.Min(fatigue + 0.001f, 1f);
-        else
-            fatigue = Mathf.Min(fatigue + 0.0001f, 1f); // 
-            
-        // suppression *= 0.5f;
-        suppression = Mathf.Max(suppression - 0.1f, 0f);
+        agent.StepPre();
     }
 
     public void Step()
     {
         if(movingState.active)
             GoForward(moveSpeedPiexelPerMin); // TODO: engage decrease movement speed.
-        DistributeFirepower();
+        
+        agent.Step();
     }
 
     public void StepPost()
     {
-        TakeDirectFire(totalTakenFire);
-    }
-    
-    static float fireAlpha = 1f;
-
-    public void DistributeFirepower()
-    {
-        var overlapRegions = new List<Region>(){parent};
-        if(movingState.active)
-            overlapRegions.Add(movingState.nextRegion);
-
-        var unitsSet = new HashSet<Unit>();
-
-        foreach(var region in overlapRegions)
-            foreach(var unit in region.GetOverlap())
-                if(!unit.side.Equals(side))
-                    unitsSet.Add(unit);
-
-        var units = unitsSet.ToList();
-        var weights = (from unit in units select unit.strengthWithLeaders).ToList();
-
-        /*
-        if(parent.areaData != null && parent.areaData.name.Contains("Prime"))
-            GD.Print("pause");
-        */
-        /*
-        if(name.Contains("Makino Nobuaki Assassin Group"))
-            GD.Print("pause");
-        */
-        
-        if(units.Count == 0)
-        {
-            isFiredLastStep = false;
-            return;
-        }
-
-        isFiredLastStep = true;
-
-        var cons = weights.Sum() / fireAlpha;
-        var alpha = weights.Select(s => (double)(s / cons)).ToArray<double>();
-        var dist = new Dirichlet(alpha);
-        var percents = dist.Sample();
-
-        var firepower = GetFirepower();
-        for(var i=0; i<units.Count; i++)
-            units[i].totalTakenFire += firepower * (float)percents[i];
-    }
-
-    float GetFirepower()
-    {
-        return strengthWithLeaders * GetFireEfficiencyModifer();
+        agent.StepPost();
     }
 
     public class MovePath

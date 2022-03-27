@@ -90,7 +90,7 @@ public class StrategyView : Control
 		// Call a "instant" fire on selected unit.
 		if(selectedPad != null)
 		{
-			selectedPad.unit.TakeDirectFire(100f);
+			selectedPad.unit.agent.TakeDirectFire(100f);
 
 			// stackBar.SetData(selectedPad?.unit.parent);
 			// unitBar.SetData(selectedPad?.unit);
