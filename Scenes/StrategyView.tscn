@@ -24,6 +24,7 @@ unitBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/UnitBar")
 stackBarPath = NodePath("BottomContainer/PageBackground/HBoxContainer/StackBar")
 arrowButtonPath = NodePath("BottomContainer/ViewToggleContainer/ArrowButton")
 artilleryFireButtonPath = NodePath("BottomContainer/ViewToggleContainer/ArtilleryFireButton")
+suppressionButtonPath = NodePath("BottomContainer/ViewToggleContainer/SuppressButton")
 strengthDetachDialogPath = NodePath("StrengthDetachDialog")
 mapImageScene = ExtResource( 5 )
 

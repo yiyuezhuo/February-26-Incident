@@ -65,9 +65,9 @@ public class CreateRequest
 		var src = detachRequest.src;
 
 		var unit = new UnitProcedure(src.side, 0, 0);
-		unit.EnterTo(src.parent);
 		var transferRequest = new TransferRequest(detachRequest, unit);
 		transferRequest.Apply();
+        unit.EnterTo(src.parent);
 
         return unit;
     }
@@ -180,7 +180,7 @@ public class MovingState
 }
 
 /// <summary>
-/// Unit is designed to be a complex but "configurable" object, just like ParticleMaterial. So for behavior branching, we favor states and tags over inheriatance and interfaces.
+/// Unit is designed to be a complex but "configurable" object, just like ParticleMaterial. So for behavior branching, we favor states and tags over inheritance and interfaces.
 /// BTW, thanks to the fact that I can't see a simple way to refactor this at this time...
 /// </summary>
 public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData, UnitPad.IData
@@ -204,7 +204,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 
     float moveSpeedMPerMin = 25; // 25m/min -> 1.5km/h
     static float mPerPixel = 6; // 6m = 1 unit pixel distance
-    float moveSpeedPiexelPerMin {get => moveSpeedMPerMin / mPerPixel;}
+    float moveSpeedPixelPerMin {get => moveSpeedMPerMin / mPerPixel;}
 
     public MovingState movingState{get;} = new MovingState();
     // public Dictionary<Unit, float> fireTargetMap = new Dictionary<Unit, float>();
@@ -221,6 +221,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
 
     public event EventHandler<MovePath> moveStateUpdated;
     public event EventHandler childrenUpdated;
+    public event EventHandler<Leader> childrenEntered;
 
     public List<Leader> children{get; set;} = new List<Leader>();
 
@@ -230,6 +231,11 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     public void OnChildrenUpdated()
     {
         childrenUpdated?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void OnChildrenEntered(Leader leader)
+    {
+        childrenEntered?.Invoke(this, leader);
     }
 
     /// <summary>
@@ -284,7 +290,7 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     public void Step()
     {
         if(movingState.active)
-            GoForward(moveSpeedPiexelPerMin); // TODO: engage decrease movement speed.
+            GoForward(moveSpeedPixelPerMin); // TODO: engage decrease movement speed.
         
         agent.Step();
     }

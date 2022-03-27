@@ -30,6 +30,7 @@ public class Side : IContainer<HashSet<Region>, Region>
     public override string ToString() => $"Side({name}, {nameJap}, {children.Count})";
     public string ToHierarchy() => ToString();
     public void OnChildrenUpdated(){}
+    public void OnChildrenEntered(Region region){}
 }
 
 
@@ -212,9 +213,27 @@ public class ScenarioData
         }
     }
 
+    void OnRegionChildrenEntered(object sender, Unit unit)
+    {
+        // register Unit
+        // var region = (Region)sender;
+        RegisterUnit(unit);
+        unit.childrenEntered += OnUnitChildrenEntered;
+    }
+
+    void OnUnitChildrenEntered(object sender, Leader leader)
+    {
+        RegisterLeader(leader);
+    }
+
     void SetupAppData(Dictionary<AreaTable.Data, Region> areaToRegion)
     {
         // Initialize App layer data
+
+        foreach(var region in regions)
+        {
+            region.childrenEntered += OnRegionChildrenEntered;
+        }
 
         // Side
 
@@ -246,7 +265,7 @@ public class ScenarioData
         foreach(var unitData in unitTable.Values) // Here we assume all units are rebels.
         {
             var unit = new UnitFromTable(unitData);
-            RegisterUnit(unit);
+            // RegisterUnit(unit);
             unitDataToUnit[unitData] = unit;
             unit.side = rebelSide;
 
@@ -259,7 +278,7 @@ public class ScenarioData
         foreach(var leaderData in leaderTable.Values)
         {
             var leader = new LeaderFromTable(leaderData);
-            RegisterLeader(leader);
+            // RegisterLeader(leader);
             leaderDataToLeader[leaderData] = leader;
             // EnterTo is delegated to assignment
         }
@@ -286,22 +305,34 @@ public class ScenarioData
             if(objectiveData.area != null)
             {
                 var unit = new UnitFromObjective(objectiveData);
-                RegisterUnit(unit);
+                // RegisterUnit(unit);
                 unit.side = govSide;
                 unit.EnterTo(areaToRegion[objectiveData.area]);
+
+                /*
+                foreach(var leader in unit.children)
+                    RegisterLeader(leader);
+                */
             }
         }
     }
 
-    public void RegisterUnit(Unit unit)
+    void RegisterUnit(Unit unit)
     {
         units.Add(unit);
+        foreach(var leader in unit.children)
+            if(!leaders.Contains(leader))
+                RegisterLeader(leader);
+        
+        // https://stackoverflow.com/questions/136975/has-an-event-handler-already-been-added
+        // unit.destroyed -= OnUnitDestroyed;
         unit.destroyed += OnUnitDestroyed;
     }
 
-    public void RegisterLeader(Leader leader)
+    void RegisterLeader(Leader leader)
     {
         leaders.Add(leader);
+        // leader.destroyed -= OnLeaderDestroyed;
         leader.destroyed += OnLeaderDestroyed;
     }
 

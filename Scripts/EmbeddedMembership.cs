@@ -9,12 +9,14 @@ public interface IContainerWeak<out TCC, out TC> where TCC : IEnumerable<TC>
 {
     TCC children {get;}
     void OnChildrenUpdated();
+    
 }
 
-public interface IContainer<out TCC, out TC> : IContainerWeak<TCC, TC> where TCC : ICollection<TC>
+public interface IContainer<out TCC, TC> : IContainerWeak<TCC, TC> where TCC : ICollection<TC>
 {
     // TCC children {get;}
     string ToHierarchy();
+    void OnChildrenEntered(TC child);
 }
 
 public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer<TCC, T> where TCC : ICollection<T>
@@ -25,12 +27,12 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
     {
         var parentOri = parent;
         parent.children.Remove(This);
-        EnterTo(container);
+        _EnterTo(container);
 
         moved?.Invoke(this, parentOri);
         parentOri.OnChildrenUpdated();
     }
-    public void EnterTo(TP container)
+    void _EnterTo(TP container)
     {
         var parentOri = parent;
         parent = container;
@@ -39,12 +41,19 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
         entered?.Invoke(this, parentOri);
         container.OnChildrenUpdated();
     }
+    public void EnterTo(TP container)
+    {
+        _EnterTo(container);
+        container.OnChildrenEntered(This);
+    }
+    /*
     public void TryMoveTo(TP container)
     {
         if(parent.children.Contains(This))
             parent.children.Remove(This);
-        EnterTo(container);
+        _EnterTo(container);
     }
+    */
     public void Destroy()
     {
         parent.children.Remove(This);

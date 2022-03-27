@@ -23,6 +23,7 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public List<Unit> children{get; set;} = new List<Unit>();
     IEnumerable<UnitPad.IData> StackBar.IData.children{get => children;}
     public event EventHandler<Region> childrenUpdated;
+    public event EventHandler<Unit> childrenEntered;
 
     string GetAreaDataDesc() => areaData != null ? areaData.ToString() : "[No Area Data]";
     public string ToLabelString() => areaData != null ? areaData.name : center.ToString();
@@ -36,6 +37,10 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public void OnChildrenUpdated()
     {
         childrenUpdated?.Invoke(this, this);
+    }
+    public void OnChildrenEntered(Unit unit)
+    {
+        childrenEntered?.Invoke(this, unit);
     }
 
     HashSet<Unit> overlapSet = new HashSet<Unit>();

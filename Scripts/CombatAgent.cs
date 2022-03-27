@@ -83,29 +83,29 @@ public class CombatAgent: UnitAgent
     }
 
     static float killFactor = 0.0015f;
-    static float killVolative = 0.0045f;
+    static float killVolatile = 0.0045f;
     static float suppressionFactor = 0.2f;
-    static float suppressionVolative = 0.02f;
+    static float suppressionVolatile = 0.02f;
     static float fatigueFactor = 0.02f;
-    static float fatigueVolative = 0.02f;
+    static float fatigueVolatile = 0.02f;
     static float fireAlpha = 1f;
 
-    float Sample(float upper, float firepower, float factor, float volative)
+    float Sample(float upper, float firepower, float factor, float _volatile)
     {
-        return (float)(new TruncatedNormal(YYZ.Random.GetRandom(), 0, upper, firepower * factor, firepower * volative)).Sample();
+        return (float)(new TruncatedNormal(YYZ.Random.GetRandom(), 0, upper, firepower * factor, firepower * _volatile)).Sample();
     }
 
     public void TakeDirectFire(float firepower)
     {
-        // TODO: use correlated sample rather than following indepent sampling.
-        // var killRaw = Sample(strengthWithLeaders, firepower, killFactor, killVolative);
+        // TODO: use correlated sample rather than following independent sampling.
+        // var killRaw = Sample(strengthWithLeaders, firepower, killFactor, killVolatile);
         if(firepower == 0)
             return;
         
         firepower *= GetCasualtiesModifer();
 
-        var suppressionDelta = Sample(strengthWithLeaders, firepower, suppressionFactor, suppressionVolative);
-        var fatigueDelta = Sample(strengthWithLeaders, firepower, fatigueFactor, fatigueVolative);
+        var suppressionDelta = Sample(strengthWithLeaders, firepower, suppressionFactor, suppressionVolatile);
+        var fatigueDelta = Sample(strengthWithLeaders, firepower, fatigueFactor, fatigueVolatile);
 
         suppression = Mathf.Min(suppression + suppressionDelta / strengthWithLeaders, 1f);
         fatigue = Mathf.Min(fatigue + fatigueDelta / strengthWithLeaders, 1f);
@@ -136,13 +136,13 @@ public class CombatAgent: UnitAgent
         if(strength > 0)
         {
             var firepowerOnStrength = firepower * w[children.Count];
-            var killed = Sample(strength, (float)firepowerOnStrength, killFactor, killVolative);
+            var killed = Sample(strength, (float)firepowerOnStrength, killFactor, killVolatile);
 
             /*
             // Test randomness
             var samples = new float[1000];
             for(int i=0; i<1000; i++)
-                samples[i] = Sample(strength, (float)firepowerOnStrength, killFactor, killVolative);
+                samples[i] = Sample(strength, (float)firepowerOnStrength, killFactor, killVolatile);
             GD.Print($"draw={killed}, mean={Statistics.Mean(samples)}, std={Statistics.StandardDeviation(samples)}");
             */
 

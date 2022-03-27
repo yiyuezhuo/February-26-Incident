@@ -15,6 +15,7 @@ public class StrategyView : Control
 	[Export] NodePath stackBarPath;
 	[Export] NodePath arrowButtonPath;
 	[Export] NodePath artilleryFireButtonPath;
+	[Export] NodePath suppressionButtonPath;
 	[Export] NodePath strengthDetachDialogPath;
 	
 	[Export] PackedScene mapImageScene;
@@ -22,11 +23,9 @@ public class StrategyView : Control
 	ScenarioData scenarioData;
 	MapView mapView;
 	MapShower mapShower;
-	TimePlayer timePlayer;
 	UnitBar unitBar;
 	StackBar stackBar;
 	StrengthDetachDialog strengthDetachDialog;
-	// Button artilleryFireButton;
 
 	// States
 
@@ -35,19 +34,17 @@ public class StrategyView : Control
 	TransferRequest currentTransferRequest;
 	CreateRequest currentCreateRequest; // This request is not relevent to `currentTransferRequest`.
 
-	Node mapContainer; //{get => mapView;}
-	Node arrowContainer; //{get => mapView;}
+	Node mapContainer;
+	Node arrowContainer;
 
 	public override void _Ready()
 	{
 		scenarioData = scenarioDataRes.GetInstance();
 		mapView = (MapView)GetNode(mapViewPath);
-		timePlayer = (TimePlayer)GetNode(timePlayerPath);
 		unitBar = (UnitBar)GetNode(unitBarPath);
 		stackBar = (StackBar)GetNode(stackBarPath);
 		strengthDetachDialog = (StrengthDetachDialog)GetNode(strengthDetachDialogPath);
 		
-		timePlayer.simulationEvent += SimulationHandler;
 		mapShower = (MapShower)mapView.GetMapShower();
 		mapShower.areaClickEvent += OnAreaClick;
 		mapShower.areaRightClickEvent += OnAreaRightClick;
@@ -55,27 +52,37 @@ public class StrategyView : Control
 		stackBar.rightClicked += OnStackUnitRightClicked;
 		strengthDetachDialog.confirmed += ApplyDetach;
 
+		var timePlayer = (TimePlayer)GetNode(timePlayerPath);
+		timePlayer.simulationEvent += SimulationHandler;
+
 		var arrowButton = (Button)GetNode(arrowButtonPath);
 		arrowButton.Connect("pressed", this, nameof(SoftSelectAllPads));
 
 		var artilleryFireButton = (Button)GetNode(artilleryFireButtonPath);
 		artilleryFireButton.Connect("pressed", this, nameof(OnArtilleryButtonPressed));
 
+		var suppressButton = (Button)GetNode(suppressionButtonPath);
+		suppressButton.Connect("pressed", this, nameof(OnSuppressButtonPressed));
+
 		arrowContainer = new Node();
 		mapView.AddChild(arrowContainer);
-		// So arrow's "z-index" is lowerer than other widgets.
+		// So arrow's "z-index" is lower than other widgets.
 		mapContainer = new Node();
 		mapView.AddChild(mapContainer);
 
 		// Non-binding setup
+		
+		foreach(var region in scenarioData.regions)
+			region.childrenEntered += OnRegionChildrenEntered;
 
 		foreach(var unit in scenarioData.units)
-			CreateStrategyPad(unit);
+		{
+			RegisterUnit(unit);
+			unit.childrenEntered += OnUnitChildrenEntered;
+		}
 
 		foreach(var leader in scenarioData.leaders)
-		{
-			leader.destroyed += OnLeaderDestroy;
-		}
+			RegisterLeader(leader);
 
 		foreach(var region in scenarioData.regions)
 		{
@@ -86,6 +93,37 @@ public class StrategyView : Control
 				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
 		}
 		mapShower.Flush();
+	}
+
+	/// <summary>
+	/// If a leader is added before the unit is added to the "tree", the leader will not be registered automatically.
+	/// </summary>
+	void OnRegionChildrenEntered(object sender, Unit unit)
+	{
+		RegisterUnit(unit);
+		// unit.childrenEntered += OnUnitChildrenEntered;
+	}
+
+	void OnUnitChildrenEntered(object sender, Leader leader)
+	{
+		RegisterLeader(leader);
+	}
+
+	void RegisterLeader(Leader leader)
+	{
+		// TODO: hack way to "register" leader only once in StrategyView layer.
+		// https://stackoverflow.com/questions/136975/has-an-event-handler-already-been-added
+		leader.destroyed -= OnLeaderDestroy;
+		leader.destroyed += OnLeaderDestroy;
+	}
+
+	/// <summary>
+	/// Add an army summoning button, by which 20,000 armies (20~40 units) enter the map 
+	/// and try to “encompass” rebels (limit their movement).
+	/// </summary>
+	void OnSuppressButtonPressed()
+	{
+
 	}
 
 	void OnLeaderDestroy(object sender, Leader leader)
@@ -114,7 +152,7 @@ public class StrategyView : Control
 	/// <summary>
 	/// Create a StrategyPad and other wraps for a "bare" unit.
 	/// </summary>
-	void CreateStrategyPad(Unit unit)
+	void RegisterUnit(Unit unit)
 	{
 		var pad = mapImageScene.Instance<StrategyPad>();
 		pad.Setup(unit, arrowContainer, this);
@@ -124,8 +162,13 @@ public class StrategyView : Control
 		padMap[unit] = pad;
 		unit.destroyed += OnUnitDestroyed;
 		unit.moveStateUpdated += OnUnitMoveEvent;
+		unit.childrenEntered += OnUnitChildrenEntered;
 		
 		mapContainer.AddChild(pad);
+
+		// "try" register leaders
+		foreach(var leader in unit.children)
+			RegisterLeader(leader);
 	}
 
 	void OnUnitDestroyed(object sender, Unit unit)
@@ -229,8 +272,8 @@ public class StrategyView : Control
 	{
 		var unit = createRequest.Apply();
 
-		CreateStrategyPad(unit);
-		scenarioData.RegisterUnit(unit); // TODO: Factory hooker refactor?
+		RegisterUnit(unit);
+		// scenarioData.RegisterUnit(unit); // TODO: Factory hooker refactor?
 
 		PointUnitTo(unit, createRequest.dstArea);
 
@@ -438,7 +481,7 @@ public class StrategyView : Control
 	public override void _GuiInput(InputEvent @event)
 	{
 		mapView._UnhandledInput(@event); 
-		// Weird hack, but it seems that Godot can't propogate event into _unhandled_input level after it's accepted in _GuiInput phase:
+		// Weird hack, but it seems that Godot can't propagate event into _unhandled_input level after it's accepted in _GuiInput phase:
 		// https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html
 		// We can set mouse filter to `ignore` for every intermedia controls. But since we need StrategyPad and MapView both to accept events,
 		// the ignore way does not work.
