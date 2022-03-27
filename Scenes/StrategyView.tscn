@@ -69,8 +69,8 @@ margin_bottom = 20.0
 alignment = 2
 
 [node name="NameViewButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
-margin_left = 1530.0
-margin_right = 1552.0
+margin_left = 1507.0
+margin_right = 1529.0
 margin_bottom = 20.0
 hint_tooltip = "Toggle view of region names."
 text = "N"
@@ -79,18 +79,25 @@ scenarioDataRes = ExtResource( 3 )
 mapContainerPath = NodePath("../../../ViewportContainer/Viewport/MapView")
 
 [node name="ArrowButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
-margin_left = 1556.0
-margin_right = 1577.0
+margin_left = 1533.0
+margin_right = 1554.0
 margin_bottom = 20.0
 hint_tooltip = "Show all arrows (soft select all units)."
 text = "A"
 
 [node name="ArtilleryFireButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
-margin_left = 1581.0
-margin_right = 1600.0
+margin_left = 1558.0
+margin_right = 1577.0
 margin_bottom = 20.0
 hint_tooltip = "[DEBUG only] Artillery fire on selected unit."
 text = "F"
+
+[node name="SuppressButton" type="Button" parent="BottomContainer/ViewToggleContainer"]
+margin_left = 1581.0
+margin_right = 1600.0
+margin_bottom = 20.0
+hint_tooltip = "[DEBUG only] Summon an government to \"suppress\" rebel."
+text = "S"
 
 [node name="PageBackground" parent="BottomContainer" instance=ExtResource( 8 )]
 margin_top = 24.0

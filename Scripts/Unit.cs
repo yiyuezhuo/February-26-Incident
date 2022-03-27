@@ -501,6 +501,7 @@ public class UnitFromObjective: Unit
         var dummyLeader = new LeaderProcedure(data.name, data.nameJap, data.picture, 1);
         dummyLeader.EnterTo(this);
 
+        /*
         if(data.isBuilding) // TODO: We may define a strength field in NotionData.
         {
             // strength
@@ -510,6 +511,8 @@ public class UnitFromObjective: Unit
         {
             strength = YYZ.Random.NextFloat() * 10;
         }
+        */
+        strength = data.guard;
     }
 }
 
