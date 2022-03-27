@@ -92,8 +92,10 @@ public class StrategyView : Control
 		{
 			selectedPad.unit.TakeDirectFire(100f);
 
-			stackBar.SetData(selectedPad?.unit.parent);
-			unitBar.SetData(selectedPad?.unit);
+			// stackBar.SetData(selectedPad?.unit.parent);
+			// unitBar.SetData(selectedPad?.unit);
+			stackBar.SoftUpdate();
+			unitBar.SoftUpdate();
 		}
 	}
 
@@ -146,8 +148,8 @@ public class StrategyView : Control
 		var pad = padMap[unit];
 		if(selectedPad != null && selectedPad.Equals(pad))
 		{
-			stackBar.SetData(pad.unit.parent);
-			SetStackUnitFocus(pad.unit);
+			stackBar.SetData(unit.parent);
+			SetStackUnitFocus(unit);
 		}
 	}
 
@@ -169,8 +171,10 @@ public class StrategyView : Control
 		
 		mapShower.Flush(); // GoForward may trigger some handlers to call areaInfo, so we flush at every
 
-		stackBar.SetData(selectedPad?.unit.parent);
-		unitBar.SetData(selectedPad?.unit);
+		// stackBar.SetData(selectedPad?.unit.parent);
+		// unitBar.SetData(selectedPad?.unit);
+		stackBar.SoftUpdate();
+		unitBar.SoftUpdate();
 	}
 
 	void SimulationStep() // 1 min -> 1 call

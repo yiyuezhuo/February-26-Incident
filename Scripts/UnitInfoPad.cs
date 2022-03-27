@@ -17,6 +17,8 @@ public class UnitInfoPad : Control
     Label fatigueLabel;
     Label suppressionLabel;
 
+    IData data;
+
     public override void _Ready()
     {
         strengthLabel = (Label)GetNode(strengthLabelPath);
@@ -31,6 +33,13 @@ public class UnitInfoPad : Control
     /// If data is null, will show no text but the pad still exists.
     /// </summary>
     public void SetData(IData data)
+    {
+        this.data = data;
+
+        SoftUpdate();
+    }
+
+    public void SoftUpdate()
     {
         strengthLabel.Text = data is null ? "" : "Strength: " + data.strength.ToString("N0");
         commandlabel.Text = data is null ? "" : "Command: " + data.command.ToString("N0");

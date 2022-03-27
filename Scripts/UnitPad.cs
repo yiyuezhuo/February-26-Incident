@@ -15,6 +15,8 @@ public class UnitPad : PortraitPad
     Label fatigueLabel;
     TextureRect flagTexture;
 
+    new IData data;
+
     public override void _Ready()
     {
         base._Ready();
@@ -27,8 +29,17 @@ public class UnitPad : PortraitPad
 
     public void SetData(IData data)
     {
-        base.SetData(data);
+        // base.SetData(data);
+        base.data = data;
         
+        this.data = data;
+        SoftUpdate();
+    }
+
+    public override void SoftUpdate()
+    {
+        base.SoftUpdate();
+
         strengthLabel.Text = data.strength.ToString("N0");
         fatigueLabel.Text = data.fatigue.ToString("P0");
         flagTexture.Texture = data.flagTex;

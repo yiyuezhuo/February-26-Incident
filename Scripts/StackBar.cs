@@ -27,13 +27,10 @@ public class StackBar : Node
             node.QueueFree();
     }
 
-    public void Update()
-    {
-        
-    }
-
     public void SetData(IData data)
     {
+        this.data = data;
+
         ClearChildren();
         
         if(data is null)
@@ -50,6 +47,12 @@ public class StackBar : Node
 
             unitPadList.Add(unitPad);
         }
+    }
+
+    public void SoftUpdate()
+    {
+        foreach(var unitPad in unitPadList)
+            unitPad.SoftUpdate();
     }
 
     public void ClearChildren()

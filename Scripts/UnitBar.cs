@@ -16,6 +16,8 @@ public class UnitBar : Control
     UnitInfoPad unitInfoPad;
     Control leaderPadContainer;
     List<LeaderPad> leaderPadList = new List<LeaderPad>();
+
+    IData data;
     
     public override void _Ready()
     {
@@ -30,6 +32,8 @@ public class UnitBar : Control
     /// </summary>
     public void SetData(IData data)
     {
+        this.data = data;
+
         unitInfoPad.SetData(data);
         ClearLeaderData();
         if(!(data is null))
@@ -43,6 +47,13 @@ public class UnitBar : Control
                 leaderPad.clicked += OnLeadPadClicked;
             }
         }
+    }
+
+    public void SoftUpdate()
+    {
+        foreach(LeaderPad pad in leaderPadContainer.GetChildren())
+            pad.SoftUpdate();
+        unitInfoPad.SoftUpdate();
     }
 
     void ClearLeaderData()

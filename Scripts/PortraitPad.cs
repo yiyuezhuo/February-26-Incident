@@ -15,6 +15,8 @@ public class PortraitPad : Control
     public event EventHandler rightClicked;
     public bool highlighted;
 
+    protected IData data;
+
     public override void _Ready()
     {
         portrait = (TextureRect)GetNode(portraitPath);
@@ -23,6 +25,12 @@ public class PortraitPad : Control
     }
 
     public virtual void SetData(IData data)
+    {
+        this.data = data;
+        SoftUpdate();
+    }
+
+    public virtual void SoftUpdate()
     {
         portrait.Texture = data.portrait;
     }

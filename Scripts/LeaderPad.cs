@@ -13,6 +13,8 @@ public class LeaderPad : PortraitPad
     Label nameLabel;
     Label nameJapLabel;
 
+    new IData data;
+
     public override void _Ready()
     {
         base._Ready();
@@ -25,8 +27,16 @@ public class LeaderPad : PortraitPad
 
     public void SetData(IData data)
     {
-        base.SetData(data);
+        base.data = data;
 
+        this.data = data;
+        SoftUpdate();
+    }
+
+    public override void SoftUpdate()
+    {
+        base.SoftUpdate();
+        
         nameLabel.Text = data.name;
         nameJapLabel.Text = VertialTransform(data.nameJap);
     }
