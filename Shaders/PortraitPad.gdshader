@@ -50,6 +50,9 @@ vec3 rgb2hsl( in vec3 c ){
 void fragment(){
 	COLOR = texture(TEXTURE, UV);
 	if(highlight){
-		COLOR = vec4(hsl2rgb(rgb2hsl(COLOR.rgb) + vec3(0.0, 0.01, 0.1)), 1.0);
+		float dist = pow(distance(UV, vec2(0.5, 0.5)) * sqrt(2), 4);
+		vec3 highlighted = hsl2rgb(rgb2hsl(COLOR.rgb) + vec3(0.0, 0.01, 1.0 * dist));
+		highlighted = mix(highlighted, vec3(0.5,0.2,0), dist);
+		COLOR = vec4(highlighted, 1.0);
 	}
 }
