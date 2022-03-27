@@ -47,7 +47,6 @@ public class StrategyView : Control
 		stackBar = (StackBar)GetNode(stackBarPath);
 		strengthDetachDialog = (StrengthDetachDialog)GetNode(strengthDetachDialogPath);
 		
-
 		timePlayer.simulationEvent += SimulationHandler;
 		mapShower = (MapShower)mapView.GetMapShower();
 		mapShower.areaClickEvent += OnAreaClick;
@@ -73,6 +72,11 @@ public class StrategyView : Control
 		foreach(var unit in scenarioData.units)
 			CreateStrategyPad(unit);
 
+		foreach(var leader in scenarioData.leaders)
+		{
+			leader.destroyed += OnLeaderDestroy;
+		}
+
 		foreach(var region in scenarioData.regions)
 		{
 			var areaInfo = mapShower.GetAreaInfo(region);
@@ -82,6 +86,14 @@ public class StrategyView : Control
 				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
 		}
 		mapShower.Flush();
+	}
+
+	void OnLeaderDestroy(object sender, Leader leader)
+	{
+		if(selectedPad != null && leader.parent.Equals(selectedPad.unit))
+		{
+			unitBar.HardUpdate();
+		}
 	}
 
 	void OnArtilleryButtonPressed()

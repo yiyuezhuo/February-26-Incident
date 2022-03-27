@@ -259,7 +259,7 @@ public class ScenarioData
         foreach(var leaderData in leaderTable.Values)
         {
             var leader = new LeaderFromTable(leaderData);
-            leaders.Add(leader);
+            RegisterLeader(leader);
             leaderDataToLeader[leaderData] = leader;
             // EnterTo is delegated to assignment
         }
@@ -297,6 +297,17 @@ public class ScenarioData
     {
         units.Add(unit);
         unit.destroyed += OnUnitDestroyed;
+    }
+
+    public void RegisterLeader(Leader leader)
+    {
+        leaders.Add(leader);
+        leader.destroyed += OnLeaderDestroyed;
+    }
+
+    void OnLeaderDestroyed(object sender, Leader leader)
+    {
+        leaders.Remove(leader);
     }
 
     void OnUnitDestroyed(object sender, Unit unit)

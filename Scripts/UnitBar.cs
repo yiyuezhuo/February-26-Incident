@@ -34,6 +34,18 @@ public class UnitBar : Control
     {
         this.data = data;
 
+        HardUpdate();
+    }
+
+    public void SoftUpdate()
+    {
+        foreach(LeaderPad pad in leaderPadContainer.GetChildren())
+            pad.SoftUpdate();
+        unitInfoPad.SoftUpdate();
+    }
+
+    public void HardUpdate()
+    {
         unitInfoPad.SetData(data);
         ClearLeaderData();
         if(!(data is null))
@@ -47,13 +59,6 @@ public class UnitBar : Control
                 leaderPad.clicked += OnLeadPadClicked;
             }
         }
-    }
-
-    public void SoftUpdate()
-    {
-        foreach(LeaderPad pad in leaderPadContainer.GetChildren())
-            pad.SoftUpdate();
-        unitInfoPad.SoftUpdate();
     }
 
     void ClearLeaderData()
