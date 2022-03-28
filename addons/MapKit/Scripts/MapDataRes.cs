@@ -15,32 +15,39 @@ public interface IRegion<TRegion>
     Vector2 center{get; set;}
 }
 
+public interface IRegionData
+{
+    int[] BaseColor{get; set;}
+    int[] RemapColor{get; set;}
+    int Points{get; set;}
+    float X{get; set;}
+    float Y{get; set;}
+    int[][] Neighbors{get; set;}
+}
 
-public class RegionMapFactory<TRegion> where TRegion : IRegion<TRegion>, new()
+/*
+class RegionData
+{
+    public int[] BaseColor;
+    public int[] RemapColor;
+    public int Points;
+    public float X;
+    public float Y;
+    public int[][] Neighbors;
+}
+*/
+
+
+public class RegionMapFactory<TRegionData, TRegion> where TRegionData : IRegionData where TRegion : IRegion<TRegion>, new()
 {
     static Color Int4ToColor(int[] arr)
     {
         return Color.Color8((byte)arr[0], (byte)arr[1], (byte)arr[2], (byte)arr[3]);
     }
 
-    class RegionData
-    {
-        public int[] BaseColor;
-        public int[] RemapColor;
-        public int Points;
-        public float X;
-        public float Y;
-        public int[][] Neighbors;
-    }
-
     class RegionDataResult
     {
-        public RegionData[] Areas;
-
-        public static RegionDataResult CreateFromJSON(string jsonString)
-        {
-            return JsonConvert.DeserializeObject<RegionDataResult>(jsonString);
-        }
+        public TRegionData[] Areas;
     }
 
     /// <summary>
@@ -51,17 +58,17 @@ public class RegionMapFactory<TRegion> where TRegion : IRegion<TRegion>, new()
         var regionMap = new Dictionary<Color, TRegion>();
         var neighborsMap = new Dictionary<TRegion, int[][]>();
 
-        RegionData[] regionDataList = RegionDataResult.CreateFromJSON(jsonString).Areas;
+        TRegionData[] regionDataList = JsonConvert.DeserializeObject<RegionDataResult>(jsonString).Areas;
+        // RegionData[] regionDataList = RegionDataResult.CreateFromJSON(jsonString).Areas;
         // Debug.Log($"regionDataList.Length={regionDataList.Length}");
         foreach(var regionData in regionDataList)
         {
             var region = new TRegion();
-            region.baseColor = Int4ToColor(regionData.BaseColor);
-            region.remapColor = Int4ToColor(regionData.RemapColor);
+
+            Extract(regionData, region);
+
             region.neighbors = new HashSet<TRegion>();
             neighborsMap[region] = regionData.Neighbors;
-
-            region.center = new Vector2(regionData.X, regionData.Y);
             regionMap[region.baseColor] = region;
         }
 
@@ -75,16 +82,23 @@ public class RegionMapFactory<TRegion> where TRegion : IRegion<TRegion>, new()
 
         return regionMap;
     }
+
+    protected virtual void Extract(TRegionData regionData, TRegion region)
+    {
+        region.baseColor = Int4ToColor(regionData.BaseColor);
+        region.remapColor = Int4ToColor(regionData.RemapColor);
+        region.center = new Vector2(regionData.X, regionData.Y);
+    }
 }
 
-public class MapData<TRegion> : IMapData<TRegion> where TRegion : IRegion<TRegion>, new()
+public class MapData<TData, TRegion> : IMapData<TRegion> where TData : IRegionData where TRegion : IRegion<TRegion>, new()
 {
     public Image baseImage;
     public int width{get; set;}
     public int height{get; set;}
     protected Dictionary<Color, TRegion> areaMap = new Dictionary<Color, TRegion>();
 
-    protected RegionMapFactory<TRegion> regionMapFactory = new RegionMapFactory<TRegion>();
+    protected virtual RegionMapFactory<TData, TRegion> regionMapFactory{get => new RegionMapFactory<TData, TRegion>();}
 
     public MapData(Texture baseTexture, string path)
     {
@@ -134,6 +148,16 @@ public class MapData<TRegion> : IMapData<TRegion> where TRegion : IRegion<TRegio
 
 // Reference implementations
 
+public class RegionData : IRegionData
+{
+    public int[] BaseColor{get; set;}
+    public int[] RemapColor{get; set;}
+    public int Points{get; set;}
+    public float X{get; set;}
+    public float Y{get; set;}
+    public int[][] Neighbors{get; set;}
+}
+
 public class Region : IArea, IRegion<Region>
 {
     public Color baseColor{get; set;}
@@ -152,15 +176,14 @@ public class Region : IArea, IRegion<Region>
     }
 }
 
-
 public class MapDataRes : Resource, IMapDataRes<Region>
 {
     [Export] protected Texture baseTexture;
     [Export(PropertyHint.File)] protected string regionDataPath;
 
-    static MapData<Region> instance;
+    static MapData<RegionData, Region> instance;
 
-    public MapData<Region> GetInstance() => instance != null ? instance : instance = new MapData<Region>(baseTexture, regionDataPath);
+    public MapData<RegionData, Region> GetInstance() => instance != null ? instance : instance = new MapData<RegionData, Region>(baseTexture, regionDataPath);
     IMapData<Region> IMapDataRes<Region>.GetInstance() => GetInstance();
 }
 

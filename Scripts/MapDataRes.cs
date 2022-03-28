@@ -29,10 +29,11 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public string ToLabelString() => areaData != null ? areaData.name : center.ToString();
 
     // public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count}, {parent})";
-    public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count})";
+    public override string ToString() => $"Region({GetAreaDataDesc()}, {center}, {children.Count}, {isEdge})";
 
     public float DistanceTo(Region other) => center.DistanceTo(other.center);
     public bool movable{get => areaData == null || areaData.movable;}
+    public bool isEdge;
 
     public void OnChildrenUpdated()
     {
@@ -58,15 +59,28 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public IEnumerable<Unit> GetOverlap() => overlapSet;
 }
 
-
-public class MapData : MapKit.MapData<Region>, PathFinding.IGraph<Region>
+public class RegionData : MapKit.RegionData
 {
+    public bool IsEdge{get; set;}
+}
+
+public class RegionMapFactory : MapKit.RegionMapFactory<RegionData, Region>
+{
+    protected override void Extract(RegionData regionData, Region region)
+    {
+        base.Extract(regionData, region);
+        region.isEdge = regionData.IsEdge;
+    }
+}
+
+public class MapData : MapKit.MapData<RegionData, Region>, PathFinding.IGraph<Region>
+{
+    protected override MapKit.RegionMapFactory<RegionData, Region> regionMapFactory{get => new RegionMapFactory();}
+
     public MapData(Texture baseTexture, string path) : base(baseTexture, path)
     {
         foreach(var region in areaMap.Values)
-        {
             region.center = MapToWorld(region.center); // We transform Map coordinates to world for simplicity.
-        }
     }
 
     public float MoveCost(Region src, Region dst) => src.DistanceTo(dst);

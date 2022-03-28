@@ -38,7 +38,7 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
         parent = container;
         container.children.Add(This);
 
-        entered?.Invoke(this, parentOri);
+        // entered?.Invoke(this, parentOri);
         container.OnChildrenUpdated();
     }
     public void EnterTo(TP container)
@@ -70,7 +70,7 @@ public class Child<T, TP, TCC> where T : Child<T, TP, TCC> where TP : IContainer
     /// This event can be also treat as children of parent "updated".
     /// </summary>
     public event EventHandler<TP> moved; 
-    public event EventHandler<TP> entered;
+    // public event EventHandler<TP> entered;
     public event EventHandler<T> destroyed;
 
     public string ToHierarchy() => $"{this} ∋ {parent}";

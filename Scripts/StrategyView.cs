@@ -91,8 +91,17 @@ public class StrategyView : Control
 				areaInfo.foregroundColor = region.parent.color;
 			else
 				areaInfo.foregroundColor = new Color(0.6f, 0.6f, 1.0f, 1.0f); // river color workaround
+
+			region.moved += OnRegionMoved;
 		}
 		mapShower.Flush();
+	}
+
+	void OnRegionMoved(object sender, Side sideOri)
+	{
+		var region = (Region)sender;
+		var areaInfo = mapShower.GetAreaInfo(region);
+		areaInfo.foregroundColor = region.parent.color;
 	}
 
 	/// <summary>
@@ -123,7 +132,9 @@ public class StrategyView : Control
 	/// </summary>
 	void OnSuppressButtonPressed()
 	{
+		GD.Print("OnSuppressButtonPressed");
 
+		
 	}
 
 	void OnLeaderDestroy(object sender, Leader leader)
@@ -193,12 +204,7 @@ public class StrategyView : Control
 	{
 		var unit = (Unit)sender;
 		foreach(var region in path.reachedRegions)
-		{
 			region.MoveTo(unit.side);
-
-			var areaInfo = mapShower.GetAreaInfo(region);
-			areaInfo.foregroundColor = unit.side.color;
-		}
 
 		var pad = padMap[unit];
 		if(selectedPad != null && selectedPad.Equals(pad))
@@ -226,8 +232,6 @@ public class StrategyView : Control
 		
 		mapShower.Flush(); // GoForward may trigger some handlers to call areaInfo, so we flush at every
 
-		// stackBar.SetData(selectedPad?.unit.parent);
-		// unitBar.SetData(selectedPad?.unit);
 		stackBar.SoftUpdate();
 		unitBar.SoftUpdate();
 	}
