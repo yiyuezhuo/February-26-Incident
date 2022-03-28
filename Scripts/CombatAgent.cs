@@ -6,6 +6,7 @@ using Godot;
 using System.Collections.Generic;
 using MathNet.Numerics.Distributions;
 using System.Linq;
+using System;
 
 public class UnitAgent
 {
@@ -92,6 +93,8 @@ public class CombatAgent: UnitAgent
 
     float Sample(float upper, float firepower, float factor, float _volatile)
     {
+        if(firepower < 1e-10)
+            return 0; // Numerical problems.
         return (float)(new TruncatedNormal(YYZ.Random.GetRandom(), 0, upper, firepower * factor, firepower * _volatile)).Sample();
     }
 
@@ -147,6 +150,9 @@ public class CombatAgent: UnitAgent
             */
 
             strength -= killed;
+
+            if(float.IsNaN(strength)) // DEBUG
+                throw new ArgumentException("strength shouldn't be nan");
         }
 
         // Elect a leader if no leader lives. If no leader is elected, the unit is destroyed.

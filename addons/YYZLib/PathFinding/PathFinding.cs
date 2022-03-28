@@ -59,7 +59,6 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
 
         var gScore = new Dictionary<IndexT, float>{{src, 0}}; // default Mathf.Infinity
 
-        // Debug.Log($"graph:{graph}");
         var fScore = new Dictionary<IndexT, float>{{src, graph.EstimateCost(src, dst)}}; // default Mathf.Infiniy
 
         while(openSet.Count > 0)
@@ -80,7 +79,6 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
                 }
             }
 
-            // if(EqualityComparer<IndexT>.Default.Equals(current, dst))
             if(current.Equals(dst))
             {
                 return ReconstructPath(cameFrom, current);
@@ -102,24 +100,6 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
         }
         return new List<IndexT>(); // failure
     }
-
-    /*
-    public Dictionary<IndexT, Path> GetReachable(IndexT src)
-    {
-        // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
-
-        var nodeToPath = GetReachable(src, float.PositiveInfinity);
-
-        return nodeToPath;
-    }
-
-    public Dictionary<IndexT, Path> GetReachable(IEnumerable<IndexT> srcIter)
-    {
-        // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
-
-        return GetReachable(srcIter, float.PositiveInfinity);
-    }
-    */
     
     public Dictionary<IndexT, Path> GetReachable(IndexT src, float budget)
     {
@@ -134,31 +114,20 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
     {
         // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
 
-        // var firstPath = new Path(){prev = default(IndexT)}; // null-like
-        // var firstPath = new Path();
-        // var nodeToPath = new Dictionary<IndexT, Path>(){{src, firstPath}};
-
         var nodeToPath = new Dictionary<IndexT, Path>();
         var openSet = new SortedSet<IndexT>(new PathComparer(nodeToPath));
 
         foreach(var src in srcIter)
         {
-            // GD.Print($"src={src}");
             nodeToPath[src] = new Path();
-            // nodeToPath.Add(src, new Path());
             openSet.Add(src);
         }
         
-        // var openSet = new SortedSet<IndexT>(new PathComparer(nodeToPath)){src};
         var closeSet = new HashSet<IndexT>();
 
-        // while(openSet.Count > 0)
-        for(int i=0; i<20 && openSet.Count > 0; i++)
+        while(openSet.Count > 0)
+        // for(int i=0; i<20 && openSet.Count > 0; i++)
         {
-            // GD.Print($"openSet({openSet.Count}), closeSet({closeSet.Count}). nodeToPath({nodeToPath.Count})");
-            // GD.Print($"openSet={string.Join(",", openSet)}");
-            // GD.Print($"closeSet={string.Join(",", closeSet)}");
-            // var pickedNode = openSet.Min(); 
             var pickedNode = openSet.Min; // `Min()` comes from Linq.IEnumerable, while the `Min` *property* comes from `SortedSet`.
             var pickedPath = nodeToPath[pickedNode];
 
@@ -191,10 +160,7 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
                     nodeToPath[node] = path;
                     openSet.Add(node);
                 }
-                // GD.Print($"node={node}");
             }
-            // GD.Print($"{nodeToPath[pickedNode]}, {budget}, {budget - nodeToPath[pickedNode].cost}, ");
-            // return nodeToPath;
         }
 
         return nodeToPath;

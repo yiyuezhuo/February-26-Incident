@@ -43,6 +43,8 @@ public abstract class Leader : Child<Leader, Unit, List<Leader>>, LeaderPad.IDat
     public abstract Texture portrait{get;}
     public abstract float command{get;}
 
+    public bool important;
+
     // public override string ToString() => $"Leader({name}, {nameJap}, {parent})";
     public override string ToString() => $"Leader({name}, {nameJap})";
 }
@@ -76,6 +78,8 @@ public class LeaderFromTable: Leader
                 rank = new Officer();
                 break;
         }
+
+        important = true;
     }
 
     public abstract class Rank
@@ -120,12 +124,14 @@ public class LeaderProcedure: Leader
     public override Texture portrait{get => _portrait;}
     public override float command{get => _command;}
 
-    public LeaderProcedure(string name, string nameJap, Texture portrait, float command)
+    public LeaderProcedure(string name, string nameJap, Texture portrait, float command, bool important=false)
     {
         _name = name;
         _nameJap = nameJap;
         _portrait = portrait;
         _command = command;
+
+        this.important = important;
     }
 }
 

@@ -351,9 +351,9 @@ public class UnitProcedure : Unit
 /// </summary>
 public class UnitSingleLeader : Unit
 {
-    public UnitSingleLeader(string name, string nameJap, Texture portrait, float command, float strength, Side side)
+    public UnitSingleLeader(string name, string nameJap, Texture portrait, float command, float strength, Side side, bool important=false)
     {
-        var dummyLeader = new LeaderProcedure(name, nameJap, portrait, command);
+        var dummyLeader = new LeaderProcedure(name, nameJap, portrait, command, important);
         dummyLeader.EnterTo(this);
         this.strength = strength;
         this.side = side;
@@ -365,7 +365,7 @@ public class UnitSingleLeader : Unit
 /// </summary>
 public class UnitFromObjective: UnitSingleLeader
 {
-    public UnitFromObjective(ObjectiveTable.Data data, Side side) : base(data.name, data.nameJap, data.picture, 1, data.guard, side)
+    public UnitFromObjective(ObjectiveTable.Data data, Side side) : base(data.name, data.nameJap, data.picture, 1, data.guard, side, true)
     {
         frozen = true;
         /*

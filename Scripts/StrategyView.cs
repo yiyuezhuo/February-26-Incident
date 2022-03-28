@@ -20,6 +20,7 @@ public class StrategyView : Control
 	[Export] NodePath artilleryFireButtonPath;
 	[Export] NodePath suppressionButtonPath;
 	[Export] NodePath strengthDetachDialogPath;
+	[Export] NodePath infoLabelPath;
 	
 	[Export] PackedScene mapImageScene;
 
@@ -29,6 +30,7 @@ public class StrategyView : Control
 	UnitBar unitBar;
 	StackBar stackBar;
 	StrengthDetachDialog strengthDetachDialog;
+	Label infoLabel;
 
 	// States
 
@@ -49,6 +51,7 @@ public class StrategyView : Control
 		unitBar = (UnitBar)GetNode(unitBarPath);
 		stackBar = (StackBar)GetNode(stackBarPath);
 		strengthDetachDialog = (StrengthDetachDialog)GetNode(strengthDetachDialogPath);
+		infoLabel = (Label)GetNode(infoLabelPath);
 		
 		mapShower = (MapShower)mapView.GetMapShower();
 		mapShower.areaClickEvent += OnAreaClick;
@@ -71,7 +74,8 @@ public class StrategyView : Control
 
 		arrowContainer = new Node();
 		mapView.AddChild(arrowContainer);
-		// So arrow's "z-index" is lower than other widgets.
+		// Arrow's "z-index" is lower than other widgets.
+
 		mapContainer = new Node();
 		mapView.AddChild(mapContainer);
 
@@ -102,6 +106,8 @@ public class StrategyView : Control
 		mapShower.Flush();
 
 		gameManager = new GameManager(scenarioData);
+
+		infoLabel.Text = "";
 	}
 
 	void OnRegionMoved(object sender, Side sideOri)
@@ -117,7 +123,6 @@ public class StrategyView : Control
 	void OnRegionChildrenEntered(object sender, Unit unit)
 	{
 		RegisterUnit(unit);
-		// unit.childrenEntered += OnUnitChildrenEntered;
 	}
 
 	void OnUnitChildrenEntered(object sender, Leader leader)
@@ -147,13 +152,6 @@ public class StrategyView : Control
 		var regionSampled = scenarioData.mapData.SampleEdgeRegion();
 		var unit = new UnitSingleLeader("Government Leader", "", scenarioData.govSide.picture, 300, 500, scenarioData.govSide);
 		unit.EnterTo(regionSampled);
-		
-		/*
-		var dstRegion = scenarioData.mapData.SampleRegion();
-		var pathFinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
-		var path = pathFinding.PathFindingAStar(unit.parent, dstRegion);
-		unit.movingState.ResetToPath(path); // TODO: FOG?
-		*/
 
 		var agent = new RandomWalkingAgent(scenarioData, scenarioData.govSide);
 		agent.Schedule(unit);
@@ -165,6 +163,8 @@ public class StrategyView : Control
 		{
 			unitBar.HardUpdate();
 		}
+		if(leader.important)
+			infoLabel.Text = $"{leader.name} {leader.nameJap} is killed.";
 	}
 
 	void OnArtilleryButtonPressed()
@@ -266,20 +266,6 @@ public class StrategyView : Control
 		stackBar.SoftUpdate();
 		unitBar.SoftUpdate();
 	}
-
-	/*
-	void SimulationStep() // 1 min -> 1 call
-	{
-		foreach(var region in scenarioData.regions)
-			region.StepPre();
-		foreach(var unit in scenarioData.units)
-			unit.StepPre();
-		foreach(var unit in scenarioData.units)
-			unit.Step();
-		foreach(var unit in scenarioData.units.ToList())
-			unit.StepPost();
-	}
-	*/
 
 	void OnAreaClick(object sender, Region area)
 	{

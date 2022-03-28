@@ -12,6 +12,7 @@ public abstract class Agent
     protected ScenarioData scenarioData;
 
     protected IEnumerable<Unit> controllingUnits{get => from unit in scenarioData.units where unit.side.Equals(controllingSide) select unit;}
+    protected IEnumerable<Unit> enemyUnits{get => from unit in scenarioData.units where !unit.side.Equals(controllingSide) select unit;}
 
     public Agent(ScenarioData scenarioData, Side side)
     {
@@ -36,11 +37,6 @@ public class RandomWalkingAgent : Agent
 
     public void Schedule(Unit unit)
     {
-        /*
-		var dstRegion = scenarioData.mapData.SampleRegion();
-		var pathFinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
-		var path = pathFinding.PathFindingAStar(unit.parent, dstRegion);
-        */
         var path = SamplePath(unit.parent);
 		unit.movingState.ResetToPath(path); // TODO: FOG?
     }
@@ -53,11 +49,10 @@ public class RandomWalkingAgent : Agent
             var dst = scenarioData.mapData.SampleRegion();
             var pathFinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
             path = pathFinding.PathFindingAStar(src, dst);
-        }while(path.Count <= 1);
+        }while(path.Count <= 1); // TODO: Add a sentinel?
 
         return path;
     }
-
 }
 
 
