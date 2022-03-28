@@ -219,6 +219,8 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
         }
     }
 
+    public bool frozen;
+
     public event EventHandler<MovePath> moveStateUpdated;
     public event EventHandler childrenUpdated;
     public event EventHandler<Leader> childrenEntered;
@@ -364,7 +366,8 @@ public class UnitSingleLeader : Unit
 public class UnitFromObjective: UnitSingleLeader
 {
     public UnitFromObjective(ObjectiveTable.Data data, Side side) : base(data.name, data.nameJap, data.picture, 1, data.guard, side)
-    {        
+    {
+        frozen = true;
         /*
         if(data.isBuilding) // TODO: We may define a strength field in NotionData.
         {

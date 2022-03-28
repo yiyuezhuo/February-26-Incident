@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
+/// <summary>
+/// "Entry point", top UI logic and game logic which is not moved to proper location yet.
+/// </summary>
 public class StrategyView : Control
 {
 	[Export] ScenarioDataRes scenarioDataRes;
@@ -31,11 +34,13 @@ public class StrategyView : Control
 
 	StrategyPad selectedPad;
 	Dictionary<Unit, StrategyPad> padMap = new Dictionary<Unit, StrategyPad>();
-	TransferRequest currentTransferRequest;
+	TransferRequest currentTransferRequest; // async refactoring?
 	CreateRequest currentCreateRequest; // This request is not relevent to `currentTransferRequest`.
 
 	Node mapContainer;
 	Node arrowContainer;
+
+	GameManager gameManager;
 
 	public override void _Ready()
 	{
@@ -95,6 +100,8 @@ public class StrategyView : Control
 			region.moved += OnRegionMoved;
 		}
 		mapShower.Flush();
+
+		gameManager = new GameManager(scenarioData);
 	}
 
 	void OnRegionMoved(object sender, Side sideOri)
@@ -140,6 +147,16 @@ public class StrategyView : Control
 		var regionSampled = scenarioData.mapData.SampleEdgeRegion();
 		var unit = new UnitSingleLeader("Government Leader", "", scenarioData.govSide.picture, 300, 500, scenarioData.govSide);
 		unit.EnterTo(regionSampled);
+		
+		/*
+		var dstRegion = scenarioData.mapData.SampleRegion();
+		var pathFinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
+		var path = pathFinding.PathFindingAStar(unit.parent, dstRegion);
+		unit.movingState.ResetToPath(path); // TODO: FOG?
+		*/
+
+		var agent = new RandomWalkingAgent(scenarioData, scenarioData.govSide);
+		agent.Schedule(unit);
 	}
 
 	void OnLeaderDestroy(object sender, Leader leader)
@@ -153,7 +170,7 @@ public class StrategyView : Control
 	void OnArtilleryButtonPressed()
 	{
 		GD.Print("OnArtilleryButtonPressed");
-		// Call a "instant" fire on selected unit.
+		// Call an "instant" fire on selected unit.
 		if(selectedPad != null)
 		{
 			selectedPad.unit.agent.TakeDirectFire(100f);
@@ -162,6 +179,8 @@ public class StrategyView : Control
 			// unitBar.SetData(selectedPad?.unit);
 			stackBar.SoftUpdate();
 			unitBar.SoftUpdate();
+			// stackBar.HardUpdate();
+			// unitBar.HardUpdate();
 		}
 	}
 
@@ -187,7 +206,7 @@ public class StrategyView : Control
 		
 		mapContainer.AddChild(pad);
 
-		// "try" register leaders
+		// "try" to register leaders
 		foreach(var leader in unit.children)
 			RegisterLeader(leader);
 	}
@@ -204,7 +223,8 @@ public class StrategyView : Control
 			}
 			else if(selectedPad.unit.parent.Equals(unit.parent))
 			{
-				stackBar.SetData(unit.parent);
+				// stackBar.SetData(unit.parent);
+				stackBar.HardUpdate();
 			}
 		}
 		padMap.Remove(unit);
@@ -238,7 +258,8 @@ public class StrategyView : Control
 	void SimulationHandler(object sender, int n)
 	{
 		for(var i=0; i<n; i++)
-			SimulationStep();
+			gameManager.SimulationStep();
+			// SimulationStep();
 		
 		mapShower.Flush(); // GoForward may trigger some handlers to call areaInfo, so we flush at every
 
@@ -246,6 +267,7 @@ public class StrategyView : Control
 		unitBar.SoftUpdate();
 	}
 
+	/*
 	void SimulationStep() // 1 min -> 1 call
 	{
 		foreach(var region in scenarioData.regions)
@@ -257,6 +279,7 @@ public class StrategyView : Control
 		foreach(var unit in scenarioData.units.ToList())
 			unit.StepPost();
 	}
+	*/
 
 	void OnAreaClick(object sender, Region area)
 	{

@@ -101,6 +101,12 @@ public class MapData : MapKit.MapData<RegionData, Region>, PathFinding.IGraph<Re
         var edgeRegionList = (from region in areaMap.Values where region.isEdge && region.movable select region).ToList();
         return edgeRegionList[YYZ.Random.Next() % edgeRegionList.Count];
     }
+
+    public Region SampleRegion()
+    {
+        var edgeRegionList = (from region in areaMap.Values where region.movable select region).ToList();
+        return edgeRegionList[YYZ.Random.Next() % edgeRegionList.Count];
+    }
 }
 
 
