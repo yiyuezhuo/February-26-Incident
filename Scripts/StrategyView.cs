@@ -153,8 +153,12 @@ public class StrategyView : Control
 		var unit = new UnitSingleLeader("Government Leader", "", scenarioData.govSide.picture, 300, 500, scenarioData.govSide);
 		unit.EnterTo(regionSampled);
 
+		/*
 		var agent = new RandomWalkingAgent(scenarioData, scenarioData.govSide);
 		agent.Schedule(unit);
+		*/
+		GD.Print($"regionSampled={regionSampled}");
+		gameManager.agent.Schedule(unit);
 	}
 
 	void OnLeaderDestroy(object sender, Leader leader)
@@ -327,9 +331,10 @@ public class StrategyView : Control
 			if(!cacheHit)
 			{
 				var extendsRequest = unit.movingState.active && Input.IsActionPressed("shift");
-				var pathfinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
+				// var pathfinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
 				var src = extendsRequest ? unit.movingState.destination : unit.parent;
-				var path = pathfinding.PathFindingAStar(src, area);
+				// var path = pathfinding.PathFindingAStar(src, area);
+				var path = PathFinding.PathFinding<Region>.AStar(scenarioData.mapData, src, area);
 
 				if(path.Count == 0)
 					return; // don't update arrow

@@ -20,6 +20,232 @@ public interface IGraph<IndexT>
     IEnumerable<IndexT> Neighbors(IndexT pos);
 }
 
+public static class PathFinding<IndexT>
+{
+    static List<IndexT> ReconstructPath(Dictionary<IndexT, IndexT> cameFrom, IndexT current)
+    {
+        var total_path = new List<IndexT>{current};
+        while(cameFrom.ContainsKey(current)){
+            current = cameFrom[current];
+            total_path.Add(current);
+        }
+        total_path.Reverse();
+        return total_path;
+    }
+
+    static float TryGet(Dictionary<IndexT, float> dict, IndexT key)
+    {
+        if (dict.ContainsKey(key))
+        {
+            return dict[key];
+        }
+        return float.PositiveInfinity;
+    }
+
+    /// <summary>
+    /// Path finding using A* algorithm, if failed it will return a empty list.
+    /// </summary>
+    public static List<IndexT> AStar(IGraph<IndexT> graph, IndexT src, IndexT dst)
+    {
+        var openSet = new HashSet<IndexT>{src};
+        var cameFrom = new Dictionary<IndexT, IndexT>();
+
+        var gScore = new Dictionary<IndexT, float>{{src, 0}}; // default Mathf.Infinity
+
+        var fScore = new Dictionary<IndexT, float>{{src, graph.EstimateCost(src, dst)}}; // default Mathf.Infiniy
+
+        while(openSet.Count > 0)
+        {
+            IEnumerator<IndexT> openSetEnumerator = openSet.GetEnumerator();
+
+            openSetEnumerator.MoveNext(); // assert?
+            IndexT current = openSetEnumerator.Current;
+            float lowest_f_score = fScore[current];
+
+            while(openSetEnumerator.MoveNext())
+            {
+                IndexT pos = openSetEnumerator.Current;
+                if(fScore[pos] < lowest_f_score)
+                {
+                    lowest_f_score = TryGet(fScore, pos);
+                    current = pos;
+                }
+            }
+
+            if(current.Equals(dst))
+            {
+                return ReconstructPath(cameFrom, current);
+            }
+
+            openSet.Remove(current);
+            foreach(IndexT neighbor in graph.Neighbors(current))
+            {
+                float tentative_gScore = TryGet(gScore, current) + graph.MoveCost(current, neighbor);
+                if(tentative_gScore < TryGet(gScore, neighbor))
+                {
+                    cameFrom[neighbor] = current;
+                    gScore[neighbor] = tentative_gScore;
+                    fScore[neighbor] = TryGet(gScore, neighbor) + graph.EstimateCost(neighbor, dst);
+
+                    openSet.Add(neighbor);
+                }
+            }
+        }
+        return new List<IndexT>(); // failure
+    }
+
+    /*
+    public static Dictionary<IndexT, Path> Dijkstra(IndexT src, float budget)
+    {
+        // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
+
+        var nodeToPath = GetReachable(new IndexT[]{src}, budget);
+
+        return nodeToPath;
+    }
+    */
+
+    public class DijkstraResult
+    {
+        public Dictionary<IndexT, Path> nodeToPath;
+        public IndexT pickedNode;
+
+        public List<IndexT> Reconstruct(IndexT node)
+        {
+            var p = node;
+            var ret = new List<IndexT>();
+            while(p != null)
+            {
+                ret.Add(p);
+                p = nodeToPath[p].prev;
+            }
+            ret.Reverse();
+            return ret;
+        }
+
+        public float Cost(IndexT node) => nodeToPath[node].cost;
+    }
+
+    public static DijkstraResult Dijkstra(IGraph<IndexT> graph, IEnumerable<IndexT> srcIter, Func<IndexT, bool> Predicate, float budget)
+    {
+        // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
+
+        var ret = new DijkstraResult();
+
+        var nodeToPath = ret.nodeToPath = new Dictionary<IndexT, Path>();
+        var openSet = new SortedSet<IndexT>(new PathComparer(nodeToPath));
+
+        foreach(var src in srcIter)
+        {
+            nodeToPath[src] = new Path();
+            openSet.Add(src);
+        }
+        
+        var closeSet = new HashSet<IndexT>();
+
+        while(openSet.Count > 0)
+        // for(int i=0; openSet.Count > 0; i++)
+        {
+            /*
+            if(i > 40)
+                System.Console.WriteLine("WTF"); // breakpoint here to debug
+            */
+            
+            var pickedNode = openSet.Min; // `Min()` comes from Linq.IEnumerable, while the `Min` *property* comes from `SortedSet`.
+            var pickedPath = nodeToPath[pickedNode];
+
+            if(Predicate(pickedNode))
+            {
+                ret.pickedNode = pickedNode;
+                break;
+            }
+
+            openSet.Remove(pickedNode);
+            closeSet.Add(pickedNode);
+
+            if(budget - nodeToPath[pickedNode].cost <= 0) // We allows the value to be negative, but it will not be allowed to "propogate".
+                continue;
+
+            foreach(var node in graph.Neighbors(pickedNode))
+            {
+                if(closeSet.Contains(node))
+                    continue;
+
+                var pickedCost = pickedPath.cost + graph.MoveCost(pickedNode, node);
+                if(nodeToPath.TryGetValue(node, out var path))
+                {
+                    if(pickedCost < path.cost)
+                    {
+                        // Resort node
+                        openSet.Remove(node); 
+
+                        path.cost = pickedCost;
+                        path.prev = pickedNode;
+
+                        openSet.Add(node);
+                    }
+                }
+                else
+                {
+                    path = new Path(){prev = pickedNode, cost = pickedCost};
+                    nodeToPath[node] = path;
+                    openSet.Add(node);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static DijkstraResult GetReachable(IGraph<IndexT> graph, IndexT src, float budget)
+    {
+        var srcIter = new IndexT[]{src};
+        return Dijkstra(graph, srcIter, DummyFalsePredicate, budget);
+    }
+
+    static bool DummyFalsePredicate(IndexT node) => false;
+
+    public static List<IndexT> ExploreNearestTarget(IGraph<IndexT> graph, IndexT src, Func<IndexT, bool> Predicate)
+    {
+        var srcIter = new IndexT[]{src};
+        var result = Dijkstra(graph, srcIter, Predicate, float.PositiveInfinity);
+        return result.Reconstruct(result.pickedNode);
+    }
+
+    /*
+    public string PathToString(List<IndexT> path)
+    {
+        string s = "";
+        foreach(IndexT p in path)
+        {
+            s += p.ToString() + ","; // TODO: Use `Join` or `StringBuilder`
+        }
+        return $"Path({path.Count}):{s}";
+    }
+    */
+
+    public class Path
+    {
+        public IndexT prev;
+        public float cost;
+
+        public override string ToString() => $"Path({prev}, {cost})";
+    }
+
+    public class PathComparer : IComparer<IndexT>
+    {
+        Dictionary<IndexT, Path> nodeToPath;
+        public PathComparer(Dictionary<IndexT, Path> nodeToPath)
+        {
+            this.nodeToPath = nodeToPath;
+        }
+        public int Compare(IndexT x, IndexT y)
+        {
+            return nodeToPath[x].cost.CompareTo(nodeToPath[y].cost);
+        }
+    }
+}
+
+/*
 public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: Do we really need this constraint?
 {
     IGraph<IndexT> graph;
@@ -144,7 +370,7 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
 
                 var pickedCost = pickedPath.cost + graph.MoveCost(pickedNode, node);
                 if(nodeToPath.TryGetValue(node, out var path))
-                {                    
+                {
                     if(pickedCost < path.cost)
                     {
                         path.cost = pickedCost;
@@ -197,6 +423,7 @@ public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: D
         }
     }
 }
+*/
 
 /*
 public class Path<IndexT>

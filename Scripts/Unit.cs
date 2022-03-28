@@ -120,7 +120,8 @@ public class MovingState
     public void ResetToPath(List<Region> path)
     {
         _Reset();
-        _Extends(path);
+        if(path.Count > 1)
+            _Extends(path);
 
         updated?.Invoke(this, false);
     }

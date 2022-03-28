@@ -20,22 +20,22 @@ public abstract class Agent
         this.scenarioData = scenarioData;
     }
 
-    public abstract void Schedule();
-
-}
-
-public class RandomWalkingAgent : Agent
-{
-    public RandomWalkingAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
-
-    public override void Schedule()
+    public virtual void Schedule() // Schedule is not necessarily consistent with Schedule(Unit unit)
     {
         foreach(var unit in controllingUnits)
             if(!unit.movingState.active && !unit.frozen)
                 Schedule(unit);
     }
 
-    public void Schedule(Unit unit)
+    public abstract void Schedule(Unit unit);
+}
+
+
+public class RandomWalkingAgent : Agent
+{
+    public RandomWalkingAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+
+    public override void Schedule(Unit unit)
     {
         var path = SamplePath(unit.parent);
 		unit.movingState.ResetToPath(path); // TODO: FOG?
@@ -47,12 +47,35 @@ public class RandomWalkingAgent : Agent
         do
         {
             var dst = scenarioData.mapData.SampleRegion();
-            var pathFinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
-            path = pathFinding.PathFindingAStar(src, dst);
+            path = PathFinding.PathFinding<Region>.AStar(scenarioData.mapData, src, dst);
         }while(path.Count <= 1); // TODO: Add a sentinel?
 
         return path;
     }
+}
+
+public class SimpleAttackingAgent : Agent
+{
+    public SimpleAttackingAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+
+    public override void Schedule(Unit unit)
+    {
+        var path = PathFinding.PathFinding<Region>.ExploreNearestTarget(scenarioData.mapData, unit.parent, HasEnemy);
+		unit.movingState.ResetToPath(path); // TODO: FOG?
+    }
+
+    bool HasEnemy(Region region)
+    {
+        // GD.Print($"HasEnemy called for {region}");
+        foreach(var unit in region.children)
+        {
+            // GD.Print($"{unit} => {!unit.side.Equals(controllingSide)}");
+            if(!unit.side.Equals(controllingSide))
+                return true;
+        }
+        return false;
+    }
+
 }
 
 

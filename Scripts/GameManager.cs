@@ -10,12 +10,13 @@ using System.Linq;
 public class GameManager
 {
     ScenarioData scenarioData;
-    Agent agent;
+    public Agent agent;
 
     public GameManager(ScenarioData scenarioData)
     {
         this.scenarioData = scenarioData;
-        this.agent = new RandomWalkingAgent(scenarioData, scenarioData.govSide);
+        // this.agent = new RandomWalkingAgent(scenarioData, scenarioData.govSide);
+        this.agent = new SimpleAttackingAgent(scenarioData, scenarioData.govSide);
     }
 
 	public void SimulationStep() // 1 min -> 1 call
