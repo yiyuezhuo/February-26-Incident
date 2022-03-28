@@ -304,9 +304,8 @@ public class ScenarioData
             // Skip off-map objectives
             if(objectiveData.area != null)
             {
-                var unit = new UnitFromObjective(objectiveData);
+                var unit = new UnitFromObjective(objectiveData, govSide);
                 // RegisterUnit(unit);
-                unit.side = govSide;
                 unit.EnterTo(areaToRegion[objectiveData.area]);
 
                 /*

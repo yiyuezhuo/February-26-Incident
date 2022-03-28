@@ -96,5 +96,11 @@ namespace YYZ
             var rnd = GetRandom();
             return (float)rnd.NextDouble();
         }
+
+        public static int Next()
+        {
+            var rnd = GetRandom();
+            return rnd.Next();
+        }
     }
 }

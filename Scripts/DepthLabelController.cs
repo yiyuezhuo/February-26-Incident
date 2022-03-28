@@ -48,6 +48,7 @@ public class DepthLabelController : Node
 			depthLabel = new Label();
 			depthLabel.Text = region.children.Count.ToString();
 			depthLabel.RectPosition = region.center + new Vector2(0, 50f); // TODO: introduce condif instead of hard-coded offset.
+			depthLabel.AddColorOverride("font_color", new Color(0,0,0));
 			mapContainer.AddChild(depthLabel);
 			depthLabelMap[region] = depthLabel;
 		}

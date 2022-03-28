@@ -6,6 +6,7 @@ using YYZ.Data.February26;
 using System.Collections.Generic;
 using Godot;
 using System;
+using System.Linq;
 
 /// <summary>
 /// App layer Region representation.
@@ -93,6 +94,12 @@ public class MapData : MapKit.MapData<RegionData, Region>, PathFinding.IGraph<Re
             if(movable)
                 yield return region;
         }
+    }
+
+    public Region SampleEdgeRegion()
+    {
+        var edgeRegionList = (from region in areaMap.Values where region.isEdge && region.movable select region).ToList();
+        return edgeRegionList[YYZ.Random.Next() % edgeRegionList.Count];
     }
 }
 

@@ -118,6 +118,9 @@ public class StrategyView : Control
 		RegisterLeader(leader);
 	}
 
+	/// <summary>
+	/// In most time, the registry should be done by `EnterTo` through `OnUnitChildrenEntered`, once the `OnUnitChildrenEntered` is bound.
+	/// </summary>
 	void RegisterLeader(Leader leader)
 	{
 		// TODO: hack way to "register" leader only once in StrategyView layer.
@@ -128,13 +131,15 @@ public class StrategyView : Control
 
 	/// <summary>
 	/// Add an army summoning button, by which 20,000 armies (20~40 units) enter the map 
-	/// and try to “encompass” rebels (limit their movement).
+	/// and try to "encompass" rebels (limit their movement).
 	/// </summary>
 	void OnSuppressButtonPressed()
 	{
 		GD.Print("OnSuppressButtonPressed");
 
-		
+		var regionSampled = scenarioData.mapData.SampleEdgeRegion();
+		var unit = new UnitSingleLeader("Government Leader", "", scenarioData.govSide.picture, 300, 500, scenarioData.govSide);
+		unit.EnterTo(regionSampled);
 	}
 
 	void OnLeaderDestroy(object sender, Leader leader)
@@ -162,9 +167,14 @@ public class StrategyView : Control
 
 	/// <summary>
 	/// Create a StrategyPad and other wraps for a "bare" unit.
+	///
+	/// In most time, the registry should be done by `EnterTo` through `OnRegionChildrenEntered`, once the `OnRegionChildrenEntered` is bound.
 	/// </summary>
 	void RegisterUnit(Unit unit)
 	{
+		if(padMap.ContainsKey(unit))
+			return;
+		
 		var pad = mapImageScene.Instance<StrategyPad>();
 		pad.Setup(unit, arrowContainer, this);
 

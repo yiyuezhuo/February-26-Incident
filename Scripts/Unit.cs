@@ -345,16 +345,26 @@ public class UnitProcedure : Unit
     }
 }
 
+/// <sumary>
+/// </summary>
+public class UnitSingleLeader : Unit
+{
+    public UnitSingleLeader(string name, string nameJap, Texture portrait, float command, float strength, Side side)
+    {
+        var dummyLeader = new LeaderProcedure(name, nameJap, portrait, command);
+        dummyLeader.EnterTo(this);
+        this.strength = strength;
+        this.side = side;
+    }
+}
+
 /// <summary>
 /// UnitFromObjective uses a normal Region as parent but a dummy leader as child.
 /// </summary>
-public class UnitFromObjective: Unit
+public class UnitFromObjective: UnitSingleLeader
 {
-    public UnitFromObjective(ObjectiveTable.Data data)
-    {
-        var dummyLeader = new LeaderProcedure(data.name, data.nameJap, data.picture, 1);
-        dummyLeader.EnterTo(this);
-
+    public UnitFromObjective(ObjectiveTable.Data data, Side side) : base(data.name, data.nameJap, data.picture, 1, data.guard, side)
+    {        
         /*
         if(data.isBuilding) // TODO: We may define a strength field in NotionData.
         {
@@ -366,7 +376,6 @@ public class UnitFromObjective: Unit
             strength = YYZ.Random.NextFloat() * 10;
         }
         */
-        strength = data.guard;
     }
 }
 
