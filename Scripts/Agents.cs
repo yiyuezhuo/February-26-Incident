@@ -66,14 +66,34 @@ public class SimpleAttackingAgent : Agent
 
     bool HasEnemy(Region region)
     {
-        // GD.Print($"HasEnemy called for {region}");
         foreach(var unit in region.children)
-        {
-            // GD.Print($"{unit} => {!unit.side.Equals(controllingSide)}");
             if(!unit.side.Equals(controllingSide))
                 return true;
-        }
         return false;
+    }
+
+}
+
+/// <summary>
+/// Plan a group of units to attack. The behavior of `Schedule` are not consistent here.
+/// </summary>
+public class ComplexAttackingAgent : Agent
+{
+    public ComplexAttackingAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+
+    public void Schedule(IEnumerable<Unit> units)
+    {
+
+    }
+
+    public override void Schedule()
+    {
+        Schedule(controllingUnits);
+    }
+
+    public override void Schedule(Unit unit)
+    {
+        Schedule(new Unit[]{unit});
     }
 
 }

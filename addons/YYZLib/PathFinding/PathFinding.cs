@@ -8,16 +8,22 @@ using System;
 namespace YYZ.PathFinding
 {
 
-public interface IGraph<IndexT>
+public interface IGeneralGraph<IndexT>
 {
+    /// <summary>
+    /// src and dst are expected to be neighbor.
+    /// </summary>
     float MoveCost(IndexT src, IndexT dst);
-    // Vector3Int: (x, y, 0)
-    // src and dst are expected to be neighbor.
 
-    float EstimateCost(IndexT src, IndexT dst);
-    // z of src and dst are expected to be 0
-    
     IEnumerable<IndexT> Neighbors(IndexT pos);
+}
+
+public interface IGraph<IndexT> : IGeneralGraph<IndexT>
+{
+    /// <summary>
+    /// A heuristic comes from Euclidean space or something like that.
+    /// </summary>
+    float EstimateCost(IndexT src, IndexT dst);
 }
 
 public static class PathFinding<IndexT>
@@ -94,17 +100,6 @@ public static class PathFinding<IndexT>
         return new List<IndexT>(); // failure
     }
 
-    /*
-    public static Dictionary<IndexT, Path> Dijkstra(IndexT src, float budget)
-    {
-        // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
-
-        var nodeToPath = GetReachable(new IndexT[]{src}, budget);
-
-        return nodeToPath;
-    }
-    */
-
     public class DijkstraResult
     {
         public Dictionary<IndexT, Path> nodeToPath;
@@ -126,7 +121,7 @@ public static class PathFinding<IndexT>
         public float Cost(IndexT node) => nodeToPath[node].cost;
     }
 
-    public static DijkstraResult Dijkstra(IGraph<IndexT> graph, IEnumerable<IndexT> srcIter, Func<IndexT, bool> Predicate, float budget)
+    public static DijkstraResult Dijkstra(IGeneralGraph<IndexT> graph, IEnumerable<IndexT> srcIter, Func<IndexT, bool> Predicate, float budget)
     {
         // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
 
@@ -148,7 +143,7 @@ public static class PathFinding<IndexT>
         {
             /*
             if(i > 40)
-                System.Console.WriteLine("WTF"); // breakpoint here to debug
+                System.Console.WriteLine("DEBUG infinite loop"); // breakpoint here to debug
             */
             
             var pickedNode = openSet.Min; // `Min()` comes from Linq.IEnumerable, while the `Min` *property* comes from `SortedSet`.
@@ -176,7 +171,7 @@ public static class PathFinding<IndexT>
                 {
                     if(pickedCost < path.cost)
                     {
-                        // Resort node
+                        // Resort the node
                         openSet.Remove(node); 
 
                         path.cost = pickedCost;
@@ -196,7 +191,7 @@ public static class PathFinding<IndexT>
         return ret;
     }
 
-    public static DijkstraResult GetReachable(IGraph<IndexT> graph, IndexT src, float budget)
+    public static DijkstraResult GetReachable(IGeneralGraph<IndexT> graph, IndexT src, float budget)
     {
         var srcIter = new IndexT[]{src};
         return Dijkstra(graph, srcIter, DummyFalsePredicate, budget);
@@ -204,239 +199,78 @@ public static class PathFinding<IndexT>
 
     static bool DummyFalsePredicate(IndexT node) => false;
 
-    public static List<IndexT> ExploreNearestTarget(IGraph<IndexT> graph, IndexT src, Func<IndexT, bool> Predicate)
+    public static List<IndexT> ExploreNearestTarget(IGeneralGraph<IndexT> graph, IndexT src, Func<IndexT, bool> Predicate)
     {
         var srcIter = new IndexT[]{src};
         var result = Dijkstra(graph, srcIter, Predicate, float.PositiveInfinity);
         return result.Reconstruct(result.pickedNode);
     }
 
-    /*
-    public string PathToString(List<IndexT> path)
+    public class Path
     {
-        string s = "";
-        foreach(IndexT p in path)
+        public IndexT prev;
+        public float cost;
+
+        public override string ToString() => $"Path({prev}, {cost})";
+    }
+
+    public class PathComparer : IComparer<IndexT>
+    {
+        Dictionary<IndexT, Path> nodeToPath;
+        public PathComparer(Dictionary<IndexT, Path> nodeToPath)
         {
-            s += p.ToString() + ","; // TODO: Use `Join` or `StringBuilder`
+            this.nodeToPath = nodeToPath;
         }
-        return $"Path({path.Count}):{s}";
+        public int Compare(IndexT x, IndexT y)
+        {
+            return nodeToPath[x].cost.CompareTo(nodeToPath[y].cost);
+        }
+    }
+
+    static float ccw(System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)
+    {
+        var p1p2 = p2 - p1;
+        var p1p3 = p3 - p1;
+        return p1p2.X * p1p3.Y - p1p2.Y * p1p3.X;
+    }
+
+    static float Dot(System.Numerics.Vector2 a, System.Numerics.Vector2 b)
+    {
+        return a.X * b.X + a.Y * b.Y;
+    }
+
+    static float CosAngle(System.Numerics.Vector2 a, System.Numerics.Vector2 b)
+    {
+        var p = Dot(a, b);
+        var angle = Dot(a, b) / Math.Sqrt(Dot(a, a)) / Math.Sqrt(Dot(b, b));
+        return (float)angle;
+    }
+
+    /*
+    public static Stack<IndexT> GrahamScan(IEnumerable<System.Numerics.Vector2> pointIter)
+    {
+        // https://en.wikipedia.org/wiki/Graham_scan
+        var stack = new Stack<IndexT>();
+
+        var p0 = new System.Numerics.Vector2(float.PositiveInfinity, float.PositiveInfinity);
+        foreach(var point in pointIter)
+            if(point.Y < p0.Y || (point.Y == p0.Y && point.X < p0.X))
+                p0 = point;
+
+        var points = pointIter.OrderBy(p => CosAngle(p0, p)).ToList();
+
+        foreach(var point in points)
+        {
+            while(stack.Count >= 2 && )
+        }
+    }
+
+    public static List<IndexT> RegionConvexHull(IGraph<IndexT> graph, IEnumerable<IndexT> regions, Func<IndexT, float> X, Func<IndexT, float> Y)
+    {
+
     }
     */
-
-    public class Path
-    {
-        public IndexT prev;
-        public float cost;
-
-        public override string ToString() => $"Path({prev}, {cost})";
-    }
-
-    public class PathComparer : IComparer<IndexT>
-    {
-        Dictionary<IndexT, Path> nodeToPath;
-        public PathComparer(Dictionary<IndexT, Path> nodeToPath)
-        {
-            this.nodeToPath = nodeToPath;
-        }
-        public int Compare(IndexT x, IndexT y)
-        {
-            return nodeToPath[x].cost.CompareTo(nodeToPath[y].cost);
-        }
-    }
-}
-
-/*
-public class PathFinding<IndexT> // where IndexT : IEquatable<IndexT> // TODO: Do we really need this constraint?
-{
-    IGraph<IndexT> graph;
-
-    public PathFinding(IGraph<IndexT> graph)
-    {
-        this.graph = graph;
-    }
-
-    List<IndexT> ReconstructPath(Dictionary<IndexT, IndexT> cameFrom, IndexT current)
-    {
-        var total_path = new List<IndexT>{current};
-        while(cameFrom.ContainsKey(current)){
-            current = cameFrom[current];
-            total_path.Add(current);
-        }
-        total_path.Reverse();
-        return total_path;
-    }
-
-    float TryGet(Dictionary<IndexT, float> dict, IndexT key)
-    {
-        if (dict.ContainsKey(key))
-        {
-            return dict[key];
-        }
-        return float.PositiveInfinity;
-    }
-
-    /// <summary>
-    /// Path finding using A* algorithm, if failed it will return empty list.
-    /// </summary>
-    public List<IndexT> PathFindingAStar(IndexT src, IndexT dst)
-    {
-        var openSet = new HashSet<IndexT>{src};
-        var cameFrom = new Dictionary<IndexT, IndexT>();
-
-        var gScore = new Dictionary<IndexT, float>{{src, 0}}; // default Mathf.Infinity
-
-        var fScore = new Dictionary<IndexT, float>{{src, graph.EstimateCost(src, dst)}}; // default Mathf.Infiniy
-
-        while(openSet.Count > 0)
-        {
-            IEnumerator<IndexT> openSetEnumerator = openSet.GetEnumerator();
-
-            openSetEnumerator.MoveNext(); // assert?
-            IndexT current = openSetEnumerator.Current;
-            float lowest_f_score = fScore[current];
-
-            while(openSetEnumerator.MoveNext())
-            {
-                IndexT pos = openSetEnumerator.Current;
-                if(fScore[pos] < lowest_f_score)
-                {
-                    lowest_f_score = TryGet(fScore, pos);
-                    current = pos;
-                }
-            }
-
-            if(current.Equals(dst))
-            {
-                return ReconstructPath(cameFrom, current);
-            }
-
-            openSet.Remove(current);
-            foreach(IndexT neighbor in graph.Neighbors(current))
-            {
-                float tentative_gScore = TryGet(gScore, current) + graph.MoveCost(current, neighbor);
-                if(tentative_gScore < TryGet(gScore, neighbor))
-                {
-                    cameFrom[neighbor] = current;
-                    gScore[neighbor] = tentative_gScore;
-                    fScore[neighbor] = TryGet(gScore, neighbor) + graph.EstimateCost(neighbor, dst);
-
-                    openSet.Add(neighbor);
-                }
-            }
-        }
-        return new List<IndexT>(); // failure
-    }
-    
-    public Dictionary<IndexT, Path> GetReachable(IndexT src, float budget)
-    {
-        // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
-
-        var nodeToPath = GetReachable(new IndexT[]{src}, budget);
-
-        return nodeToPath;
-    }
-
-    public Dictionary<IndexT, Path> GetReachable(IEnumerable<IndexT> srcIter, float budget)
-    {
-        // First phase, determine true "reachable" nodes using the Dijkstra's algorithm
-
-        var nodeToPath = new Dictionary<IndexT, Path>();
-        var openSet = new SortedSet<IndexT>(new PathComparer(nodeToPath));
-
-        foreach(var src in srcIter)
-        {
-            nodeToPath[src] = new Path();
-            openSet.Add(src);
-        }
-        
-        var closeSet = new HashSet<IndexT>();
-
-        while(openSet.Count > 0)
-        // for(int i=0; i<20 && openSet.Count > 0; i++)
-        {
-            var pickedNode = openSet.Min; // `Min()` comes from Linq.IEnumerable, while the `Min` *property* comes from `SortedSet`.
-            var pickedPath = nodeToPath[pickedNode];
-
-            openSet.Remove(pickedNode);
-            closeSet.Add(pickedNode);
-
-            if(budget - nodeToPath[pickedNode].cost <= 0) // We allows the value to be negative, but it will not be allowed to "propogate".
-                continue;
-
-            foreach(var node in graph.Neighbors(pickedNode))
-            {
-                if(closeSet.Contains(node))
-                    continue;
-
-                var pickedCost = pickedPath.cost + graph.MoveCost(pickedNode, node);
-                if(nodeToPath.TryGetValue(node, out var path))
-                {
-                    if(pickedCost < path.cost)
-                    {
-                        path.cost = pickedCost;
-                        path.prev = pickedNode;
-
-                        openSet.Remove(node); // resort node
-                        openSet.Add(node);
-                    }
-                }
-                else
-                {
-                    path = new Path(){prev = pickedNode, cost = pickedCost};
-                    nodeToPath[node] = path;
-                    openSet.Add(node);
-                }
-            }
-        }
-
-        return nodeToPath;
-    }
-
-    public string PathToString(List<IndexT> path)
-    {
-        string s = "";
-        foreach(IndexT p in path)
-        {
-            s += p.ToString() + ","; // TODO: Use `Join` or `StringBuilder`
-        }
-        return $"Path({path.Count}):{s}";
-    }
-
-    public class Path
-    {
-        public IndexT prev;
-        public float cost;
-
-        public override string ToString() => $"Path({prev}, {cost})";
-    }
-
-    public class PathComparer : IComparer<IndexT>
-    {
-        Dictionary<IndexT, Path> nodeToPath;
-        public PathComparer(Dictionary<IndexT, Path> nodeToPath)
-        {
-            this.nodeToPath = nodeToPath;
-        }
-        public int Compare(IndexT x, IndexT y)
-        {
-            return nodeToPath[x].cost.CompareTo(nodeToPath[y].cost);
-        }
-    }
-}
-*/
-
-/*
-public class Path<IndexT>
-{
-    public List<IndexT> trace;
-    public float traceCost; // this value can be negative
-    public IndexT halfWayDst(){get => traceCost <}
-    // public float halfWayReducedCost;
-    public float remain;
-    public IndexT src => trace[0];
-    public IndexT dst => trace[trace.Count-1];
-}
-*/
 }
 
 
+}
