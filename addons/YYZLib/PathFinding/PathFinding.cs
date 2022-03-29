@@ -58,7 +58,7 @@ public static class PathFinding<IndexT>
 
         var gScore = new Dictionary<IndexT, float>{{src, 0}}; // default Mathf.Infinity
 
-        var fScore = new Dictionary<IndexT, float>{{src, graph.EstimateCost(src, dst)}}; // default Mathf.Infiniy
+        var fScore = new Dictionary<IndexT, float>{{src, graph.EstimateCost(src, dst)}};
 
         while(openSet.Count > 0)
         {
@@ -158,7 +158,7 @@ public static class PathFinding<IndexT>
             openSet.Remove(pickedNode);
             closeSet.Add(pickedNode);
 
-            if(budget - nodeToPath[pickedNode].cost <= 0) // We allows the value to be negative, but it will not be allowed to "propogate".
+            if(budget - nodeToPath[pickedNode].cost <= 0) // We allows the value to be negative, but it will not be allowed to "propagate".
                 continue;
 
             foreach(var node in graph.Neighbors(pickedNode))
@@ -245,12 +245,10 @@ public static class PathFinding<IndexT>
         var angle = Dot(a, b) / Math.Sqrt(Dot(a, a)) / Math.Sqrt(Dot(b, b));
         return (float)angle;
     }
-
-    /*
-    public static Stack<IndexT> GrahamScan(IEnumerable<System.Numerics.Vector2> pointIter)
+    
+    public static Stack<System.Numerics.Vector2> GrahamScan(IEnumerable<System.Numerics.Vector2> pointIter)
     {
         // https://en.wikipedia.org/wiki/Graham_scan
-        var stack = new Stack<IndexT>();
 
         var p0 = new System.Numerics.Vector2(float.PositiveInfinity, float.PositiveInfinity);
         foreach(var point in pointIter)
@@ -259,17 +257,47 @@ public static class PathFinding<IndexT>
 
         var points = pointIter.OrderBy(p => CosAngle(p0, p)).ToList();
 
-        foreach(var point in points)
+        var stackWithoutTop = new Stack<System.Numerics.Vector2>(); // Since it's not convenient to peek second element of the stack.
+        var top = points.First();
+
+        foreach(var point in points.Skip(1))
         {
-            while(stack.Count >= 2 && )
+            while(stackWithoutTop.Count >= 1 && ccw(stackWithoutTop.Peek(), top, point) <= 0)
+            {
+                top = stackWithoutTop.Pop();
+            }
+            stackWithoutTop.Push(top);
+            top = point;
         }
+
+        stackWithoutTop.Push(top); // The stack is with top from now.
+        var stack = stackWithoutTop;
+
+        return stack;
     }
 
-    public static List<IndexT> RegionConvexHull(IGraph<IndexT> graph, IEnumerable<IndexT> regions, Func<IndexT, float> X, Func<IndexT, float> Y)
+    public static List<IndexT> RegionConvexHull(IGraph<IndexT> graph, IEnumerable<IndexT> regions, Func<IndexT, System.Numerics.Vector2> CenterFor)
     {
+        var center2region = new Dictionary<System.Numerics.Vector2, IndexT>();
+        foreach(var region in regions)
+            center2region[CenterFor(region)] = region;
 
+        var stack = GrahamScan(center2region.Keys);
+        var src = center2region[stack.Pop()];
+        var boundaries = new HashSet<IndexT>(){src};
+
+        while(stack.Count > 0)
+        {
+            var dst = center2region[stack.Pop()];
+            foreach(var region in AStar(graph, src, dst))
+                boundaries.Add(region);
+
+            src = dst;
+        }
+
+        return boundaries.ToList();
     }
-    */
+    
 }
 
 
