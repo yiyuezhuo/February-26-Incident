@@ -101,12 +101,11 @@ public class SimpleAttackingAgent : Agent
     }
 }
 
-/// <summary>
-/// Plan a group of units to attack. The behavior of `Schedule` are not consistent here.
-/// </summary>
-public class ComplexAttackingAgent : Agent
+public abstract class EncircleAgent : Agent
 {
-    public ComplexAttackingAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+    public EncircleAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+
+    protected abstract List<Region> GetWrapper(List<Region> nonEmptyOpponentRegions);
 
     public void Schedule(IEnumerable<Unit> units)
     {
@@ -114,7 +113,13 @@ public class ComplexAttackingAgent : Agent
         if(opponentRegions.Count == 0)
             return;
         
-        var wrapper = PathFinding.PathFinding<Region>.RegionConvexHullWrapper(scenarioData.mapData, opponentRegions, CenterFor);
+        // var wrapper = PathFinding.PathFinding<Region>.RegionConvexHullWrapper(scenarioData.mapData, opponentRegions, CenterFor);
+        var wrapper = GetWrapper(opponentRegions);
+        Distribute(units, wrapper);
+    }
+
+    void Distribute(IEnumerable<Unit> units, List<Region> wrapper)
+    {
         // How to distribute units to occupy is a complex planning problem. Here we just distribute it using order.
         var idx = 0;
         foreach(var unit in units)
@@ -136,8 +141,36 @@ public class ComplexAttackingAgent : Agent
     {
         // Schedule(new Unit[]{unit});
     }
-
 }
+
+/// <summary>
+/// Plan a group of units to attack. The behavior of `Schedule` are not consistent here.
+/// </summary>
+public class ConvexEncircleAgent : EncircleAgent
+{
+    public ConvexEncircleAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+
+    protected override List<Region> GetWrapper(List<Region> opponentRegions) => PathFinding.PathFinding<Region>.RegionConvexHullWrapper(scenarioData.mapData, opponentRegions, CenterFor);
+}
+
+public class SimpleEncircleAgent : EncircleAgent
+{
+    public SimpleEncircleAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+
+    protected override List<Region> GetWrapper(List<Region> opponentRegions)
+    {
+        var selectedSet = new HashSet<Region>();
+        var excludeSet = opponentRegions.ToHashSet();
+        
+        foreach(var opponentRegion in opponentRegions)
+            foreach(var region in opponentRegion.neighbors)
+                if(!excludeSet.Contains(region))
+                    selectedSet.Add(region);
+        
+        return selectedSet.ToList();
+    }
+}
+
 
 
 }

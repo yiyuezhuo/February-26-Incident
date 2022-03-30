@@ -365,8 +365,10 @@ public static class PathFinding<IndexT>
                 if(!hull.boundariesSet.Contains(region) && !hull.IsInside(region))
                     set.Add(region);
         
+        /*
         if(set.Count == 0)
             System.Console.WriteLine("WTF");
+        */
         
         return set.ToList();
     }
