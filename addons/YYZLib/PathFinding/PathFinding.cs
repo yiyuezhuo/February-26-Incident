@@ -227,6 +227,9 @@ public static class PathFinding<IndexT>
         }
     }
 
+    /// <summary>
+    /// ccw: ccw > 0 if three points make a counter-clockwise turn, clockwise if ccw < 0, and collinear if ccw = 0.
+    /// </summary>
     static float ccw(System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)
     {
         var p1p2 = p2 - p1;
@@ -245,6 +248,26 @@ public static class PathFinding<IndexT>
         var angle = Dot(a, b) / Math.Sqrt(Dot(a, a)) / Math.Sqrt(Dot(b, b));
         return (float)angle;
     }
+
+    class GramScanComparer : IComparer<System.Numerics.Vector2>
+    {
+        Dictionary<System.Numerics.Vector2, float> angleMap = new Dictionary<System.Numerics.Vector2, float>();
+        System.Numerics.Vector2 p0;
+
+        public GramScanComparer(IEnumerable<System.Numerics.Vector2> points, System.Numerics.Vector2 p0)
+        {
+            foreach(var p in points)
+                angleMap[p] = CosAngle(p0, p);
+            this.p0 = p0;
+        }
+        public int Compare(System.Numerics.Vector2 a, System.Numerics.Vector2 b)
+        {
+            var ret = angleMap[a].CompareTo(angleMap[b]);
+            if(ret == 0)
+                return Dot(a - p0, a - p0).CompareTo(Dot(b - p0, b - p0));
+            return ret;
+        }
+    }
     
     public static Stack<System.Numerics.Vector2> GrahamScan(IEnumerable<System.Numerics.Vector2> pointIter)
     {
@@ -255,17 +278,17 @@ public static class PathFinding<IndexT>
             if(point.Y < p0.Y || (point.Y == p0.Y && point.X < p0.X))
                 p0 = point;
 
-        var points = pointIter.OrderBy(p => CosAngle(p0, p)).ToList();
+        var points = pointIter.ToList();
+        points.Sort(new GramScanComparer(points, p0));
 
-        var stackWithoutTop = new Stack<System.Numerics.Vector2>(); // Since it's not convenient to peek second element of the stack.
+        var stackWithoutTop = new Stack<System.Numerics.Vector2>(); // We don't include top in the stack, since it's not convenient to peek second element of this stack implementation.
         var top = points.First();
 
         foreach(var point in points.Skip(1))
         {
             while(stackWithoutTop.Count >= 1 && ccw(stackWithoutTop.Peek(), top, point) <= 0)
-            {
                 top = stackWithoutTop.Pop();
-            }
+            
             stackWithoutTop.Push(top);
             top = point;
         }
@@ -276,7 +299,34 @@ public static class PathFinding<IndexT>
         return stack;
     }
 
-    public static List<IndexT> RegionConvexHull(IGraph<IndexT> graph, IEnumerable<IndexT> regions, Func<IndexT, System.Numerics.Vector2> CenterFor)
+    public class RegionConvexHull
+    {
+        public List<IndexT> boundaries;
+        public HashSet<IndexT> boundariesSet;
+        Func<IndexT, System.Numerics.Vector2> CenterFor;
+
+        public RegionConvexHull(List<IndexT> boundaries, HashSet<IndexT> boundariesSet, Func<IndexT, System.Numerics.Vector2> CenterFor)
+        {
+            this.boundaries = boundaries;
+            this.boundariesSet = boundariesSet;
+            this.CenterFor = CenterFor;
+        }
+
+        public bool IsInside(IndexT region) // Need checks
+        {
+            if(boundaries.Count <= 1)
+                return region.Equals(boundaries[0]);
+            
+            var tail = boundaries.First();
+            foreach(var head in boundaries.Skip(1))
+                if(ccw(CenterFor(tail), CenterFor(head), CenterFor(region)) <= 0)
+                    return false;
+            return true;
+        }
+
+    }
+
+    public static RegionConvexHull RegionConvexHullFor(IGraph<IndexT> graph, IEnumerable<IndexT> regions, Func<IndexT, System.Numerics.Vector2> CenterFor)
     {
         var center2region = new Dictionary<System.Numerics.Vector2, IndexT>();
         foreach(var region in regions)
@@ -284,20 +334,42 @@ public static class PathFinding<IndexT>
 
         var stack = GrahamScan(center2region.Keys);
         var src = center2region[stack.Pop()];
-        var boundaries = new HashSet<IndexT>(){src};
+        var boundariesSet = new HashSet<IndexT>(){src}; 
+        var boundaries = new List<IndexT>(){src};
 
         while(stack.Count > 0)
         {
             var dst = center2region[stack.Pop()];
             foreach(var region in AStar(graph, src, dst))
-                boundaries.Add(region);
+                if(!boundariesSet.Contains(region))
+                {
+                    boundariesSet.Add(region);
+                    boundaries.Add(region);
+                }
 
             src = dst;
         }
 
-        return boundaries.ToList();
+        boundaries.Reverse();
+
+        return new RegionConvexHull(boundaries, boundariesSet, CenterFor);
     }
-    
+
+
+    public static List<IndexT> RegionConvexHullWrapper(IGraph<IndexT> graph, IEnumerable<IndexT> regions, Func<IndexT, System.Numerics.Vector2> CenterFor)
+    {
+        var hull = RegionConvexHullFor(graph, regions, CenterFor);
+        var set = new HashSet<IndexT>();
+        foreach(var b in hull.boundaries)
+            foreach(var region in graph.Neighbors(b))
+                if(!hull.boundariesSet.Contains(region) && !hull.IsInside(region))
+                    set.Add(region);
+        
+        if(set.Count == 0)
+            System.Console.WriteLine("WTF");
+        
+        return set.ToList();
+    }
 }
 
 

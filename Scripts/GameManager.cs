@@ -16,7 +16,8 @@ public class GameManager
     {
         this.scenarioData = scenarioData;
         // this.agent = new RandomWalkingAgent(scenarioData, scenarioData.govSide);
-        this.agent = new SimpleAttackingAgent(scenarioData, scenarioData.govSide);
+        // this.agent = new SimpleAttackingAgent(scenarioData, scenarioData.govSide);
+		this.agent = new ComplexAttackingAgent(scenarioData, scenarioData.govSide);
     }
 
 	public void SimulationStep() // 1 min -> 1 call

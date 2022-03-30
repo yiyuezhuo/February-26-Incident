@@ -11,8 +11,30 @@ public abstract class Agent
     protected Side controllingSide;
     protected ScenarioData scenarioData;
 
-    protected IEnumerable<Unit> controllingUnits{get => from unit in scenarioData.units where unit.side.Equals(controllingSide) select unit;}
+    protected IEnumerable<Unit> controllingUnits{get => from unit in scenarioData.units where unit.side.Equals(controllingSide) && !unit.frozen select unit;}
     protected IEnumerable<Unit> enemyUnits{get => from unit in scenarioData.units where !unit.side.Equals(controllingSide) select unit;}
+    protected IEnumerable<Region> RegionsOf(Side side)
+    {
+        foreach(var region in scenarioData.regions)
+            foreach(var unit in region.children)
+                if(unit.side.Equals(side))
+                {
+                    yield return region;
+                    break;
+                }
+    }
+
+    protected IEnumerable<Region> RegionsOfOpponentOf(Side side)
+    {
+        foreach(var region in scenarioData.regions)
+            foreach(var unit in region.children)
+                if(!unit.side.Equals(side))
+                {
+                    yield return region;
+                    break;
+                }
+    }
+
 
     public Agent(ScenarioData scenarioData, Side side)
     {
@@ -23,11 +45,17 @@ public abstract class Agent
     public virtual void Schedule() // Schedule is not necessarily consistent with Schedule(Unit unit)
     {
         foreach(var unit in controllingUnits)
-            if(!unit.movingState.active && !unit.frozen)
+            if(!unit.movingState.active)
                 Schedule(unit);
     }
 
     public abstract void Schedule(Unit unit);
+
+    /// <summary>
+    /// Extract center info and invert y.
+    /// </summary>
+    protected System.Numerics.Vector2 CenterFor(Region region) => new System.Numerics.Vector2(region.center.x, -region.center.y); 
+    // TODO: performance issue? Is it better to make a dedicate interface targeting Godot or Unity's Vector2?
 }
 
 
@@ -71,7 +99,6 @@ public class SimpleAttackingAgent : Agent
                 return true;
         return false;
     }
-
 }
 
 /// <summary>
@@ -83,17 +110,31 @@ public class ComplexAttackingAgent : Agent
 
     public void Schedule(IEnumerable<Unit> units)
     {
+        var opponentRegions = RegionsOfOpponentOf(controllingSide).ToList();
+        if(opponentRegions.Count == 0)
+            return;
+        
+        var wrapper = PathFinding.PathFinding<Region>.RegionConvexHullWrapper(scenarioData.mapData, opponentRegions, CenterFor);
+        // How to distribute units to occupy is a complex planning problem. Here we just distribute it using order.
+        var idx = 0;
+        foreach(var unit in units)
+        {
+            var dst = wrapper[idx];
+            var path = PathFinding.PathFinding<Region>.AStar(scenarioData.mapData, unit.parent, dst);
+            unit.movingState.ResetToPath(path);
 
+            idx = (idx + 1) % wrapper.Count;
+        }
     }
 
     public override void Schedule()
     {
-        Schedule(controllingUnits);
+        Schedule(controllingUnits.Where(x => !x.movingState.active));
     }
 
     public override void Schedule(Unit unit)
     {
-        Schedule(new Unit[]{unit});
+        // Schedule(new Unit[]{unit});
     }
 
 }
