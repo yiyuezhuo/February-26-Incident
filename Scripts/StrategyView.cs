@@ -21,6 +21,8 @@ public class StrategyView : Control
 	[Export] NodePath suppressionButtonPath;
 	[Export] NodePath strengthDetachDialogPath;
 	[Export] NodePath infoLabelPath;
+	[Export] NodePath phaseLabelPath;
+	[Export] NodePath ceaseFireButtonPath;
 	
 	[Export] PackedScene mapImageScene;
 
@@ -31,6 +33,7 @@ public class StrategyView : Control
 	StackBar stackBar;
 	StrengthDetachDialog strengthDetachDialog;
 	Label infoLabel;
+	Label phaseLabel;
 
 	// States
 
@@ -52,6 +55,7 @@ public class StrategyView : Control
 		stackBar = (StackBar)GetNode(stackBarPath);
 		strengthDetachDialog = (StrengthDetachDialog)GetNode(strengthDetachDialogPath);
 		infoLabel = (Label)GetNode(infoLabelPath);
+		phaseLabel = (Label)GetNode(phaseLabelPath);
 		
 		mapShower = (MapShower)mapView.GetMapShower();
 		mapShower.areaClickEvent += OnAreaClick;
@@ -71,6 +75,9 @@ public class StrategyView : Control
 
 		var suppressButton = (Button)GetNode(suppressionButtonPath);
 		suppressButton.Connect("pressed", this, nameof(OnSuppressButtonPressed));
+
+		var ceaseFireButton = (Button)GetNode(ceaseFireButtonPath);
+		ceaseFireButton.Connect("pressed", this, nameof(OnCeaseFireButtonPressed));
 
 		arrowContainer = new Node();
 		mapView.AddChild(arrowContainer);
@@ -108,6 +115,14 @@ public class StrategyView : Control
 		gameManager = new GameManager(scenarioData);
 
 		infoLabel.Text = "";
+	}
+
+	void OnCeaseFireButtonPressed()
+	{
+		gameManager.GotoNextState();
+		var text = gameManager.state.ToLabelString();
+		ShowInfo($"Go to phase {text}");
+		phaseLabel.Text = text;
 	}
 
 	void OnRegionMoved(object sender, Side sideOri)
@@ -168,8 +183,11 @@ public class StrategyView : Control
 			unitBar.HardUpdate();
 		}
 		if(leader.important)
-			infoLabel.Text = $"{leader.name} {leader.nameJap} is killed.";
+			ShowInfo($"{leader.name} {leader.nameJap} is killed.");
+			// infoLabel.Text = $"{leader.name} {leader.nameJap} is killed.";
 	}
+
+	void ShowInfo(string text) => infoLabel.Text = text;
 
 	void OnArtilleryButtonPressed()
 	{
@@ -217,6 +235,8 @@ public class StrategyView : Control
 
 	void OnUnitDestroyed(object sender, Unit unit)
 	{
+		var region = unit.parent;
+
 		if(selectedPad != null)
 		{
 			if(unit.Equals(selectedPad.unit))
@@ -225,20 +245,25 @@ public class StrategyView : Control
 				stackBar.SetData(null);
 				unitBar.SetData(null);
 			}
-			else if(selectedPad.unit.parent.Equals(unit.parent))
+			else if(selectedPad.unit.parent.Equals(region))
 			{
 				// stackBar.SetData(unit.parent);
 				stackBar.HardUpdate();
 			}
 		}
 		padMap.Remove(unit);
+
+		if(!region.IsEmpty() && region.IsUnique() && !region.children[0].side.Equals(region.parent))
+			region.MoveTo(region.children[0].side);
+			
 	}
 
 	void OnUnitMoveEvent(object sender, Unit.MovePath path)
 	{
 		var unit = (Unit)sender;
 		foreach(var region in path.reachedRegions)
-			region.MoveTo(unit.side);
+			if(region.IsConsistentWith(unit.side))
+				region.MoveTo(unit.side);
 
 		var pad = padMap[unit];
 		if(selectedPad != null && selectedPad.Equals(pad))

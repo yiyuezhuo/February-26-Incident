@@ -35,6 +35,23 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public float DistanceTo(Region other) => center.DistanceTo(other.center);
     public bool movable{get => areaData == null || areaData.movable;}
     public bool isEdge;
+    public bool IsEmpty() => children.Count == 0;
+
+    /// <summary>
+    /// true if no units of other side occupy the region.
+    /// </summary>
+    public bool IsConsistentWith(Side side)
+    {
+        foreach(var child in children)
+            if(!child.side.Equals(side))
+                return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Determine the region is occupied by only one side's units. The empty region situation is undefined and will raise an exception.
+    /// </summary>
+    public bool IsUnique() => IsConsistentWith(children[0].side);
 
     public void OnChildrenUpdated()
     {

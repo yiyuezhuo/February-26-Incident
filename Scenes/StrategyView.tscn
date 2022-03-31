@@ -28,6 +28,8 @@ artilleryFireButtonPath = NodePath("BottomContainer/HBoxContainer/ViewToggleCont
 suppressionButtonPath = NodePath("BottomContainer/HBoxContainer/ViewToggleContainer/SuppressButton")
 strengthDetachDialogPath = NodePath("StrengthDetachDialog")
 infoLabelPath = NodePath("BottomContainer/HBoxContainer/InfoLabel")
+phaseLabelPath = NodePath("BottomContainer/HBoxContainer/ViewToggleContainer/PhaseLabel")
+ceaseFireButtonPath = NodePath("BottomContainer/HBoxContainer/ViewToggleContainer/CeaseFireButton")
 mapImageScene = ExtResource( 5 )
 
 [node name="DepthLabelController" type="Node" parent="."]
@@ -72,20 +74,27 @@ margin_bottom = 20.0
 
 [node name="InfoLabel" type="Label" parent="BottomContainer/HBoxContainer"]
 margin_top = 1.0
-margin_right = 1503.0
+margin_right = 1386.0
 margin_bottom = 19.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 13 )
 text = "Some info"
 
 [node name="ViewToggleContainer" type="HBoxContainer" parent="BottomContainer/HBoxContainer"]
-margin_left = 1507.0
+margin_left = 1390.0
 margin_right = 1600.0
 margin_bottom = 20.0
 alignment = 2
 
+[node name="PhaseLabel" type="Label" parent="BottomContainer/HBoxContainer/ViewToggleContainer"]
+margin_top = 3.0
+margin_right = 89.0
+margin_bottom = 17.0
+text = "Assault Phase"
+
 [node name="NameViewButton" type="Button" parent="BottomContainer/HBoxContainer/ViewToggleContainer"]
-margin_right = 22.0
+margin_left = 93.0
+margin_right = 115.0
 margin_bottom = 20.0
 hint_tooltip = "Toggle view of region names."
 text = "N"
@@ -94,25 +103,32 @@ scenarioDataRes = ExtResource( 3 )
 mapContainerPath = NodePath("../../../../ViewportContainer/Viewport/MapView")
 
 [node name="ArrowButton" type="Button" parent="BottomContainer/HBoxContainer/ViewToggleContainer"]
-margin_left = 26.0
-margin_right = 47.0
+margin_left = 119.0
+margin_right = 140.0
 margin_bottom = 20.0
 hint_tooltip = "Show all arrows (soft select all units)."
 text = "A"
 
 [node name="ArtilleryFireButton" type="Button" parent="BottomContainer/HBoxContainer/ViewToggleContainer"]
-margin_left = 51.0
-margin_right = 70.0
+margin_left = 144.0
+margin_right = 163.0
 margin_bottom = 20.0
 hint_tooltip = "[DEBUG only] Artillery fire on selected unit."
 text = "F"
 
 [node name="SuppressButton" type="Button" parent="BottomContainer/HBoxContainer/ViewToggleContainer"]
-margin_left = 74.0
-margin_right = 93.0
+margin_left = 167.0
+margin_right = 186.0
 margin_bottom = 20.0
 hint_tooltip = "[DEBUG only] Summon an government to \"suppress\" rebel."
 text = "S"
+
+[node name="CeaseFireButton" type="Button" parent="BottomContainer/HBoxContainer/ViewToggleContainer"]
+margin_left = 190.0
+margin_right = 210.0
+margin_bottom = 20.0
+hint_tooltip = "[DEBUG only] Toggle Cease Fire Mode."
+text = "C"
 
 [node name="PageBackground" parent="BottomContainer" instance=ExtResource( 8 )]
 margin_top = 24.0
