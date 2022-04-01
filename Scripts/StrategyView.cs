@@ -164,7 +164,7 @@ public class StrategyView : Control
 	{
 		GD.Print("OnSuppressButtonPressed");
 
-		var regionSampled = scenarioData.mapData.SampleEdgeRegion();
+		var regionSampled = scenarioData.mapData.SampleEdgeRegion(); // TODO: Move `SampleEdgeRegion` to GameManager
 		var unit = new UnitSingleLeader("Government Leader", "", scenarioData.govSide.picture, 300, 500, scenarioData.govSide);
 		unit.EnterTo(regionSampled);
 
@@ -356,10 +356,8 @@ public class StrategyView : Control
 			if(!cacheHit)
 			{
 				var extendsRequest = unit.movingState.active && Input.IsActionPressed("shift");
-				// var pathfinding = new PathFinding.PathFinding<Region>(scenarioData.mapData);
 				var src = extendsRequest ? unit.movingState.destination : unit.parent;
-				// var path = pathfinding.PathFindingAStar(src, area);
-				var path = PathFinding.PathFinding<Region>.AStar(scenarioData.mapData, src, area);
+				var path = PathFinding.PathFinding<Region>.AStar(gameManager.GetGraph(), src, area);
 
 				if(path.Count == 0)
 					return; // don't update arrow
@@ -445,7 +443,7 @@ public class StrategyView : Control
 		var selectedLeaderList = new List<Leader>();
 
 		for(int i=0; i<srcUnit.children.Count; i++)
-			if(highlightList[i])
+			if(highlightList[i]) // FIXME: Sometimes srcUnit is not synced with UI states? If happend again, check strength and whether it's "destroyed". Godot's thread system lacks document though.
 				selectedLeaderList.Add(srcUnit.children[i]);
 
 		return new DetachRequest(srcUnit, selectedLeaderList);

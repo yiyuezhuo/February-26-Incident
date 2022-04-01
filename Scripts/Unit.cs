@@ -281,26 +281,26 @@ public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Le
     public float strengthWithLeaders{get => strength + children.Count;}
     float commandEfficiency{get => Mathf.Min(command / strengthWithLeaders, 2);}
 
-    public void StepPre()
+    public void StepPre(IStepConfig config)
     {
         parent.AddOverlap(this);
         if(movingState.active)
             movingState.nextRegion.AddOverlap(this);
 
-        agent.StepPre();
+        agent.StepPre(config);
     }
 
-    public void Step()
+    public void Step(IStepConfig config)
     {
         if(movingState.active)
             GoForward(moveSpeedPixelPerMin); // TODO: engage decrease movement speed.
         
-        agent.Step();
+        agent.Step(config);
     }
 
-    public void StepPost()
+    public void StepPost(IStepConfig config)
     {
-        agent.StepPost();
+        agent.StepPost(config);
     }
 
     public class MovePath

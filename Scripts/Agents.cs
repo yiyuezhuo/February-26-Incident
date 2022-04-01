@@ -10,6 +10,7 @@ public abstract class Agent
 {
     protected Side controllingSide;
     protected ScenarioData scenarioData;
+    protected GameManager gameManager;
 
     protected IEnumerable<Unit> controllingUnits{get => from unit in scenarioData.units where unit.side.Equals(controllingSide) && !unit.frozen select unit;}
     protected IEnumerable<Unit> enemyUnits{get => from unit in scenarioData.units where !unit.side.Equals(controllingSide) select unit;}
@@ -35,11 +36,11 @@ public abstract class Agent
                 }
     }
 
-
-    public Agent(ScenarioData scenarioData, Side side)
+    public Agent(ScenarioData scenarioData, Side side, GameManager gameManager)
     {
         this.controllingSide = side;
         this.scenarioData = scenarioData;
+        this.gameManager = gameManager;
     }
 
     public virtual void Schedule() // Schedule is not necessarily consistent with Schedule(Unit unit)
@@ -61,7 +62,7 @@ public abstract class Agent
 
 public class RandomWalkingAgent : Agent
 {
-    public RandomWalkingAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+    public RandomWalkingAgent(ScenarioData scenarioData, Side side, GameManager gameManager): base(scenarioData, side, gameManager) {}
 
     public override void Schedule(Unit unit)
     {
@@ -74,8 +75,8 @@ public class RandomWalkingAgent : Agent
         List<Region> path;
         do
         {
-            var dst = scenarioData.mapData.SampleRegion();
-            path = PathFinding.PathFinding<Region>.AStar(scenarioData.mapData, src, dst);
+            var dst = scenarioData.mapData.SampleRegion(); // TODO: Move `SampleRegion` to GameManager? It seems like that it may need phase related info to work.
+            path = PathFinding.PathFinding<Region>.AStar(gameManager.GetGraph(), src, dst);
         }while(path.Count <= 1); // TODO: Add a sentinel?
 
         return path;
@@ -84,11 +85,11 @@ public class RandomWalkingAgent : Agent
 
 public class SimpleAttackingAgent : Agent
 {
-    public SimpleAttackingAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+    public SimpleAttackingAgent(ScenarioData scenarioData, Side side, GameManager gameManager): base(scenarioData, side, gameManager) {}
 
     public override void Schedule(Unit unit)
     {
-        var path = PathFinding.PathFinding<Region>.ExploreNearestTarget(scenarioData.mapData, unit.parent, HasEnemy);
+        var path = PathFinding.PathFinding<Region>.ExploreNearestTarget(gameManager.GetUnconstraitGraph(), unit.parent, HasEnemy);
 		unit.movingState.ResetToPath(path); // TODO: FOG?
     }
 
@@ -103,7 +104,7 @@ public class SimpleAttackingAgent : Agent
 
 public abstract class EncircleAgent : Agent
 {
-    public EncircleAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+    public EncircleAgent(ScenarioData scenarioData, Side side, GameManager gameManager): base(scenarioData, side, gameManager) {}
 
     protected abstract List<Region> GetWrapper(List<Region> nonEmptyOpponentRegions);
 
@@ -113,7 +114,6 @@ public abstract class EncircleAgent : Agent
         if(opponentRegions.Count == 0)
             return;
         
-        // var wrapper = PathFinding.PathFinding<Region>.RegionConvexHullWrapper(scenarioData.mapData, opponentRegions, CenterFor);
         var wrapper = GetWrapper(opponentRegions);
         Distribute(units, wrapper);
     }
@@ -125,7 +125,7 @@ public abstract class EncircleAgent : Agent
         foreach(var unit in units)
         {
             var dst = wrapper[idx];
-            var path = PathFinding.PathFinding<Region>.AStar(scenarioData.mapData, unit.parent, dst);
+            var path = PathFinding.PathFinding<Region>.AStar(gameManager.GetGraph(), unit.parent, dst);
             unit.movingState.ResetToPath(path);
 
             idx = (idx + 1) % wrapper.Count;
@@ -148,14 +148,14 @@ public abstract class EncircleAgent : Agent
 /// </summary>
 public class ConvexEncircleAgent : EncircleAgent
 {
-    public ConvexEncircleAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+    public ConvexEncircleAgent(ScenarioData scenarioData, Side side, GameManager gameManager): base(scenarioData, side, gameManager) {}
 
-    protected override List<Region> GetWrapper(List<Region> opponentRegions) => PathFinding.PathFinding<Region>.RegionConvexHullWrapper(scenarioData.mapData, opponentRegions, CenterFor);
+    protected override List<Region> GetWrapper(List<Region> opponentRegions) => PathFinding.PathFinding<Region>.RegionConvexHullWrapper(gameManager.GetUnconstraitGraph(), opponentRegions, CenterFor);
 }
 
 public class SimpleEncircleAgent : EncircleAgent
 {
-    public SimpleEncircleAgent(ScenarioData scenarioData, Side side): base(scenarioData, side) {}
+    public SimpleEncircleAgent(ScenarioData scenarioData, Side side, GameManager gameManager): base(scenarioData, side, gameManager) {}
 
     protected override List<Region> GetWrapper(List<Region> opponentRegions)
     {

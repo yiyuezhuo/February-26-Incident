@@ -20,31 +20,39 @@ public interface IVisitor // IVistor should be
 	void Visit(CombatState state);
 }
 
-public interface IState : IVisitor
+public interface IState : IVisitor, IStepConfig
 {
 	void Accept(IVisitor visitor);
 	string ToLabelString();
 	void Enter();
 	void Exit();
+	PathFinding.IGraph<Region> GetGraph();
 }
 
 public abstract class State
 {
 	protected GameManager gameManager;
-	public State(GameManager gameManager)
+	protected ScenarioData scenarioData;
+
+	public State(GameManager gameManager, ScenarioData scenarioData)
 	{
 		this.gameManager = gameManager;
+		this.scenarioData = scenarioData;
 	}
 
 	// public void Accept(IVisitor visitor) => visitor.Visit(this); // We need type info from derived class.
 	public virtual void Enter(){}
 	public virtual void Exit(){}
 	public virtual string ToLabelString() => GetType().Name;
+
+	public virtual bool IsSkipCombat() => false;
+
+	public virtual PathFinding.IGraph<Region> GetGraph() => gameManager.GetUnconstraitGraph();
 }
 
 public class AssaultState : State, IState
 {
-	public AssaultState(GameManager gameManager) : base(gameManager){}
+	public AssaultState(GameManager gameManager, ScenarioData scenarioData) : base(gameManager, scenarioData){}
 	public void Accept(IVisitor visitor) => visitor.Visit(this);
 	public void Visit(AssaultState state){}
 	public void Visit(CeaseFireState state){}
@@ -53,16 +61,36 @@ public class AssaultState : State, IState
 
 public class CeaseFireState : State, IState
 {
-	public CeaseFireState(GameManager gameManager) : base(gameManager){}
+	public CeaseFireState(GameManager gameManager, ScenarioData scenarioData) : base(gameManager, scenarioData){}
 	public void Accept(IVisitor visitor) => visitor.Visit(this);
-	public void Visit(AssaultState state){}
+	public void Visit(AssaultState state)
+	{
+		foreach(var unit in scenarioData.units)
+		{
+			// All moves into the hostile region are canceled.
+			// if(unit.movingState.active && !unit.movingState.nextRegion.IsConsistentWith(unit.side))
+			if(unit.movingState.active && !unit.movingState.nextRegion.parent.Equals(unit.side))
+				unit.movingState.Reset();
+			
+			// All units in hostile regions are "exiled" to a friendly region.
+			if(!unit.side.Equals(unit.parent.parent))
+			{
+				var path = PathFinding.PathFinding<Region>.ExploreNearestTarget(gameManager.GetUnconstraitGraph(), unit.parent, region => region.parent.Equals(unit.side));
+				unit.movingState.ResetToPath(path);
+			}
+		}
+	}
 	public void Visit(CeaseFireState state){}
 	public void Visit(CombatState state){}
+
+	public override bool IsSkipCombat() => true;
+
+	public override PathFinding.IGraph<Region> GetGraph() => gameManager.GetSideConstraitGraph();
 }
 
 public class CombatState : State, IState
 {
-	public CombatState(GameManager gameManager) : base(gameManager){}
+	public CombatState(GameManager gameManager, ScenarioData scenarioData) : base(gameManager, scenarioData){}
 	public void Accept(IVisitor visitor) => visitor.Visit(this);
 	public void Visit(AssaultState state){}
 	public void Visit(CeaseFireState state){}
@@ -98,10 +126,10 @@ public class GameManager
         // this.agent = new RandomWalkingAgent(scenarioData, scenarioData.govSide);
         // this.agent = new SimpleAttackingAgent(scenarioData, scenarioData.govSide);
 		// this.agent = new ConvexEncircleAgent(scenarioData, scenarioData.govSide);
-		this.agent = new SimpleEncircleAgent(scenarioData, scenarioData.govSide);
+		this.agent = new SimpleEncircleAgent(scenarioData, scenarioData.govSide, this);
 
-		states.Add(new AssaultState(this));
-		states.Add(new CeaseFireState(this));
+		states.Add(new AssaultState(this, scenarioData));
+		states.Add(new CeaseFireState(this, scenarioData));
 		state = states[0];
     }
 
@@ -112,13 +140,39 @@ public class GameManager
 		foreach(var region in scenarioData.regions)
 			region.StepPre();
 		foreach(var unit in scenarioData.units)
-			unit.StepPre();
+			unit.StepPre(state);
 		foreach(var unit in scenarioData.units)
-			unit.Step();
+			unit.Step(state);
 		foreach(var unit in scenarioData.units.ToList())
-			unit.StepPost();
+			unit.StepPost(state);
 
         agent.Schedule();
+	}
+
+	public PathFinding.IGraph<Region> GetUnconstraitGraph() => scenarioData.mapData;
+	public PathFinding.IGraph<Region> GetSideConstraitGraph() => new SideConstraitGraph(GetUnconstraitGraph());
+
+	/// <summary>
+	/// State/Phase determine the concrete selected graph. Though we may be something like `GraphFor(Side)`, `GraphFor(Unit)`. 
+	/// </summary>
+	public PathFinding.IGraph<Region> GetGraph() => state.GetGraph();
+}
+
+public class SideConstraitGraph : PathFinding.IGraph<Region>
+{
+	PathFinding.IGraph<Region> unconstraitGraph;
+	public SideConstraitGraph(PathFinding.IGraph<Region> unconstraitGraph)
+	{
+		this.unconstraitGraph = unconstraitGraph;
+	}
+
+	public float MoveCost(Region src, Region dst) => unconstraitGraph.MoveCost(src, dst);
+	public float EstimateCost(Region src, Region dst) => unconstraitGraph.EstimateCost(src, dst);
+	public IEnumerable<Region> Neighbors(Region src)
+	{
+		foreach(var nei in unconstraitGraph.Neighbors(src))
+			if(nei.parent.Equals(src.parent))
+				yield return nei;
 	}
 }
 

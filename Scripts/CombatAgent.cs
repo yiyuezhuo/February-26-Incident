@@ -8,6 +8,7 @@ using MathNet.Numerics.Distributions;
 using System.Linq;
 using System;
 
+
 public class UnitAgent
 {
     protected Unit unit;
@@ -32,6 +33,11 @@ public class UnitAgent
     }
 }
 
+public interface IStepConfig
+{
+    bool IsSkipCombat();
+}
+
 public class CombatAgent: UnitAgent
 {
     public CombatAgent(Unit unit) : base(unit) {}
@@ -41,8 +47,13 @@ public class CombatAgent: UnitAgent
 
     float commandEfficiency{get => Mathf.Min(command / strengthWithLeaders, 2);}
 
-    public void StepPre()
+    public void StepPre(IStepConfig config)
     {
+        /*
+        if(config.IsSkipCombat())
+            return;
+        */
+        
         totalTakenFire = 0;
 
         if(!isFiredLastStep)
@@ -57,13 +68,18 @@ public class CombatAgent: UnitAgent
         suppression = Mathf.Max(suppression - 0.1f, 0f);
     }
 
-    public void Step()
+    public void Step(IStepConfig config)
     {
+        if(config.IsSkipCombat())
+            return;
         DistributeFirepower();
     }
 
-    public void StepPost()
+    public void StepPost(IStepConfig config)
     {
+        if(config.IsSkipCombat())
+            return;
+        
         TakeDirectFire(totalTakenFire);
     }
 
@@ -83,8 +99,8 @@ public class CombatAgent: UnitAgent
         return fatigueModifer * suppressionModifier * commandModifer;
     }
 
-    static float killFactor = 0.0015f;
-    static float killVolatile = 0.0045f;
+    static float killFactor = 0.0010f;
+    static float killVolatile = 0.0030f;
     static float suppressionFactor = 0.2f;
     static float suppressionVolatile = 0.02f;
     static float fatigueFactor = 0.02f;
