@@ -170,7 +170,7 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
         }
     }
 
-    // Those "high-level" APIs are deprecated, we prefer to control Nodes directly at this time.
+    // Those "high-level" APIs are deprecated, we prefer to control Nodes directly at this point.
     public void SetArrows(IEnumerable<IArrowData> arrowDataIter) => arrowContainer.BindData(arrowDataIter);
     public void SetMapImages(IEnumerable<IMapImageData> mapImageIter) => mapImageContainer.BindData(mapImageIter);
     public void SetLongArrowPoints(IEnumerable<Vector2> controlPoints) => longArrow.SetCurvePositions(controlPoints);

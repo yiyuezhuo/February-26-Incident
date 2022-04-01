@@ -181,7 +181,7 @@ public class AreaInfo<TArea> where TArea : IArea
 /// Map sprite manager. MapShower itself will not capture any event, but it comes with some `OnXYZ` handlers to be called from outside and
 /// invokes some events. While `Strap`s members are public, they should not be included in any implemented interfaces. 
 /// We will just use those public members from limited horizon, such as the file defined in MapShower itself.
-/// We may introduce namespace to enforce or hint this in future, but we will enforce interface rule only at this time.
+/// We may introduce namespace to enforce or hint this in future, but we will enforce interface rule only at this point.
 /// </summary>
 public class MapShower<TArea> : Sprite where  TArea : IArea
 {

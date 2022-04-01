@@ -182,7 +182,7 @@ public class MovingState
 
 /// <summary>
 /// Unit is designed to be a complex but "configurable" object, just like ParticleMaterial. So for behavior branching, we favor states and tags over inheritance and interfaces.
-/// BTW, thanks to the fact that I can't see a simple way to refactor this at this time...
+/// BTW, thanks to the fact that I can't see a simple way to refactor this at this point...
 /// </summary>
 public abstract class Unit : Child<Unit, Region, List<Unit>>, IContainer<List<Leader>, Leader>, UnitInfoPad.IData, UnitBar.IData, UnitPad.IData
 {
@@ -335,7 +335,7 @@ public class UnitProcedure : Unit
 {
     // public override string name{get => "";} // TODO: C# doesn't allow adding setter in child class???
     // CC: https://stackoverflow.com/questions/82437/why-is-it-impossible-to-override-a-getter-only-property-and-add-a-setter
-    // Since These properties are not needed at this time, 
+    // Since These properties are not needed at this point, 
     // public override string nameJap{get => "";}
 
     public UnitProcedure(Side side, float strength, float fatigue)

@@ -2,7 +2,7 @@ shader_type canvas_item;
 
 uniform bool highlight;
 
-// Ok, Godot doesn't have #include at this time... So I must copy & paste those "solid" library function eveywhere.
+// Ok, Godot doesn't have #include at this point... So I must copy & paste those "solid" library function eveywhere.
 
 //https://github.com/Jam3/glsl-hsl2rgb/blob/master/index.glsl
 vec3 hsl2rgb( in vec3 c )

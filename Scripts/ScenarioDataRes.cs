@@ -85,7 +85,7 @@ public class LeaderFromTable: Leader
     public abstract class Rank
     {
         /// <summary>
-        /// The command capacity, it's determined by regression at this time.
+        /// The command capacity, it's determined by regression at this point.
         /// </summary>
         public abstract float command{get;}
     }
@@ -298,7 +298,7 @@ public class ScenarioData
         // Rebels occupy initial regions
         foreach(var region in regions)
         {
-            if(region.children.Count > 0) // All "units" belong to Rebel at this time.
+            if(region.children.Count > 0) // All "units" belong to Rebel at this point.
             {
                 region.MoveTo(rebelSide);
             }

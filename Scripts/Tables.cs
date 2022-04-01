@@ -12,7 +12,7 @@ using System;
 
 public interface IDataTable
 {
-    void Inspect(bool verbose); // Debug purpose at this time
+    void Inspect(bool verbose); // Debug purpose at this point
 }
 
 /// <summary>
