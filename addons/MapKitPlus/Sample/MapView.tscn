@@ -1,0 +1,24 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://addons/MapKitPlus/Sample/MapView.cs" type="Script" id=1]
+[ext_resource path="res://addons/MapKitPlus/Scenes/MapView.tscn" type="PackedScene" id=2]
+[ext_resource path="res://addons/MapKit/Sample/MapShower.cs" type="Script" id=3]
+[ext_resource path="res://addons/MapKit/Sample/mapData.tres" type="Resource" id=4]
+[ext_resource path="res://addons/MapKit/Sample/sample_map.png" type="Texture" id=5]
+[ext_resource path="res://addons/MapKit/Sample/sample_material.tres" type="Material" id=6]
+[ext_resource path="res://addons/MapKitPlus/Sample/uiStateData.tres" type="Resource" id=7]
+
+[node name="MapView" instance=ExtResource( 2 )]
+script = ExtResource( 1 )
+mapShowerPath = NodePath("Map")
+cameraPath = NodePath("Camera2D")
+arrowContainerPath = NodePath("ArrowContainer")
+mapImageContainerPath = NodePath("MapImageContainer")
+longArrowPath = NodePath("LongArrow")
+uiStateDataRes = ExtResource( 7 )
+
+[node name="Map" parent="." index="0"]
+material = ExtResource( 6 )
+texture = ExtResource( 5 )
+script = ExtResource( 3 )
+mapDataResource = ExtResource( 4 )

@@ -18,3 +18,5 @@ handle_input_locally = false
 render_target_update_mode = 3
 
 [node name="MapView" parent="ViewportContainer/Viewport" instance=ExtResource( 1 )]
+mapShowerPath = NodePath("Map")
+cameraPath = NodePath("Camera2D")

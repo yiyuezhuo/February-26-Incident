@@ -1,4 +1,4 @@
-namespace YYZ.MapKit.Widgets
+namespace YYZ.MapKitPlus.Widgets
 {
 
 

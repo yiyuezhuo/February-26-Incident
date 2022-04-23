@@ -1,4 +1,5 @@
-namespace YYZ.MapKit.Widgets{
+namespace YYZ.MapKitPlus.Widgets
+{
 
 
 using Godot;

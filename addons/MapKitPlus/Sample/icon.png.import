@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/icon.png-cf37a66de142d380b7e988f495720d63.stex"
+path="res://.import/icon.png-457559cb24dbfb423360139f66fd5eeb.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/MapKit/Sample/icon.png"
-dest_files=[ "res://.import/icon.png-cf37a66de142d380b7e988f495720d63.stex" ]
+source_file="res://addons/MapKitPlus/Sample/icon.png"
+dest_files=[ "res://.import/icon.png-457559cb24dbfb423360139f66fd5eeb.stex" ]
 
 [params]
 

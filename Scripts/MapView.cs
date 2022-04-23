@@ -8,8 +8,8 @@ public class MapView : YYZ.MapKit.MapView<Region>
     {
         base._Ready();
         
-        arrowContainer.Hide();
-        mapImageContainer.Hide();
+        // arrowContainer.Hide();
+        // mapImageContainer.Hide();
     }
 
 }

@@ -30,7 +30,7 @@ public class StrategyPad : TextureRect
 
     public event EventHandler clicked;
 
-    MapKit.Widgets.ProgressLongArrow arrow;
+    MapKitPlus.Widgets.ProgressLongArrow arrow;
 
     Control propogateTo;
 
@@ -118,7 +118,6 @@ public class StrategyPad : TextureRect
 
     void SyncPortrait()
     {
-        // Texture = unit.children[0].portrait;
         Texture = unit.portrait;
     }
 
@@ -161,13 +160,11 @@ public class StrategyPad : TextureRect
     {
         arrow?.QueueFree();
         QueueFree();
-        // arrow = null;
-        // TODO: reset movingState?
     }
 
     void IntializeArrow()
     {
-        arrow = progressLongArrowScene.Instance<MapKit.Widgets.ProgressLongArrow>();
+        arrow = progressLongArrowScene.Instance<MapKitPlus.Widgets.ProgressLongArrow>();
         arrowContainer.AddChild(arrow);
 
         var controlPoints = unit.movingState.path.Select(x => x.center);

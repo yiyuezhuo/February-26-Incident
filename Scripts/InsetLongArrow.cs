@@ -11,13 +11,13 @@ public class InsetLongArrow : Node2D
     [Export] NodePath outerArrowPath;
     [Export] NodePath innerArrowPath;
 
-    MapKit.Widgets.LongArrow outerArrow;
-    MapKit.Widgets.LongArrow innerArrow;
+    MapKitPlus.Widgets.LongArrow outerArrow;
+    MapKitPlus.Widgets.LongArrow innerArrow;
 
     public override void _Ready()
     {
-        outerArrow = (MapKit.Widgets.LongArrow)GetNode(outerArrowPath);
-        innerArrow = (MapKit.Widgets.LongArrow)GetNode(innerArrowPath);
+        outerArrow = (MapKitPlus.Widgets.LongArrow)GetNode(outerArrowPath);
+        innerArrow = (MapKitPlus.Widgets.LongArrow)GetNode(innerArrowPath);
     }
 
     public void SetCurvePositions(IEnumerable<Vector2> controlPoints)

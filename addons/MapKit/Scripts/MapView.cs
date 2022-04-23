@@ -6,16 +6,6 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-using YYZ.MapKit.Widgets;
-
-
-public interface IMapViewStateData
-{
-    Vector2 cameraPosition{get;set;}
-    Vector2 cameraZoom{get;set;}
-    bool required{get;set;}
-}
-
 /// <summary>
 /// MapView controls all the map related UI (MapShower sprite, counters on the map etc...). MapView is relatively self-included,
 /// so it has capture some events from the engine and sends them to MapShower, and it's expected to be contained in a `Viewport` or `ViewportContainer`. 
@@ -28,21 +18,9 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
 {
     [Export] NodePath mapShowerPath;
     [Export] NodePath cameraPath;
-    [Export] NodePath arrowContainerPath;
-    [Export] NodePath mapImageContainerPath;
-    [Export] Resource uiStateDataRes;
-    [Export] NodePath longArrowPath;
-
-    // Persistent state
-    protected IMapViewStateData uiStateData;
 
     protected MapShower<TArea> mapShower;
     protected Camera2D camera;
-
-    // "Widgets"
-    protected ArrowContainer arrowContainer;
-    protected MapImageContainer mapImageContainer;
-    protected LongArrow longArrow;
 
     protected bool dragging = false;
 
@@ -53,30 +31,8 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
     {
         mapShower = (MapShower<TArea>)GetNode(mapShowerPath);
         camera = (Camera2D)GetNode(cameraPath);
-        arrowContainer = (ArrowContainer)GetNode(arrowContainerPath);
-        mapImageContainer = (MapImageContainer)GetNode(mapImageContainerPath);
-        uiStateData = (IMapViewStateData)uiStateDataRes;
-        longArrow = (LongArrow)GetNode(longArrowPath);
-
-        Restore();
 
         cameraBeginPos = camera.Position;
-    }
-
-    void Restore() // It may be helpful to create a `TryResotre` to handle `uiStateData == null` situation.
-    {
-        if(uiStateData.required)
-        {
-            camera.Position = uiStateData.cameraPosition;
-            camera.Zoom = uiStateData.cameraZoom;
-        }
-    }
-
-    public void Store()
-    {
-        uiStateData.required = true;
-        uiStateData.cameraPosition = camera.Position;
-        uiStateData.cameraZoom = camera.Zoom;
     }
 
     /// <summary>
@@ -162,11 +118,6 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
         }
     }
 
-    // Those "high-level" APIs are deprecated, we prefer to control Nodes directly at this point.
-    public void SetArrows(IEnumerable<IArrowData> arrowDataIter) => arrowContainer.BindData(arrowDataIter);
-    public void SetMapImages(IEnumerable<IMapImageData> mapImageIter) => mapImageContainer.BindData(mapImageIter);
-    public void SetLongArrowPoints(IEnumerable<Vector2> controlPoints) => longArrow.SetCurvePositions(controlPoints);
-    public void SetLongArrowVisible(bool visible) => longArrow.Visible = visible;
 
     public MapShower<TArea> GetMapShower() => mapShower;
 
