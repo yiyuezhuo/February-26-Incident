@@ -14,7 +14,7 @@ using System.Collections.Generic;
 public class UIStateData : Resource, IMapViewStateData
 {
     [Export] public Vector2 cameraPosition{get;set;}
-    [Export]public Vector2 cameraZoom{get;set;}
+    [Export] public Vector2 cameraZoom{get;set;}
     [Export] public bool required{get;set;} = false; // C# 6.0 feature: https://stackoverflow.com/questions/40730/what-is-the-best-way-to-give-a-c-sharp-auto-property-an-initial-value
 }
 
