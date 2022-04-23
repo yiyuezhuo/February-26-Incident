@@ -90,7 +90,7 @@ public class MapData<TData, TRegion> : IMapData<TRegion> where TData : IRegionDa
 
     public MapData(Texture baseTexture, string path)
     {
-        var regionJsonString = YYZ.Text.Read(path);
+        var regionJsonString = Utils.ReadText(path);
 
         baseImage = baseTexture.GetData();
         baseImage.Lock();
