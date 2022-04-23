@@ -1,0 +1,108 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Scenes/RelationshipItem.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scenes/RelationshipButton.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scripts/RelationshipGrid.cs" type="Script" id=3]
+
+[node name="RelationshipGrid" type="GridContainer"]
+margin_right = 40.0
+margin_bottom = 40.0
+columns = 5
+script = ExtResource( 3 )
+
+[node name="TopLeftAnchor" parent="." instance=ExtResource( 1 )]
+margin_top = 3.0
+margin_right = 50.0
+margin_bottom = 17.0
+
+[node name="RebelHeader" parent="." instance=ExtResource( 2 )]
+margin_left = 54.0
+margin_right = 104.0
+text = "Rebel"
+
+[node name="TargetsHeader" parent="." instance=ExtResource( 2 )]
+margin_left = 108.0
+margin_right = 166.0
+text = "Targets"
+
+[node name="ArmyHeader" parent="." instance=ExtResource( 2 )]
+margin_left = 170.0
+margin_right = 220.0
+text = "Army"
+
+[node name="EmperorHeader" parent="." instance=ExtResource( 2 )]
+margin_left = 224.0
+margin_right = 290.0
+text = "Emperor"
+
+[node name="Rebel" parent="." instance=ExtResource( 1 )]
+margin_top = 24.0
+margin_right = 50.0
+margin_bottom = 38.0
+text = "Rebel"
+
+[node name="RebelToRebel" parent="." instance=ExtResource( 1 )]
+margin_left = 54.0
+margin_top = 24.0
+margin_right = 104.0
+margin_bottom = 38.0
+text = "-"
+
+[node name="RebelToTargets" parent="." instance=ExtResource( 1 )]
+margin_left = 108.0
+margin_top = 24.0
+margin_right = 166.0
+margin_bottom = 38.0
+custom_colors/font_color = Color( 1, 0, 0, 1 )
+text = "0"
+
+[node name="RebelToArmy" parent="." instance=ExtResource( 1 )]
+margin_left = 170.0
+margin_top = 24.0
+margin_right = 220.0
+margin_bottom = 38.0
+custom_colors/font_color = Color( 0.592157, 1, 0.0705882, 1 )
+text = "100"
+
+[node name="RebelToEmperor" parent="." instance=ExtResource( 1 )]
+margin_left = 224.0
+margin_top = 24.0
+margin_right = 290.0
+margin_bottom = 38.0
+custom_colors/font_color = Color( 0.592157, 1, 0.0705882, 1 )
+text = "100"
+
+[node name="Targets" parent="." instance=ExtResource( 1 )]
+margin_top = 42.0
+margin_right = 50.0
+margin_bottom = 56.0
+text = "Targets"
+
+[node name="TargetsToRebel" parent="." instance=ExtResource( 1 )]
+margin_left = 54.0
+margin_top = 42.0
+margin_right = 104.0
+margin_bottom = 56.0
+
+[node name="TargetsToTargets" parent="." instance=ExtResource( 1 )]
+margin_left = 108.0
+margin_top = 42.0
+margin_right = 166.0
+margin_bottom = 56.0
+text = "-"
+
+[node name="TargetsToArmy" parent="." instance=ExtResource( 1 )]
+margin_left = 170.0
+margin_top = 42.0
+margin_right = 220.0
+margin_bottom = 56.0
+custom_colors/font_color = Color( 0.317647, 1, 0, 1 )
+text = "100"
+
+[node name="TargetsToEmperor" parent="." instance=ExtResource( 1 )]
+margin_left = 224.0
+margin_top = 42.0
+margin_right = 290.0
+margin_bottom = 56.0
+custom_colors/font_color = Color( 0.392157, 0.827451, 0.109804, 1 )
+text = "100"
