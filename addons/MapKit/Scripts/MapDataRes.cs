@@ -25,18 +25,6 @@ public interface IRegionData
     int[][] Neighbors{get; set;}
 }
 
-/*
-class RegionData
-{
-    public int[] BaseColor;
-    public int[] RemapColor;
-    public int Points;
-    public float X;
-    public float Y;
-    public int[][] Neighbors;
-}
-*/
-
 
 public class RegionMapFactory<TRegionData, TRegion> where TRegionData : IRegionData where TRegion : IRegion<TRegion>, new()
 {
@@ -133,13 +121,11 @@ public class MapData<TData, TRegion> : IMapData<TRegion> where TData : IRegionDa
             return null;
         }
 
-        // return baseArr[x + y * width];
         return baseImage.GetPixel(x, y);
     }
     
     public TRegion ColorToArea(Color color)
     {
-        //GD.Print($"color={color}, areaMap.Count={areaMap.Count}, areaMap.Keys={areaMap.Keys}");
         return areaMap[color];
     }
 

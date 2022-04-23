@@ -61,9 +61,6 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
         Restore();
 
         cameraBeginPos = camera.Position;
-
-        // arrowContainer.Hide();
-        // mapImageContainer.Hide();
     }
 
     void Restore() // It may be helpful to create a `TryResotre` to handle `uiStateData == null` situation.
@@ -87,8 +84,6 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
     /// </summary>
     public override void _UnhandledInput(InputEvent @event) // event is C# keyword
     {
-        //GD.Print($"GameManager _UnhandledInput {@event}");
-
         var buttonEvent = @event as InputEventMouseButton;
         if(buttonEvent != null)
         {
@@ -104,8 +99,6 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
                     break;
 
                 case (int)ButtonList.Right: // 2
-                    // dragging = buttonEvent.Pressed;
-                    // GD.Print($"dragging: {dragging}");
                     DraggingClickHandler(buttonEvent);
                     break;
 
@@ -143,7 +136,6 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
         if(motionEvent != null)
         {
             var pos = mapShower.GetLocalMousePosition();
-            //GD.Print($"pos: {pos}");
             mapShower.OnRaycastHit(pos);
             if(dragging)
             {
@@ -155,7 +147,7 @@ public class MapView<TArea> : Node2D where TArea : IArea //, IMapView
     void DraggingClickHandler(InputEventMouseButton buttonEvent)
     {
         dragging = buttonEvent.Pressed;
-        GD.Print($"dragging: {dragging}");
+        // GD.Print($"dragging: {dragging}");
         if(buttonEvent.Pressed)
         {
             cameraBeginPos = camera.Position;

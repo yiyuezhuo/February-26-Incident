@@ -95,7 +95,6 @@ void fragment(){
 	vec4 c1 = texture(base_texture, UV + vec2(width, 0.0));
 	vec4 c2 = texture(base_texture, UV + vec2(0.0, width));
 	vec4 c3 = texture(base_texture, UV + vec2(-width, 0.0));
-	//vec4 c4 = texture(base_texture, UV + vec2(width, -width));
 	vec4 c4 = texture(base_texture, UV + vec2(0.0, -width));
 	if (c != c1 || c != c2 || c != c3 || c != c4){
 		COLOR = vec4(0,0,0,1);
@@ -104,23 +103,9 @@ void fragment(){
 		vec2 idx2 = idx.rg * remap_k + remap_b;
 		vec4 foreground_palette_color = texture(foreground_palette_texture, idx2);
 		
-		// vec4 mode_pp = texture(mode_palette_texture, idx2);
-		// COLOR = vec4(mode_pp.r, 0, 0, 1);
-		// COLOR = vec4(0, mode_pp.g, 0, 1);
-		// COLOR = vec4(0, 0, mode_pp.b, 1);
-		// COLOR = vec4(0, 0, mode_pp.a, 1);
-		// COLOR = vec4(0, mode_pp.a, 0, 1);
-		
-		
 		switch(mode){
 			case 0:
-				// vec4 mode_pp = texture(mode_palette_texture, idx2);
-				// COLOR = vec4(0, 0, mode_pp.b, 1);
-				// break;
-				
 				vec4 mode_p = texture(mode_palette_texture, idx2);
-				// COLOR = vec4(0, 0, mode_p.b, 1);
-				// return;
 				
 				if(mode_p.g == 0.0){
 					COLOR = foreground_palette_color;
@@ -132,17 +117,12 @@ void fragment(){
 				if(mode_p.r == 1.0){
 					vec3 hsl_COLOR = rgb2hsl(COLOR.rgb);
 					COLOR.rgb = hsl2rgb(hsl_COLOR + vec3(0.00, 0.05, 0.3));
-					// COLOR = vec4(1.0, 0.0, 0.0, 1.0);
 					COLOR = clamp(COLOR, 0.0, 1.0);
 					COLOR = mix(COLOR, selecting_color, 0.05);
 				}else if(mode_p.b >= 0.5){
-					// It's very likely that we will change behavior of this branch so we just copy-paste from above
 					vec3 hsl_COLOR = rgb2hsl(COLOR.rgb);
 					COLOR.rgb = hsl2rgb(hsl_COLOR + vec3(0.00, 0.05, 0.1));
 					COLOR = mix(COLOR, vec4(0.0, 1.0, 0.0, 1.0), 0.05);
-					//COLOR = vec4(0,0,mode_p.b,1);
-					//COLOR = vec4(0,mode_p.g,0,1);
-					//COLOR = vec4(mode_p.r,0,0,1);
 				}
 				
 				break;
@@ -151,8 +131,6 @@ void fragment(){
 				vec4 mode_p = texture(mode_palette_texture, idx2);
 				if(mode_p.r != 0.0){
 					COLOR = selecting_color;
-					// COLOR = mix(selecting_color, foreground_palette_color, 0.5);
-					//return;
 				}else if(mode_p.g == 0.0){
 					// Show foreground color in the area
 					COLOR = foreground_palette_color;
@@ -168,7 +146,5 @@ void fragment(){
 				COLOR = pow(terrain_color, vec4(selecting_color.r));
 				break;
 		}
-		
 	}
-	// COLOR = texture(base_texture, UV);
 }

@@ -49,6 +49,11 @@ handle_input_locally = false
 render_target_update_mode = 3
 
 [node name="MapView" parent="ViewportContainer/Viewport" instance=ExtResource( 1 )]
+mapShowerPath = NodePath("Map")
+cameraPath = NodePath("Camera2D")
+arrowContainerPath = NodePath("ArrowContainer")
+mapImageContainerPath = NodePath("MapImageContainer")
+longArrowPath = NodePath("LongArrow")
 
 [node name="TimePlayer" parent="." instance=ExtResource( 6 )]
 anchor_left = 1.0

@@ -7,13 +7,10 @@ using System.Collections.Generic;
 
 public abstract class AutoExpandedContainer<NodeType, DataType> : Node2D where NodeType : CanvasItem
 {
-    //protected PackedScene refScene; // subclass should define dedicated [Export] variable and assign the value to it, so that we can custom value shown in inspector.
     protected abstract PackedScene GetRefScene();
 
     public void BindData(IEnumerable<DataType> dataIter)
     {
-        // GD.Print($"BindData:{dataIter}");
-        
         var children = GetChildren();
         var prevLen = children.Count;
         var idx = 0;

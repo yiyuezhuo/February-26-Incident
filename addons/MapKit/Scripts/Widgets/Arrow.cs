@@ -50,9 +50,6 @@ public class Arrow : Node2D
 
         var bp = body.Points;
         var hp = head.Points;
-
-        // GD.Print($"after body->{bp.Length}->{bp}->{bp[0]}->{bp[1]}, head->{hp.Length}->{hp}->{hp[0]}->{hp[1]}");
-
     }
 
     public void MoveToCenter(Vector2 src, Vector2 pointTo)

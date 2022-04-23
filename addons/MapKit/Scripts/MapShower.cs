@@ -80,7 +80,6 @@ public class ImageTextureStrap<TArea> where TArea : IArea
 
     void BeginChangeColor()
     {
-        // GD.Print("before Lock");
         image.Lock();
         Locked = true;
     }
@@ -208,9 +207,7 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
 
     public override void _Ready()
     {
-        // GD.Print($"mapDataResource={mapDataResource}, typeof(TArea)={typeof(TArea)}");
         mapData = ((IMapDataRes<TArea>)mapDataResource).GetInstance(); // TODO: Casting performance problem?
-        // mapData.EnsureSetup(); // TODO: Looks like a very ugly implementation leak
 
         var material = (ShaderMaterial)this.Material;
 
@@ -244,13 +241,9 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
         var texture = new ImageTexture();
         texture.CreateFromImage(image);
 
-        // GD.Print($"texture.Flags={texture.Flags}");
-
         // Default is 7 -> (binary) 111 -> (FLAG_MIPMAPS, FLAG_REPEAT, FLAG_FILTER) = (true, true, true)
         texture.Flags = 0; // Disable those misleading "optimizations":
         //  0 -> (binary) 000 -> (binary) 111 -> (FLAG_MIPMAPS, FLAG_REPEAT, FLAG_FILTER) = (false, false, false)
-
-        // GD.Print($"texture.Flags={texture.Flags}");
 
         material.SetShaderParam(paramName, texture);
         return new ImageTextureStrap<TArea>(image, texture);
@@ -261,43 +254,10 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
     }
 
     static Image CreateInitImage(Color colorInit)
-    {
-        /*
-        const int arrLen = 256*256*4;
-
-        byte[] poolByteArray = new byte[arrLen];
-
-        var r = (byte)colorInit.r8;
-        var g = (byte)colorInit.g8;
-        var b = (byte)colorInit.b8;
-        var a = (byte)colorInit.a8;
-
-        for(int i=0; i<arrLen; i+=4)
-        {
-            
-            poolByteArray[i] = r;
-            poolByteArray[i+1] = g;
-            poolByteArray[i+2] = b;
-            poolByteArray[i+3] = a;
-            
-            //poolByteArray[i] = 0;
-            //poolByteArray[i+1] = 0;
-            //poolByteArray[i+2] = 0;
-            //poolByteArray[i+3] = 0;
-        }
-
-        var paletteImage = new Image();
-        paletteImage.CreateFromData(256, 256, false, Image.Format.Rgba8, poolByteArray);
-        */
-
-        
+    {   
         var paletteImage = new Image();
         paletteImage.Create(256, 256, false, Image.Format.Rgba8);
         paletteImage.Fill(colorInit);
-
-        paletteImage.Lock();
-        // GD.Print($"paletteImage.GetPixel(0, 0)={paletteImage.GetPixel(0, 0)}");
-        paletteImage.Unlock();
 
         return paletteImage;
     }
@@ -324,7 +284,6 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
         
         if(!areaSelected.Equals(areaLastSelected))
         {
-            // GD.Print($"Area select:{areaSelected}");
             if(areaLastSelected != null){
                 GetAreaInfo(areaLastSelected).isSelecting = false;
             }
@@ -334,7 +293,7 @@ public class MapShower<TArea> : Sprite where  TArea : IArea
 
             areaSelectedEvent?.Invoke(this, areaSelected); // Signal support only Godot.Object derived objects.
 
-            Flush(); // modeStrap.Flush();
+            Flush();
         }
     }
     
