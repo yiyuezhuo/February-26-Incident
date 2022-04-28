@@ -22,3 +22,6 @@ material = ExtResource( 6 )
 texture = ExtResource( 5 )
 script = ExtResource( 3 )
 mapDataResource = ExtResource( 4 )
+
+[node name="Camera2D" parent="." index="1"]
+current = false

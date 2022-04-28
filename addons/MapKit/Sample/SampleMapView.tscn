@@ -7,7 +7,7 @@
 [ext_resource path="res://addons/MapKit/Sample/MapShower.cs" type="Script" id=5]
 [ext_resource path="res://addons/MapKit/Sample/MapView.cs" type="Script" id=7]
 
-[node name="MapView" instance=ExtResource( 3 )]
+[node name="MapView2" instance=ExtResource( 3 )]
 script = ExtResource( 7 )
 mapShowerPath = NodePath("Map")
 cameraPath = NodePath("Camera2D")

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://Scripts/TimePlayer.cs" type="Script" id=1]
+[ext_resource path="res://Scripts/UI/TimePlayer.cs" type="Script" id=1]
 
 [node name="TimePlayer" type="PanelContainer"]
 margin_right = 14.0

@@ -2,7 +2,7 @@
 
 [ext_resource path="res://NotionData/Tables 1cacc/Leaders Ta 3f9c1/Teruzo_Ando.jpg" type="Texture" id=1]
 [ext_resource path="res://fonts/nico_font_big.tres" type="DynamicFont" id=2]
-[ext_resource path="res://Scripts/UnitPad.cs" type="Script" id=3]
+[ext_resource path="res://Scripts/UI/UnitPad.cs" type="Script" id=3]
 [ext_resource path="res://Shaders/PortraitPad.gdshader" type="Shader" id=4]
 [ext_resource path="res://Textures/320px-226_Hi_no_Maru.svg.png" type="Texture" id=5]
 

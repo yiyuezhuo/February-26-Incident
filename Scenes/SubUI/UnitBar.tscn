@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://Scenes/LeaderPad.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Scripts/UnitBar.cs" type="Script" id=3]
-[ext_resource path="res://Scenes/UnitInfoPad.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/SubUI/LeaderPad.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scripts/UI/UnitBar.cs" type="Script" id=3]
+[ext_resource path="res://Scenes/SubUI/UnitInfoPad.tscn" type="PackedScene" id=4]
 
 [node name="UnitBar" type="MarginContainer"]
 margin_right = 1024.0

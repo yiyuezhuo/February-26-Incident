@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://Scripts/StackBar.cs" type="Script" id=1]
+[ext_resource path="res://Scripts/UI/StackBar.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/UnitPad.tscn" type="PackedScene" id=2]
 
 [node name="StackBar" type="MarginContainer"]
