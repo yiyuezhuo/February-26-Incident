@@ -1,3 +1,7 @@
+namespace YYZ.App
+{
+
+
 using Godot;
 using System;
 
@@ -93,4 +97,7 @@ public class TimePlayer : Control
             this.lastClickedNonPauseButton = clickedButton;
         this.multipler = multipler;
     }
+}
+
+
 }

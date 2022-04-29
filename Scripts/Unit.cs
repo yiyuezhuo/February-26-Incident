@@ -352,9 +352,10 @@ public class UnitProcedure : Unit
 /// </summary>
 public class UnitSingleLeader : Unit
 {
-    public UnitSingleLeader(string name, string nameJap, Texture portrait, float command, float strength, Side side, bool important=false)
+    protected Leader dummyLeader; // dummy leader is ensured to exist only in the initialization.
+    public UnitSingleLeader(string name, string nameJap, Texture portrait, float command, float strength, Side side)
     {
-        var dummyLeader = new LeaderProcedure(name, nameJap, portrait, command, important);
+        dummyLeader = new LeaderProcedure(name, nameJap, portrait, command);
         dummyLeader.EnterTo(this);
         this.strength = strength;
         this.side = side;
@@ -366,20 +367,15 @@ public class UnitSingleLeader : Unit
 /// </summary>
 public class UnitFromObjective: UnitSingleLeader
 {
-    public UnitFromObjective(ObjectiveTable.Data data, Side side) : base(data.name, data.nameJap, data.picture, 1, data.guard, side, true)
+    public UnitFromObjective(ObjectiveTable.Data data, Side side) : base(data.name, data.nameJap, data.picture, 1, data.guard, side)
     {
         frozen = true;
-        /*
-        if(data.isBuilding) // TODO: We may define a strength field in NotionData.
-        {
-            // strength
-            strength = YYZ.Random.NextFloat() * 30;
-        }
-        else
-        {
-            strength = YYZ.Random.NextFloat() * 10;
-        }
-        */
+        dummyLeader.important = true;
+
+        if(data.isBuilding) // FIXME: code smell
+            dummyLeader.destroyDesc = "sabotaged";
+        else if(data.isEmperor)
+            dummyLeader.destroyDesc = "secured";
     }
 }
 

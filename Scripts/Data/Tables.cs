@@ -209,6 +209,7 @@ public class ObjectiveTable : DataTable<ObjectiveTable.Item, ObjectiveTable.Data
         public AreaTable.Data area; // This kind of value will be "linked" after initialization (include `Setup`).
         public string areaId;
         public bool isBuilding;
+        public bool isEmperor; // or "hostage"?
         public float guard{get => item.Guard;}
 
         public void Setup(Item item, string root)
@@ -220,7 +221,7 @@ public class ObjectiveTable : DataTable<ObjectiveTable.Item, ObjectiveTable.Data
             areaId = UrlToId(item.Area);
             // `area` will be linked in later phase.
             isBuilding = item.Tags.Contains("Building");
-            // guard = float.Parse(item.Guard);
+            isEmperor = item.Tags.Contains("Emperor");
         }
 
         public override string ToString() => $"Objective({name}, {nameJap})";

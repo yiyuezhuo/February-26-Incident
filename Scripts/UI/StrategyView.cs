@@ -1,6 +1,7 @@
 namespace YYZ.App
 {
 
+
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
@@ -183,8 +184,8 @@ public class StrategyView : Control
 			unitBar.HardUpdate();
 		}
 		if(leader.important)
-			ShowInfo($"{leader.name} {leader.nameJap} is killed.");
-			// infoLabel.Text = $"{leader.name} {leader.nameJap} is killed.";
+			ShowInfo(leader.ToDestoryString());
+			// ShowInfo($"{leader.name} {leader.nameJap} is killed.");
 	}
 
 	void ShowInfo(string text) => infoLabel.Text = text;

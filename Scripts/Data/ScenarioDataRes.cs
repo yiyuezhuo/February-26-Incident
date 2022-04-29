@@ -47,6 +47,9 @@ public abstract class Leader : Child<Leader, Unit, List<Leader>>, LeaderPad.IDat
 
     // public override string ToString() => $"Leader({name}, {nameJap}, {parent})";
     public override string ToString() => $"Leader({name}, {nameJap})";
+
+    public string destroyDesc = "killed";
+    public string ToDestoryString() => $"{name} {nameJap} is {destroyDesc}.";
 }
 
 public class LeaderFromTable: Leader
@@ -124,14 +127,14 @@ public class LeaderProcedure: Leader
     public override Texture portrait{get => _portrait;}
     public override float command{get => _command;}
 
-    public LeaderProcedure(string name, string nameJap, Texture portrait, float command, bool important=false)
+    public LeaderProcedure(string name, string nameJap, Texture portrait, float command) //, bool important=false)
     {
         _name = name;
         _nameJap = nameJap;
         _portrait = portrait;
         _command = command;
 
-        this.important = important;
+        // this.important = important;
     }
 }
 

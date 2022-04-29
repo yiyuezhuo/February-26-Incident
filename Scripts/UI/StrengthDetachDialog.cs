@@ -1,3 +1,7 @@
+namespace YYZ.App
+{
+
+
 using Godot;
 using System;
 
@@ -37,5 +41,7 @@ public class StrengthDetachDialog : ConfirmationDialog // ConfirmationDialog has
         slider.MaxValue = maxValue;
         slider.Value = 0;
     }
+}
+
 
 }

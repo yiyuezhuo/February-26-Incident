@@ -148,7 +148,7 @@ public class CombatAgent: UnitAgent
             {
                 var leader = children[i];
                 leader.Destroy();
-                GD.Print($"{leader} is killed"); // true leader kill will be implemented later.
+                GD.Print($"{leader} is killed");
             }
         }
 
