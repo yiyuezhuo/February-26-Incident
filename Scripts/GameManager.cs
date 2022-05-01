@@ -63,12 +63,15 @@ public class CeaseFireState : State, IState
 {
 	public CeaseFireState(GameManager gameManager, ScenarioData scenarioData) : base(gameManager, scenarioData){}
 	public void Accept(IVisitor visitor) => visitor.Visit(this);
+
+	/// <summary>
+	/// Triggered when AssualtState -> CeaseFireState
+	/// </summary>
 	public void Visit(AssaultState state)
 	{
 		foreach(var unit in scenarioData.units)
 		{
 			// All moves into the hostile region are canceled.
-			// if(unit.movingState.active && !unit.movingState.nextRegion.IsConsistentWith(unit.side))
 			if(unit.movingState.active && !unit.movingState.nextRegion.parent.Equals(unit.side))
 				unit.movingState.Reset();
 			
