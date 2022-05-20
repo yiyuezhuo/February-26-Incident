@@ -18,6 +18,7 @@ public class Region : Child<Region, Side, HashSet<Region>>, IContainer<List<Unit
     public Color remapColor{get; set;}
     public HashSet<Region> neighbors{get;set;}
     public Vector2 center{get; set;}
+    public float area{get; set;}
     
     public AreaTable.Data areaData; // Most of time, it's null.
 

@@ -18,7 +18,10 @@ namespace YYZ
 
     public static class Text
     {
-        public static string Read(string path)
+        /// <summary>
+        /// Works only in the editor.
+        /// </summary>
+        public static string ReadBySharp(string path)
         {
             path = ProjectSettings.GlobalizePath(path);
             return System.IO.File.ReadAllText(path); // Godot's `res://` path should be resolved by Godot itself
@@ -36,6 +39,8 @@ namespace YYZ
             dataFile.Close();
             return dataText;
         }
+
+        public static string Read(string path) => ReadByGodotAPI(path);
 
         public static CsvReader GetCsvReader(string path)
         {

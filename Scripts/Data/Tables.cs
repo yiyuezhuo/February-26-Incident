@@ -28,6 +28,7 @@ public class DataTable<RT, T> : Dictionary<string, T>, IDataTable where T : Data
 
     public DataTable(string tablePath, string root)
     {
+        // GD.Print($"tablePath={tablePath}, root={root}");
         var csvReader = YYZ.Text.GetCsvReader(tablePath);
         var items = csvReader.GetRecords<RT>();
         foreach(var item in items)

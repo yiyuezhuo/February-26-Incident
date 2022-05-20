@@ -23,6 +23,9 @@ window/size/height=900
 [global]
 
 display=false
+window=false
+soze=false
+size=false
 
 [input]
 
